@@ -1,0 +1,246 @@
+"id.exposure","id.outcome","outcome","exposure","method","nsnp","b","se","pval"
+"izmQFn","0Jl4V0","cs","Endometriosis (Rahmioglu)","MR Egger",32,-0.288183420137904,0.217425568421765,0.195032783865922
+"izmQFn","0Jl4V0","cs","Endometriosis (Rahmioglu)","Weighted median",32,0.0165077152831792,0.0508167519896722,0.745296188145538
+"izmQFn","0Jl4V0","cs","Endometriosis (Rahmioglu)","Inverse variance weighted",32,0.00992514745388534,0.0558668004966041,0.858992085957317
+"izmQFn","0Jl4V0","cs","Endometriosis (Rahmioglu)","Simple mode",32,0.0686188740384868,0.097339619020707,0.486108930117505
+"izmQFn","0Jl4V0","cs","Endometriosis (Rahmioglu)","Weighted mode",32,0.0469175557029327,0.0885729345316981,0.600089749411334
+"izmQFn","5glKJm","nvp_sev_subsamp","Endometriosis (Rahmioglu)","MR Egger",34,-0.0376971324899658,0.061395675308843,0.543554087576629
+"izmQFn","5glKJm","nvp_sev_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.00463375053327044,0.0258435099508511,0.85770186737152
+"izmQFn","5glKJm","nvp_sev_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.0221014125606132,0.0187136390550006,0.237589883951462
+"izmQFn","5glKJm","nvp_sev_subsamp","Endometriosis (Rahmioglu)","Simple mode",34,-0.0056356468240189,0.0468845058573539,0.905051399760794
+"izmQFn","5glKJm","nvp_sev_subsamp","Endometriosis (Rahmioglu)","Weighted mode",34,-4.35537278749565e-05,0.0393995292603429,0.999124644098631
+"izmQFn","7mW2uw","gh_subsamp","Endometriosis (Rahmioglu)","MR Egger",33,-0.00479186100902558,0.13919853180614,0.9727592340225
+"izmQFn","7mW2uw","gh_subsamp","Endometriosis (Rahmioglu)","Weighted median",33,-0.0695085589212984,0.0537591329383829,0.1960239262956
+"izmQFn","7mW2uw","gh_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.0525924818746454,0.0412013463660996,0.201787716435545
+"izmQFn","7mW2uw","gh_subsamp","Endometriosis (Rahmioglu)","Simple mode",33,-0.127250630128728,0.105353178817658,0.235957059224455
+"izmQFn","7mW2uw","gh_subsamp","Endometriosis (Rahmioglu)","Weighted mode",33,-0.0986914460802073,0.101168383342941,0.336621324098289
+"izmQFn","8a1Uwg","bf_sus","Endometriosis (Rahmioglu)","MR Egger",33,0.0240841185290955,0.145681128701287,0.869764905500614
+"izmQFn","8a1Uwg","bf_sus","Endometriosis (Rahmioglu)","Weighted median",33,-0.0128485725800431,0.0653968068803714,0.844241570411839
+"izmQFn","8a1Uwg","bf_sus","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.0213482064943311,0.0445916602580491,0.632117302239742
+"izmQFn","8a1Uwg","bf_sus","Endometriosis (Rahmioglu)","Simple mode",33,-0.0242002206348311,0.124881356202992,0.847568577864339
+"izmQFn","8a1Uwg","bf_sus","Endometriosis (Rahmioglu)","Weighted mode",33,-0.0167491016865233,0.0995274678935635,0.867417264842607
+"izmQFn","8iCDrt","hdp_subsamp","Endometriosis (Rahmioglu)","MR Egger",32,0.125373874566795,0.107212623203467,0.251452209532273
+"izmQFn","8iCDrt","hdp_subsamp","Endometriosis (Rahmioglu)","Weighted median",32,0.000576273274397928,0.0484163892061417,0.990503449354142
+"izmQFn","8iCDrt","hdp_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",32,-0.0305961783382062,0.0338478691115962,0.36603136080405
+"izmQFn","8iCDrt","hdp_subsamp","Endometriosis (Rahmioglu)","Simple mode",32,-0.0785722389988391,0.0867092476939186,0.371842193757802
+"izmQFn","8iCDrt","hdp_subsamp","Endometriosis (Rahmioglu)","Weighted mode",32,0.0346017536549184,0.070640207826307,0.627702265955383
+"izmQFn","8nR86Z","apgar1","Endometriosis (Rahmioglu)","MR Egger",34,-0.149440038140438,0.0757930766061379,0.0573430210654031
+"izmQFn","8nR86Z","apgar1","Endometriosis (Rahmioglu)","Weighted median",34,-0.0695203675889648,0.0308643314414332,0.024293840388632
+"izmQFn","8nR86Z","apgar1","Endometriosis (Rahmioglu)","Inverse variance weighted",34,-0.0513035361831477,0.0235240162452733,0.0291907849376304
+"izmQFn","8nR86Z","apgar1","Endometriosis (Rahmioglu)","Simple mode",34,-0.0700882836951139,0.0690484893858744,0.317462571191674
+"izmQFn","8nR86Z","apgar1","Endometriosis (Rahmioglu)","Weighted mode",34,-0.107466838903008,0.0510473361248719,0.0429652155470828
+"izmQFn","Antepartum_bleeding_filtered","Antepartum_bleeding_filtered","Endometriosis (Rahmioglu)","MR Egger",40,0.316898969578691,0.276059676667327,0.258170410991126
+"izmQFn","Antepartum_bleeding_filtered","Antepartum_bleeding_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.0788265135781766,0.117702557719839,0.503043035122182
+"izmQFn","Antepartum_bleeding_filtered","Antepartum_bleeding_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,0.0530988492225161,0.0886448656755392,0.549168561410295
+"izmQFn","Antepartum_bleeding_filtered","Antepartum_bleeding_filtered","Endometriosis (Rahmioglu)","Simple mode",40,0.116301971458412,0.2283761020848,0.613442060078809
+"izmQFn","Antepartum_bleeding_filtered","Antepartum_bleeding_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,0.102146443487009,0.176533443016282,0.566169914985485
+"izmQFn","AxdkAe","s_misc_subsamp","Endometriosis (Rahmioglu)","MR Egger",34,0.0503301501030812,0.0788360755180945,0.527746393655036
+"izmQFn","AxdkAe","s_misc_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.0263238309670611,0.0355838873644577,0.459440612255956
+"izmQFn","AxdkAe","s_misc_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.00555461441731746,0.0238740417404491,0.816022834342093
+"izmQFn","AxdkAe","s_misc_subsamp","Endometriosis (Rahmioglu)","Simple mode",34,0.0441353496838567,0.0689420023302226,0.526475337972241
+"izmQFn","AxdkAe","s_misc_subsamp","Endometriosis (Rahmioglu)","Weighted mode",34,0.0400976703406969,0.0573539474825261,0.489371573316665
+"izmQFn","BdGl3T","rup_memb","Endometriosis (Rahmioglu)","MR Egger",34,0.244322385749079,0.162298693402522,0.142032498169201
+"izmQFn","BdGl3T","rup_memb","Endometriosis (Rahmioglu)","Weighted median",34,0.135127974720916,0.0566236575578132,0.0170131893257549
+"izmQFn","BdGl3T","rup_memb","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.112203742227151,0.0502182735991417,0.0254619609356502
+"izmQFn","BdGl3T","rup_memb","Endometriosis (Rahmioglu)","Simple mode",34,0.0647133690056658,0.132018458609772,0.627246891771867
+"izmQFn","BdGl3T","rup_memb","Endometriosis (Rahmioglu)","Weighted mode",34,0.206020912121927,0.0916993583109447,0.0314692372403272
+"izmQFn","Early_bleeding_ending_in_live_birth_filtered","Early_bleeding_ending_in_live_birth_filtered","Endometriosis (Rahmioglu)","MR Egger",40,-0.0190952008670827,0.186675767278711,0.919063801788918
+"izmQFn","Early_bleeding_ending_in_live_birth_filtered","Early_bleeding_ending_in_live_birth_filtered","Endometriosis (Rahmioglu)","Weighted median",40,-0.0130291686039209,0.084561073859277,0.877546673087971
+"izmQFn","Early_bleeding_ending_in_live_birth_filtered","Early_bleeding_ending_in_live_birth_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,0.091511584235353,0.0593097412068513,0.122844466505925
+"izmQFn","Early_bleeding_ending_in_live_birth_filtered","Early_bleeding_ending_in_live_birth_filtered","Endometriosis (Rahmioglu)","Simple mode",40,-0.0395784156243024,0.188899610218339,0.835132277563378
+"izmQFn","Early_bleeding_ending_in_live_birth_filtered","Early_bleeding_ending_in_live_birth_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,-0.0234675159439361,0.136174757035537,0.864066308192025
+"izmQFn","Early_bleeding_with_any_outcome_filtered","Early_bleeding_with_any_outcome_filtered","Endometriosis (Rahmioglu)","MR Egger",40,0.166741187882989,0.112025606818309,0.144892718598052
+"izmQFn","Early_bleeding_with_any_outcome_filtered","Early_bleeding_with_any_outcome_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.0372800344320156,0.0436464476119268,0.393029229704748
+"izmQFn","Early_bleeding_with_any_outcome_filtered","Early_bleeding_with_any_outcome_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,0.0676671093511433,0.0362451441546442,0.0619115087807317
+"izmQFn","Early_bleeding_with_any_outcome_filtered","Early_bleeding_with_any_outcome_filtered","Endometriosis (Rahmioglu)","Simple mode",40,0.0386837943582079,0.0809109969708673,0.635246030719026
+"izmQFn","Early_bleeding_with_any_outcome_filtered","Early_bleeding_with_any_outcome_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,0.0499075165988587,0.067264863875235,0.462559630028098
+"izmQFn","eSGwx8","bf_dur_4c","Endometriosis (Rahmioglu)","MR Egger",34,0.0278300244575758,0.0611071042693743,0.651875044687692
+"izmQFn","eSGwx8","bf_dur_4c","Endometriosis (Rahmioglu)","Weighted median",34,0.0094192398711708,0.0248739756234328,0.704926618136356
+"izmQFn","eSGwx8","bf_dur_4c","Endometriosis (Rahmioglu)","Inverse variance weighted",34,-0.0136479186867763,0.0184691160173439,0.459931920900421
+"izmQFn","eSGwx8","bf_dur_4c","Endometriosis (Rahmioglu)","Simple mode",34,0.0597561877304626,0.05079356203189,0.247831205039955
+"izmQFn","eSGwx8","bf_dur_4c","Endometriosis (Rahmioglu)","Weighted mode",34,0.0504998131961833,0.0384033130173917,0.197579723348172
+"izmQFn","finngen_R12_N14_FEMALEINFERT_filtered","finngen_R12_N14_FEMALEINFERT_filtered","Endometriosis (Rahmioglu)","MR Egger",40,0.527590040272499,0.158745456869558,0.00197540957345524
+"izmQFn","finngen_R12_N14_FEMALEINFERT_filtered","finngen_R12_N14_FEMALEINFERT_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.509695814575025,0.057654462148404,9.52683793371061e-19
+"izmQFn","finngen_R12_N14_FEMALEINFERT_filtered","finngen_R12_N14_FEMALEINFERT_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,0.488162178262687,0.0507006356376653,6.07112265138542e-22
+"izmQFn","finngen_R12_N14_FEMALEINFERT_filtered","finngen_R12_N14_FEMALEINFERT_filtered","Endometriosis (Rahmioglu)","Simple mode",40,0.549721417405462,0.147286872322829,0.000604117436995406
+"izmQFn","finngen_R12_N14_FEMALEINFERT_filtered","finngen_R12_N14_FEMALEINFERT_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,0.603228624373144,0.103587001153031,9.11097748225563e-07
+"izmQFn","finngen_R12_O15_PLAC_DISORD_filtered","finngen_R12_O15_PLAC_DISORD_filtered","Endometriosis (Rahmioglu)","MR Egger",40,-0.0360706407107886,0.722241288361942,0.960429687685427
+"izmQFn","finngen_R12_O15_PLAC_DISORD_filtered","finngen_R12_O15_PLAC_DISORD_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.271118254233641,0.341967808126255,0.427883832740188
+"izmQFn","finngen_R12_O15_PLAC_DISORD_filtered","finngen_R12_O15_PLAC_DISORD_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,0.346377001765023,0.232781923300274,0.136753726050705
+"izmQFn","finngen_R12_O15_PLAC_DISORD_filtered","finngen_R12_O15_PLAC_DISORD_filtered","Endometriosis (Rahmioglu)","Simple mode",40,0.753823750028991,0.749928987081556,0.320999914927288
+"izmQFn","finngen_R12_O15_PLAC_DISORD_filtered","finngen_R12_O15_PLAC_DISORD_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,0.408384147666679,0.570389223941397,0.478272387347491
+"izmQFn","finngen_R12_O15_PLAC_PRAEVIA_filtered","finngen_R12_O15_PLAC_PRAEVIA_filtered","Endometriosis (Rahmioglu)","MR Egger",40,0.476144066038042,0.311655012704023,0.134846086293733
+"izmQFn","finngen_R12_O15_PLAC_PRAEVIA_filtered","finngen_R12_O15_PLAC_PRAEVIA_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.612779688867977,0.1482789322449,3.58659748683247e-05
+"izmQFn","finngen_R12_O15_PLAC_PRAEVIA_filtered","finngen_R12_O15_PLAC_PRAEVIA_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,0.483438665847909,0.10035811697002,1.45633665831085e-06
+"izmQFn","finngen_R12_O15_PLAC_PRAEVIA_filtered","finngen_R12_O15_PLAC_PRAEVIA_filtered","Endometriosis (Rahmioglu)","Simple mode",40,0.766698427375187,0.295506431397199,0.0132771167082861
+"izmQFn","finngen_R12_O15_PLAC_PRAEVIA_filtered","finngen_R12_O15_PLAC_PRAEVIA_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,0.735250692014679,0.239719757322771,0.00391669020335274
+"izmQFn","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","Endometriosis (Rahmioglu)","MR Egger",40,0.50073189882059,0.446128874846428,0.268737385853357
+"izmQFn","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.41892281360414,0.20919948431229,0.0452305484730953
+"izmQFn","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,0.309916832609657,0.143722239426579,0.0310555957047672
+"izmQFn","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","Endometriosis (Rahmioglu)","Simple mode",40,-0.137132025324674,0.384536327617409,0.723301119480373
+"izmQFn","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,0.435793895332494,0.325889939662612,0.188891001015299
+"izmQFn","finngen_R12_O15_PREG_ECTOP_filtered","finngen_R12_O15_PREG_ECTOP_filtered","Endometriosis (Rahmioglu)","MR Egger",40,0.155286388791894,0.16918092097178,0.364475354491949
+"izmQFn","finngen_R12_O15_PREG_ECTOP_filtered","finngen_R12_O15_PREG_ECTOP_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.0432452735486042,0.0778027034761992,0.578325344920432
+"izmQFn","finngen_R12_O15_PREG_ECTOP_filtered","finngen_R12_O15_PREG_ECTOP_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,0.0221712391077094,0.0542961989364953,0.683025033313912
+"izmQFn","finngen_R12_O15_PREG_ECTOP_filtered","finngen_R12_O15_PREG_ECTOP_filtered","Endometriosis (Rahmioglu)","Simple mode",40,-0.132106441677495,0.178557102116216,0.463818341839429
+"izmQFn","finngen_R12_O15_PREG_ECTOP_filtered","finngen_R12_O15_PREG_ECTOP_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,0.020671843295321,0.141872561430991,0.884903096010657
+"izmQFn","fWCNVX","r_misc_subsamp","Endometriosis (Rahmioglu)","MR Egger",34,0.458480331733045,0.256938782671184,0.0838443805511633
+"izmQFn","fWCNVX","r_misc_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.125805276286325,0.098804424949416,0.202920215886968
+"izmQFn","fWCNVX","r_misc_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.0639825035777583,0.0799826071391179,0.423736746118783
+"izmQFn","fWCNVX","r_misc_subsamp","Endometriosis (Rahmioglu)","Simple mode",34,-0.0965529601788853,0.247424277249005,0.698872340438483
+"izmQFn","fWCNVX","r_misc_subsamp","Endometriosis (Rahmioglu)","Weighted mode",34,0.322831095428151,0.160743932132955,0.0528472870458383
+"izmQFn","gfnGj0","ga_subsamp","Endometriosis (Rahmioglu)","MR Egger",34,0.181204651280311,0.237139133607509,0.450388981614378
+"izmQFn","gfnGj0","ga_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.0485768306382953,0.0405844567508972,0.231333102032437
+"izmQFn","gfnGj0","ga_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.0911757009512474,0.0718070045400209,0.204179864605041
+"izmQFn","gfnGj0","ga_subsamp","Endometriosis (Rahmioglu)","Simple mode",34,0.103831902570294,0.0824451718225463,0.216719151462081
+"izmQFn","gfnGj0","ga_subsamp","Endometriosis (Rahmioglu)","Weighted mode",34,0.0603486255489754,0.0844281929946082,0.479763851882242
+"izmQFn","GIaaMb","depr_subsamp","Endometriosis (Rahmioglu)","MR Egger",34,-0.0793924916528155,0.134254859906369,0.558436166766822
+"izmQFn","GIaaMb","depr_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,-0.013512348799273,0.0625111655146076,0.828863839042395
+"izmQFn","GIaaMb","depr_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.0259237236866063,0.0407238608850564,0.524402802599551
+"izmQFn","GIaaMb","depr_subsamp","Endometriosis (Rahmioglu)","Simple mode",34,0.00763396367935187,0.114480144173955,0.947235858876619
+"izmQFn","GIaaMb","depr_subsamp","Endometriosis (Rahmioglu)","Weighted mode",34,0.00118995509163333,0.102211712760246,0.990781287886076
+"izmQFn","h5lugE","bf_est","Endometriosis (Rahmioglu)","MR Egger",33,0.0293562459669422,0.146309148157477,0.842286524254748
+"izmQFn","h5lugE","bf_est","Endometriosis (Rahmioglu)","Weighted median",33,0.00881460007035348,0.0625849520693942,0.887994633146172
+"izmQFn","h5lugE","bf_est","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.0154871675556476,0.0442716102043665,0.726472553010644
+"izmQFn","h5lugE","bf_est","Endometriosis (Rahmioglu)","Simple mode",33,0.1218375049298,0.12529775539446,0.338152991443566
+"izmQFn","h5lugE","bf_est","Endometriosis (Rahmioglu)","Weighted mode",33,0.0701232893210606,0.103120777504431,0.501387646786876
+"izmQFn","hb5NoX","pretb_all","Endometriosis (Rahmioglu)","MR Egger",34,-0.280384963553005,0.242521413677871,0.256189091485044
+"izmQFn","hb5NoX","pretb_all","Endometriosis (Rahmioglu)","Weighted median",34,-0.153891133224872,0.0524317173445012,0.00333464812508745
+"izmQFn","hb5NoX","pretb_all","Endometriosis (Rahmioglu)","Inverse variance weighted",34,-0.196462882044804,0.0732434405180969,0.00731118842455472
+"izmQFn","hb5NoX","pretb_all","Endometriosis (Rahmioglu)","Simple mode",34,-0.204746241232278,0.105829277844715,0.0616398972977856
+"izmQFn","hb5NoX","pretb_all","Endometriosis (Rahmioglu)","Weighted mode",34,-0.0584852676598824,0.0784643352083882,0.461322017927334
+"izmQFn","igiFRe","posttb_all","Endometriosis (Rahmioglu)","MR Egger",34,0.0447329115486378,0.276077520492455,0.872300815720047
+"izmQFn","igiFRe","posttb_all","Endometriosis (Rahmioglu)","Weighted median",34,0.127096272736754,0.0624803694841659,0.0419335232923899
+"izmQFn","igiFRe","posttb_all","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.0369907433728841,0.0827512128744236,0.654866760303424
+"izmQFn","igiFRe","posttb_all","Endometriosis (Rahmioglu)","Simple mode",34,0.145007315127509,0.113277294556584,0.209432503452219
+"izmQFn","igiFRe","posttb_all","Endometriosis (Rahmioglu)","Weighted mode",34,0.194796854237162,0.107728640370314,0.0796939042841138
+"izmQFn","ipoPYO","zbw_all","Endometriosis (Rahmioglu)","MR Egger",34,0.013417120896934,0.109240699381295,0.90301650005866
+"izmQFn","ipoPYO","zbw_all","Endometriosis (Rahmioglu)","Weighted median",34,0.0403882180296447,0.0203632365917356,0.0473240027191482
+"izmQFn","ipoPYO","zbw_all","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.0390729392353726,0.0324337071911915,0.228318514713969
+"izmQFn","ipoPYO","zbw_all","Endometriosis (Rahmioglu)","Simple mode",34,0.0887687999676117,0.0411073816804599,0.0381813365669771
+"izmQFn","ipoPYO","zbw_all","Endometriosis (Rahmioglu)","Weighted mode",34,0.0954518376925885,0.0352956461995905,0.0107374294548964
+"izmQFn","jSbdVa","em_cs","Endometriosis (Rahmioglu)","MR Egger",32,0.59861292310117,0.254793536228731,0.0255804174840311
+"izmQFn","jSbdVa","em_cs","Endometriosis (Rahmioglu)","Weighted median",32,0.0282958140007063,0.0937315742192423,0.762742514752401
+"izmQFn","jSbdVa","em_cs","Endometriosis (Rahmioglu)","Inverse variance weighted",32,0.152460064888453,0.0835997124763892,0.0681987610867011
+"izmQFn","jSbdVa","em_cs","Endometriosis (Rahmioglu)","Simple mode",32,-0.0728431790387423,0.174713571586759,0.679603347890835
+"izmQFn","jSbdVa","em_cs","Endometriosis (Rahmioglu)","Weighted mode",32,-0.0500509266961848,0.15942186886614,0.75565999343328
+"izmQFn","kQDJhZ","bf_ini","Endometriosis (Rahmioglu)","MR Egger",33,0.0380956817040246,0.165465439660588,0.819422930262689
+"izmQFn","kQDJhZ","bf_ini","Endometriosis (Rahmioglu)","Weighted median",33,0.00910124603416267,0.0693992862714791,0.895662009864875
+"izmQFn","kQDJhZ","bf_ini","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.0186419802744201,0.0499638545184278,0.709067075078492
+"izmQFn","kQDJhZ","bf_ini","Endometriosis (Rahmioglu)","Simple mode",33,0.0868171697273279,0.157363978206746,0.584988701783334
+"izmQFn","kQDJhZ","bf_ini","Endometriosis (Rahmioglu)","Weighted mode",33,0.090557447820351,0.115786964085754,0.43990257505894
+"izmQFn","kqZUZO","hbw_all","Endometriosis (Rahmioglu)","MR Egger",34,0.0352693825737841,0.265225984911736,0.895043017597194
+"izmQFn","kqZUZO","hbw_all","Endometriosis (Rahmioglu)","Weighted median",34,0.117126005609612,0.0904784094000772,0.19548626585712
+"izmQFn","kqZUZO","hbw_all","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.0478714729621021,0.0791711784094496,0.545406372997165
+"izmQFn","kqZUZO","hbw_all","Endometriosis (Rahmioglu)","Simple mode",34,0.116037437854012,0.174978669722112,0.511839348472611
+"izmQFn","kqZUZO","hbw_all","Endometriosis (Rahmioglu)","Weighted mode",34,0.132472069226983,0.129842458391008,0.315030547336671
+"izmQFn","LDTd5K","lga","Endometriosis (Rahmioglu)","MR Egger",34,0.101331627213477,0.261916976302126,0.701402678276199
+"izmQFn","LDTd5K","lga","Endometriosis (Rahmioglu)","Weighted median",34,0.121366880478392,0.0849899799143264,0.153287831301063
+"izmQFn","LDTd5K","lga","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.0955475211782632,0.0786862263930993,0.22463883026927
+"izmQFn","LDTd5K","lga","Endometriosis (Rahmioglu)","Simple mode",34,0.0296503640733883,0.169333995355235,0.862071097445688
+"izmQFn","LDTd5K","lga","Endometriosis (Rahmioglu)","Weighted mode",34,0.0977644056054614,0.112893292447799,0.392748594015948
+"izmQFn","Loj9vx","sb_subsamp","Endometriosis (Rahmioglu)","MR Egger",34,0.0626020685897211,0.220103348825954,0.777920062032228
+"izmQFn","Loj9vx","sb_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,-0.0903698828767816,0.0945201051485918,0.339025935220077
+"izmQFn","Loj9vx","sb_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",34,-0.0675985135755921,0.0655364916959623,0.302323412661044
+"izmQFn","Loj9vx","sb_subsamp","Endometriosis (Rahmioglu)","Simple mode",34,-0.265127296112101,0.178035099275583,0.145934297318369
+"izmQFn","Loj9vx","sb_subsamp","Endometriosis (Rahmioglu)","Weighted mode",34,-0.117452778605421,0.14500546834494,0.423749336139807
+"izmQFn","N2y2RK","hyp","Endometriosis (Rahmioglu)","MR Egger",33,-0.224250102776131,0.248041081586263,0.372923109016299
+"izmQFn","N2y2RK","hyp","Endometriosis (Rahmioglu)","Weighted median",33,-0.0372642540420508,0.112968563521241,0.741502781026066
+"izmQFn","N2y2RK","hyp","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.0118705193614673,0.0763767512147168,0.876489756788339
+"izmQFn","N2y2RK","hyp","Endometriosis (Rahmioglu)","Simple mode",33,0.20527905510657,0.231361566819778,0.38155646442077
+"izmQFn","N2y2RK","hyp","Endometriosis (Rahmioglu)","Weighted mode",33,-0.0980194029349428,0.183662132517424,0.597241197114245
+"izmQFn","NpF9J3","gdm_subsamp","Endometriosis (Rahmioglu)","MR Egger",33,-0.116444723220168,0.111546508905115,0.304598745935238
+"izmQFn","NpF9J3","gdm_subsamp","Endometriosis (Rahmioglu)","Weighted median",33,0.0216716926843661,0.052769766858596,0.681304347452369
+"izmQFn","NpF9J3","gdm_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.034389912620049,0.0344545661925979,0.318219470108366
+"izmQFn","NpF9J3","gdm_subsamp","Endometriosis (Rahmioglu)","Simple mode",33,0.0670781821049409,0.113268715314882,0.557875579431856
+"izmQFn","NpF9J3","gdm_subsamp","Endometriosis (Rahmioglu)","Weighted mode",33,0.0670781821049409,0.11394288343007,0.560195384440803
+"izmQFn","oCLH4Y","pe_subsamp","Endometriosis (Rahmioglu)","MR Egger",33,0.116976390017626,0.131883063389314,0.381924545242785
+"izmQFn","oCLH4Y","pe_subsamp","Endometriosis (Rahmioglu)","Weighted median",33,-0.01198821164729,0.0551853716828011,0.82802496370738
+"izmQFn","oCLH4Y","pe_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.0597720408063079,0.0396639173028904,0.131820238396258
+"izmQFn","oCLH4Y","pe_subsamp","Endometriosis (Rahmioglu)","Simple mode",33,-0.0402813379025244,0.102910822279476,0.698081272118037
+"izmQFn","oCLH4Y","pe_subsamp","Endometriosis (Rahmioglu)","Weighted mode",33,-0.0030663375632205,0.0785657178151769,0.969109788723879
+"izmQFn","OlM2tR","lowapgar5","Endometriosis (Rahmioglu)","MR Egger",34,0.846101788710401,0.682583638276837,0.224153031653713
+"izmQFn","OlM2tR","lowapgar5","Endometriosis (Rahmioglu)","Weighted median",34,0.388793386909542,0.247654474459392,0.116437788089654
+"izmQFn","OlM2tR","lowapgar5","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.114665052204649,0.210711142423511,0.58631675535293
+"izmQFn","OlM2tR","lowapgar5","Endometriosis (Rahmioglu)","Simple mode",34,0.228923690953943,0.520678959476267,0.663046598605488
+"izmQFn","OlM2tR","lowapgar5","Endometriosis (Rahmioglu)","Weighted mode",34,0.47798917929918,0.353573846146848,0.185607627337239
+"izmQFn","Postpartum_hemorrhage_due_to_atony_filtered","Postpartum_hemorrhage_due_to_atony_filtered","Endometriosis (Rahmioglu)","MR Egger",40,-0.470528147053657,0.172621205714947,0.0096475977155396
+"izmQFn","Postpartum_hemorrhage_due_to_atony_filtered","Postpartum_hemorrhage_due_to_atony_filtered","Endometriosis (Rahmioglu)","Weighted median",40,-0.0763230437166135,0.0669351893223027,0.254180954358951
+"izmQFn","Postpartum_hemorrhage_due_to_atony_filtered","Postpartum_hemorrhage_due_to_atony_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,-0.037198633603073,0.0592606886134181,0.530192752944136
+"izmQFn","Postpartum_hemorrhage_due_to_atony_filtered","Postpartum_hemorrhage_due_to_atony_filtered","Endometriosis (Rahmioglu)","Simple mode",40,0.185657526407973,0.162014180386016,0.25880545303894
+"izmQFn","Postpartum_hemorrhage_due_to_atony_filtered","Postpartum_hemorrhage_due_to_atony_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,-0.171428746714741,0.197050849785868,0.389638856853912
+"izmQFn","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Endometriosis (Rahmioglu)","MR Egger",40,-0.527997054429027,0.302367212470491,0.0888548194080975
+"izmQFn","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Endometriosis (Rahmioglu)","Weighted median",40,-0.119910188742919,0.103083610199549,0.244735250086749
+"izmQFn","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,-0.156609811292608,0.0977837862893292,0.109245676731984
+"izmQFn","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Endometriosis (Rahmioglu)","Simple mode",40,-0.0346387525813436,0.262757445128082,0.895798208249569
+"izmQFn","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,-0.141520466802819,0.25590583733039,0.583407588972983
+"izmQFn","Postpartum_hemorrhage_filtered","Postpartum_hemorrhage_filtered","Endometriosis (Rahmioglu)","MR Egger",40,-0.447356590604586,0.168968425396068,0.0117370476585895
+"izmQFn","Postpartum_hemorrhage_filtered","Postpartum_hemorrhage_filtered","Endometriosis (Rahmioglu)","Weighted median",40,-0.0228836093889379,0.0543981998466829,0.673997162644275
+"izmQFn","Postpartum_hemorrhage_filtered","Postpartum_hemorrhage_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",40,-0.0577001562168051,0.0573200966233684,0.314112382857933
+"izmQFn","Postpartum_hemorrhage_filtered","Postpartum_hemorrhage_filtered","Endometriosis (Rahmioglu)","Simple mode",40,0.0715714204895816,0.118677719595596,0.549950904471691
+"izmQFn","Postpartum_hemorrhage_filtered","Postpartum_hemorrhage_filtered","Endometriosis (Rahmioglu)","Weighted mode",40,0.0120658891336192,0.114741404182461,0.916790031738462
+"izmQFn","pRMjBo","lowapgar1","Endometriosis (Rahmioglu)","MR Egger",30,0.571794819621677,0.359426048141667,0.122870845378239
+"izmQFn","pRMjBo","lowapgar1","Endometriosis (Rahmioglu)","Weighted median",30,0.140532774429143,0.123063879444751,0.253474880259024
+"izmQFn","pRMjBo","lowapgar1","Endometriosis (Rahmioglu)","Inverse variance weighted",30,0.163778773547177,0.0913353751628713,0.0729476376212917
+"izmQFn","pRMjBo","lowapgar1","Endometriosis (Rahmioglu)","Simple mode",30,-0.0469516710854021,0.30744926754613,0.87968177091385
+"izmQFn","pRMjBo","lowapgar1","Endometriosis (Rahmioglu)","Weighted mode",30,-0.0469516710854021,0.36342871740526,0.898098492445415
+"izmQFn","q9LWIJ","sga","Endometriosis (Rahmioglu)","MR Egger",33,0.216169834325172,0.216123808841533,0.324951324016858
+"izmQFn","q9LWIJ","sga","Endometriosis (Rahmioglu)","Weighted median",33,-0.0725789006446228,0.0899378911175443,0.419672744868333
+"izmQFn","q9LWIJ","sga","Endometriosis (Rahmioglu)","Inverse variance weighted",33,0.00696485328317031,0.066765474591913,0.916916845284607
+"izmQFn","q9LWIJ","sga","Endometriosis (Rahmioglu)","Simple mode",33,-0.146962930174522,0.200816088264475,0.469599305724626
+"izmQFn","q9LWIJ","sga","Endometriosis (Rahmioglu)","Weighted mode",33,-0.0419945184679555,0.14097996303828,0.767723432782124
+"izmQFn","QRLC9k","anaemia_preg_all","Endometriosis (Rahmioglu)","MR Egger",34,-0.229451153223363,0.345167598835653,0.510971117638539
+"izmQFn","QRLC9k","anaemia_preg_all","Endometriosis (Rahmioglu)","Weighted median",34,0.0631141492418872,0.132477499487083,0.633779388438136
+"izmQFn","QRLC9k","anaemia_preg_all","Endometriosis (Rahmioglu)","Inverse variance weighted",34,-0.0158958350774024,0.104361332709203,0.878938202309695
+"izmQFn","QRLC9k","anaemia_preg_all","Endometriosis (Rahmioglu)","Simple mode",34,0.33738958648456,0.297488279739783,0.264912853997489
+"izmQFn","QRLC9k","anaemia_preg_all","Endometriosis (Rahmioglu)","Weighted mode",34,0.144575629370423,0.224173750805559,0.523433315185522
+"izmQFn","qWxmJF","ga_all","Endometriosis (Rahmioglu)","MR Egger",34,0.17278439450444,0.235995648257382,0.469405300709805
+"izmQFn","qWxmJF","ga_all","Endometriosis (Rahmioglu)","Weighted median",34,0.121072054612542,0.0391184944530008,0.00196807566064041
+"izmQFn","qWxmJF","ga_all","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.102624283678367,0.0713160149818981,0.150148384898538
+"izmQFn","qWxmJF","ga_all","Endometriosis (Rahmioglu)","Simple mode",34,0.143068107290473,0.0808075754975164,0.0858858096357782
+"izmQFn","qWxmJF","ga_all","Endometriosis (Rahmioglu)","Weighted mode",34,0.114092876448898,0.0954787476994102,0.240621936862014
+"izmQFn","r62ZT8","misc_subsamp","Endometriosis (Rahmioglu)","MR Egger",34,0.0532216861650549,0.0641109857246193,0.412605103626097
+"izmQFn","r62ZT8","misc_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.0034328290933134,0.0286046029562611,0.904475484115023
+"izmQFn","r62ZT8","misc_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.00733753939704829,0.0194205030566681,0.705561066206193
+"izmQFn","r62ZT8","misc_subsamp","Endometriosis (Rahmioglu)","Simple mode",34,-0.0508488680846432,0.0552329507809442,0.363927380439314
+"izmQFn","r62ZT8","misc_subsamp","Endometriosis (Rahmioglu)","Weighted mode",34,0.0167276173812271,0.0454824359576381,0.715384339611292
+"izmQFn","S2KkuO","el_cs","Endometriosis (Rahmioglu)","MR Egger",29,0.694525771681421,0.309082046742319,0.0330124863934649
+"izmQFn","S2KkuO","el_cs","Endometriosis (Rahmioglu)","Weighted median",29,0.130136763668172,0.119506560912988,0.27617558789247
+"izmQFn","S2KkuO","el_cs","Endometriosis (Rahmioglu)","Inverse variance weighted",29,0.231301761122491,0.101516078958829,0.0226983432863015
+"izmQFn","S2KkuO","el_cs","Endometriosis (Rahmioglu)","Simple mode",29,-0.0818828318364744,0.255374129867548,0.75086502941694
+"izmQFn","S2KkuO","el_cs","Endometriosis (Rahmioglu)","Weighted mode",29,-0.0690864605817303,0.228322020462563,0.764443830903813
+"izmQFn","tA6QKc","pretb_subsamp","Endometriosis (Rahmioglu)","MR Egger",33,-0.355129817574407,0.26394888767457,0.188239728704332
+"izmQFn","tA6QKc","pretb_subsamp","Endometriosis (Rahmioglu)","Weighted median",33,-0.0904775896960508,0.0667112744674847,0.175017618128229
+"izmQFn","tA6QKc","pretb_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.175719125867089,0.0803338028323281,0.0287160913680291
+"izmQFn","tA6QKc","pretb_subsamp","Endometriosis (Rahmioglu)","Simple mode",33,-0.155005862248092,0.121946070914855,0.212854944263225
+"izmQFn","tA6QKc","pretb_subsamp","Endometriosis (Rahmioglu)","Weighted mode",33,-0.0316136547024413,0.102829695716078,0.760502782196594
+"izmQFn","tpqPUC","apgar5","Endometriosis (Rahmioglu)","MR Egger",34,-0.045852985918847,0.0523716562509219,0.38781003169943
+"izmQFn","tpqPUC","apgar5","Endometriosis (Rahmioglu)","Weighted median",34,-0.0433603586023332,0.0197961530482366,0.0284993948784153
+"izmQFn","tpqPUC","apgar5","Endometriosis (Rahmioglu)","Inverse variance weighted",34,-0.0144852050443004,0.0158780323184854,0.361621548003405
+"izmQFn","tpqPUC","apgar5","Endometriosis (Rahmioglu)","Simple mode",34,-0.0536580308666242,0.0357551983344278,0.142939855478879
+"izmQFn","tpqPUC","apgar5","Endometriosis (Rahmioglu)","Weighted mode",34,-0.0506397878462482,0.0258941640137611,0.0590176439212611
+"izmQFn","u1NnGJ","nicu","Endometriosis (Rahmioglu)","MR Egger",33,0.105734194089158,0.263692345725647,0.691188583022719
+"izmQFn","u1NnGJ","nicu","Endometriosis (Rahmioglu)","Weighted median",33,0.0178914559170888,0.100964681574552,0.85934729433674
+"izmQFn","u1NnGJ","nicu","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.0385332072270678,0.0653298357918812,0.555307602176763
+"izmQFn","u1NnGJ","nicu","Endometriosis (Rahmioglu)","Simple mode",33,0.167585056794437,0.206565924564664,0.423192217030964
+"izmQFn","u1NnGJ","nicu","Endometriosis (Rahmioglu)","Weighted mode",33,0.151985118864283,0.183991824934958,0.414896376714923
+"izmQFn","uCy6N6","vpretb_all","Endometriosis (Rahmioglu)","MR Egger",33,-1.06234182090348,0.552701183240093,0.0638268117835572
+"izmQFn","uCy6N6","vpretb_all","Endometriosis (Rahmioglu)","Weighted median",33,-0.299995315333478,0.217034231248546,0.166895307240447
+"izmQFn","uCy6N6","vpretb_all","Endometriosis (Rahmioglu)","Inverse variance weighted",33,-0.334952593797646,0.169392732601007,0.0479994983011127
+"izmQFn","uCy6N6","vpretb_all","Endometriosis (Rahmioglu)","Simple mode",33,-0.265413223160146,0.456160968686127,0.564750540683736
+"izmQFn","uCy6N6","vpretb_all","Endometriosis (Rahmioglu)","Weighted mode",33,-0.252686625144815,0.490908305988891,0.610276977388408
+"izmQFn","ueiHcR","induction","Endometriosis (Rahmioglu)","MR Egger",32,0.230938250550755,0.286509748438535,0.426563392620128
+"izmQFn","ueiHcR","induction","Endometriosis (Rahmioglu)","Weighted median",32,-0.106889441457067,0.0779213686892161,0.170138064336542
+"izmQFn","ueiHcR","induction","Endometriosis (Rahmioglu)","Inverse variance weighted",32,0.00524680181072389,0.0877773946611573,0.952335671441309
+"izmQFn","ueiHcR","induction","Endometriosis (Rahmioglu)","Simple mode",32,-0.231070662710661,0.154024554750179,0.143674430148436
+"izmQFn","ueiHcR","induction","Endometriosis (Rahmioglu)","Weighted mode",32,-0.252928037668404,0.123526293719523,0.0491564303953992
+"izmQFn","XxgHsi","lbw_all","Endometriosis (Rahmioglu)","MR Egger",34,-0.165987951289575,0.307685934590283,0.593295451991381
+"izmQFn","XxgHsi","lbw_all","Endometriosis (Rahmioglu)","Weighted median",34,-0.110715050800351,0.0696143425988114,0.111743374915974
+"izmQFn","XxgHsi","lbw_all","Endometriosis (Rahmioglu)","Inverse variance weighted",34,-0.135644933091512,0.091031881146311,0.136202775865857
+"izmQFn","XxgHsi","lbw_all","Endometriosis (Rahmioglu)","Simple mode",34,-0.292623956989237,0.171304170534308,0.0969887918663205
+"izmQFn","XxgHsi","lbw_all","Endometriosis (Rahmioglu)","Weighted mode",34,-0.167258089930557,0.16811787474505,0.327031294851576
+"izmQFn","yCC0d6","nvp_sev_all","Endometriosis (Rahmioglu)","MR Egger",34,-0.0231995536217408,0.0582618042010402,0.693130876217392
+"izmQFn","yCC0d6","nvp_sev_all","Endometriosis (Rahmioglu)","Weighted median",34,0.014014260837082,0.024392162093081,0.565602772718019
+"izmQFn","yCC0d6","nvp_sev_all","Endometriosis (Rahmioglu)","Inverse variance weighted",34,0.019444265722654,0.0176011574649144,0.269283026477262
+"izmQFn","yCC0d6","nvp_sev_all","Endometriosis (Rahmioglu)","Simple mode",34,-0.00785564921437773,0.0470327179681115,0.868369510966568
+"izmQFn","yCC0d6","nvp_sev_all","Endometriosis (Rahmioglu)","Weighted mode",34,0.0117790609721885,0.0395283846738711,0.767578985541327
