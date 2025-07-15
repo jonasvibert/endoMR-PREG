@@ -292,7 +292,7 @@ bim_data[, chrpos := paste0("chr", CHR, ":", BP)]
   # Variance Explained by Selected SNPs
   ###############################################################################
   
-  # In this section, we quantify how much of the variability in our exposure
+  # We quantify how much of the variability in our exposure
   # (“Endometriosis (Rahmioglu)”) is captured by the SNPs retained after
   # LD‐clumping. We compute:
   #
