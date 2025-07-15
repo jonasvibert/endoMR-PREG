@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Directory containing your .txt files and snps.txt
+DATA_DIR="/Users/jonasvibert/Desktop/Stata/endoMR-PREG/data"
+SNPS_FILE="$DATA_DIR/snps.txt"
+
+# 1) Check that SNP list exists
+if [[ ! -f "$SNPS_FILE" ]]; then
+  echo "ERROR: SNP list not found at $SNPS_FILE" >&2
+  exit 1
+fi
+
+# 2) List of raw outcome files to filter
+FILES=(
+  "Early_bleeding_with_any_outcome.txt"
+  "Early_bleeding_ending_in_live_birth.txt"
+  "Postpartum_hemorrhage_due_to_atony.txt"
+  "Antepartum_bleeding.txt"
+  "Postpartum_hemorrhage_due_to_retained_placenta.txt"
+  "Postpartum_hemorrhage.txt"
+)
+
+cd "$DATA_DIR"
+
+# 3) Loop over each file and filter
+for f in "${FILES[@]}"; do
+  if [[ ! -f "$f" ]]; then
+    echo "WARNING: $f not found, skipping" >&2
+    continue
+  fi
+
+  echo "Filtering $f …"
+  out="${f%.txt}_filtered.txt"
+
+  # Copy header line
+  head -n 1 "$f" > "$out"
+
+  # Then keep only rows where the 4th column (rsName) matches one of your SNPs
+  awk '
+    NR==FNR { snp[$1]; next }
+    FNR==1  { print; next }
+    $4 in snp
+  ' "$SNPS_FILE" "$f" >> "$out"
+
+  echo "→ created $out"
+done
+
+echo "All files processed."

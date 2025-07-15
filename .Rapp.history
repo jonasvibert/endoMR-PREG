@@ -1,0 +1,124 @@
+x=10
+x
+X
+x=2
+x
+x<-3
+x
+5->x
+x
+1var=3
+var1=3
+var1
+ls()
+rmvar1
+rm(var1)
+ls()
+y<-4
+y
+x
+x+y
+x/y
+y/x
+y*y
+z=y*x
+z
+ls()
+sqrt(x)
+help(sqrt)
+abs(-2)
+log(x)
+log2(x)
+log10(x,base=2)
+log(x, base=2)
+help(log)
+prenom = jonas
+prenom="jonas"
+prenom
+prenom="coline"
+prenom
+ls(prenom)
+ls()
+prenom="je m'appelle paul"
+prenom
+prenom="je m'appelle marc'"
+prenom
+source("/Users/jonasvibert/Downloads/Copie de Excel Studie Frailty and Lymphadenekotmie_ scores + available data.xlsx")
+source("/Users/jonasvibert/Downloads/Copie de Excel Studie Frailty and Lymphadenekotmie_ scores + available data.ods")
+source("/Users/jonasvibert/Downloads/Copie de Excel Studie Frailty and Lymphadenekotmie_ scores + available data - Feuille 1.csv")
+data <- read.csv2(file="Copie de Excel Studie Frailty and Lymphadenekotmie_ scores + available data - Feuille 1.csv")
+Copie de Excel Studie Frailty and Lymphadenekotmie_ scores + available data - Feuille 1.csv
+data <- read.csv2(file="donnéesbrutescomplètes")
+> data <- read.csv2(file="Donnéesbrutescomplètes")
+data <- read.csv2(file="Donnéesbrutescomplètes")
+demo()
+Herschey
+# installation de devtools depuis CRAN#
+install.packages("devtools"#
+library(devtools)#
+#
+# installation de Table1 depuis github#
+install_github("emwozniak/Table1")#
+library(Table1)
+data <- read.csv2(file="Copie de Excel Studie Frailty and Lymphadenekotmie_ scores + available data - Feuille 1.csv")
+# Installer et charger le package epiR si ce n'est pas déjà fait#
+# install.packages("epiR")#
+library(epiR)#
+#
+# Définir le tableau 2x2#
+# Format : matrix(c(a, b, c, d), nrow=2)#
+# a = exposé et malade, b = exposé et non malade#
+# c = non exposé et malade, d = non exposé et non malade#
+tab <- matrix(c(30, 70, 10, 90), nrow = 2, byrow = TRUE)#
+#
+# Calcul du risque relatif (RR)#
+result <- epi.2by2(tab, method = "cohort.count", conf.level = 0.95)#
+#
+# Affichage des résultats#
+print(result)
+r studio
+############################################ endoMRPREG                              ## Jonas Vibert                            ## 19.04.25                                ############################################################################### 1. DATA PREPARATION - EXPOSURE #################################### Load packagesinstall.packages("remotes")remotes::install_github("MRCIEU/TwoSampleMR")remotes::install_github("MRCIEU/MRInstruments")install.packages("knitr")install.packages("ggplot2")install.packages("dplyr")install.packages("gwasrapidd")
+library(TwoSampleMR)library(MRInstruments)library(knitr)library(ggplot2)library(dplyr)library(gwasrapidd)library(tidyr)
+# === 1.0 EXTRACT FROM OPENGWASavailable_gwas <- gwasinfo()subset(available_gwas, grepl("Rahmioglu", author, ignore.case = TRUE))
+~/Library/Preferences/com.rstudio.desktop#
+~/Library/Application Support/RStudio#
+~/Library/Caches/com.rstudio.desktop
+# Load packagesinstall.packages("remotes")remotes::install_github("MRCIEU/TwoSampleMR")remotes::install_github("MRCIEU/MRInstruments")install.packages("knitr")install.packages("ggplot2")install.packages("dplyr")install.packages("gwasrapidd")
+#############################################################################                                                                          ##      Select SNPs & clump from endometriosis GWAS - Rahmioglu dataset     ##                                                                          ##########################################################################################################################################################                                SETUP                                     ############################################################################### Clear the workspace  rm(list = ls())## Set API token for IEU GWAS database access  Sys.setenv(IEU_API_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImFwaS1qd3QiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhcGkub3Blbmd3YXMuaW8iLCJhdWQiOiJhcGkub3Blbmd3YXMuaW8iLCJzdWIiOiJqb25hcy52aWJlcnRAY2h1di5jaCIsImlhdCI6MTc0ODYxNTY4MSwiZXhwIjoxNzQ5ODI1MjgxfQ.kygMDZXhsXM6C_HWUnMtFw9xKUoAws6S9cwPTfuJ1leuRwqxs3wEo_iS87K89t8alefLqKEA408-
+oRB5vxj330gDIqr_SIY6lvPWooPTlw_eg945zS77XWtJm8jSa2tRyJYr6sTtJUvZBsyEp9cGTIBTYNSHzWKpAly9bdbFI0yEMTeDby84ps4qGtlcfqzChkg9YwitBu_-nr6ZlteNaYk6ydP-QICXETB8ypVfEnZOiqInLtEyOQt0oEHKrz6IPSUsqoRcIaCh6zSOuT3TCXQOMiwzX-7bw10ataPfjVJehlLAQmTvDuhjENwtRwicnQoA_hpMVjB2SjtzJv8MUw")## Set CRAN repository (University of Bristol mirror)  options(repos = c(CRAN ="http://www.stats.bris.ac.uk/R/"))## Set digits for numeric display  options(digits = 10)## Load necessary packages  install.packages("remotes")  remotes::install_github("MRCIEU/TwoSampleMR")  remotes::install_github("MRCIEU/MRInstruments")  library(TwoSampleMR)  library(MRInstruments)  library(knitr)  library(ggplot2)  library(dplyr)  library(gwasrapidd)  library(tidyr)  library(openxlsx)  library(data.table)## Define project directories  project_dir <- "/Users/jonasvibert/Desktop/Stata/endoMR-PREG/"  data_dir <- file.path(project_dir, "data/")  results_dir <- file.path(project_dir, "results/")  scripts_dir <- file.path(project_dir, "scrip
+ts/")  plots_dir <- file.path(project_dir, "plots/")## Create directories   dir.create(data_dir, showWarnings = FALSE, recursive = TRUE)  dir.create(results_dir, showWarnings = FALSE, recursive = TRUE)  dir.create(scripts_dir, showWarnings = FALSE, recursive = TRUE)  dir.create(plots_dir, showWarnings = FALSE, recursive = TRUE)## Set working directory  setwd(project_dir)#############################################################################                   Load Endometriosis GWAS - Rahmioglu data               ##############################################################################
+## Load top 10,000 SNPs from supplementary Table 33 (including 23andMe)      expdat_raw <- openxlsx::read.xlsx(      file.path(data_dir, "NIHMS1873427-supplement-Supplementary_Materials.xlsx"),      sheet = "Supp33.Top10K-SNPs",      startRow = 2,      colNames = TRUE,      rowNames = FALSE)## Check columns  print(colnames(expdat_raw))## Format data for TwoSampleMR  expdat <- format_data(    expdat_raw,     type = "id.exposure",    snp_col = "SNP",    beta_col = "Effect",    se_col = "Standard.Error",    eaf_col = "Effective.Allele.Frequency",    effect_allele_col = "Effective.Allele",    other_allele_col = "Non-effective.Allele",    pval_col = "P-value",    samplesize_col = "Sample.Size",    chr_col = "chr_name",    pos_col = "chrom_start"  )#############################################################################                      LD-Based Clumping Using PLINK and 1000G            #############################################################################colnames(ex
+pdat) <- gsub("\\.id\\.exposure", ".exposure", colnames(expdat))colnames(expdat)plink_path <- "/Users/jonasvibert/Desktop/Stata/endoMR-PREG/plink_mac_20241022/plink"bfile_path <- "/Users/jonasvibert/Desktop/Stata/endoMR-PREG/plink_mac_20241022/24088632"   # le chemin sans extension## Map SNP chr:position to rsIDs # Load .bim  bim_file <- "/Users/jonasvibert/Desktop/Stata/endoMR-PREG/plink_mac_20241022/24088632/1000G.EUR.QC.bim"  bim_data <- fread(bim_file, header = FALSE)  colnames(bim_data) <- c("CHR", "SNP_bim", "CM", "BP", "A1", "A2")  bim_data$chrpos <- paste0("chr", bim_data$CHR, ":", bim_data$BP)# Create chrpos in expdat.  expdat$chrpos <- expdat$SNP# Remove unnecessary duplicate columns before merging  expdat_clean <- expdat %>% select(-matches("^id\\.exposure$"))# Merge  expdat_mapped <- merge(expdat_clean, bim_data[, c("chrpos", "SNP_bim")], by = "chrpos", all.x = TRUE)# Replace the SNP column with the rsID    expdat_mapped$SNP <- expdat_mapped$SNP_bim# Filter only SNPs with
+an rsID  expdat_ready <- expdat_mapped %>% filter(!is.na(SNP))# Check how many SNPs are mapped  cat("Nombre de SNPs mappés avec un rsID :", nrow(expdat_ready), "\n")  head(expdat_ready$SNP)## Perform LD-based clumping using PLINK and 1000G reference  clumped <- clump_data(    expdat_ready,    clump_kb = 10000,    clump_r2 = 0.001,    clump_p1 = 5e-8,    clump_p2 = 1,    bfile = "/Users/jonasvibert/Desktop/Stata/endoMR-PREG/plink_mac_20241022/24088632/1000G.EUR.QC",    plink_bin = "/Users/jonasvibert/Desktop/Stata/endoMR-PREG/plink_mac_20241022/plink"  )  clumped_snps <- clumped$SNP# Filter final dataset  final_expdat <- expdat_ready[expdat_ready$SNP %in% clumped_snps, ]# Check the number of SNPs and preview the first few rows of the clumped dataset  nrow(clumped)  head(clumped)## Save the formatted exposure dataset   write.table(expdat_ready, file = "./data/endo_dat.txt", quote = FALSE, row.names = FALSE, sep = "\t")  cat("Exposure data saved as './data/endo_dat.txt'\n")#Save
+and unique list of rsIDs  rsid <- unique(expdat_ready$SNP)  write.table(rsid, file = "./data/rsid.txt", row.names = FALSE, col.names = FALSE, quote = FALSE)  cat("List of rsIDs saved as './data/rsid.txt'\n")# Display the full table in R  View(clumped)# Export as CSV for Excel#
+  ############################################################################  #                      LD-Based Clumping Using PLINK and UKbiobank        #  ############################################################################  # 2.1. Read the file (no header)  plink_path <- "/Users/jonasvibert/Desktop/Stata/endoMR-PREG/plink_mac_20241022/plink"  bfile_path <- "/Users/jonasvibert/Desktop/Stata/endoMR-PREG/plink_mac_20241022/24088632/1000G.EUR.QC"  endo <- fread("/Users/jonasvibert/Desktop/Stata/endoMR-PREG/plink_mac_20241022/endo_dat_10000snps.txt", header = FALSE)#
+  # 2.2 clean sheet  endo <- endo[-1, ]  setnames(endo,            old = names(endo),           new = c("chrpos","CHR","BP","A1","A2","EAF","beta.exposure",                   "se.exposure","pval.exposure","N","id.exposure","mr_keep",                   "reported","units","SNP")  )  num_cols <- c("CHR","BP","EAF","beta.exposure","se.exposure","pval.exposure","N")  endo[, (num_cols) := lapply(.SD, as.numeric), .SDcols = num_cols]#
+  # 2.2.1 Display table   head(endo, 3)#
+  # check again  sum(is.na(endo$CHR))  # should be zero#
+  # 2.3. Create the minimal PLINK‐clump input  clump_input <- endo %>%    transmute(      SNP = SNP,      CHR = as.integer(CHR),      BP  = as.integer(BP),      P   = pval.exposure    )#
+  # 2.4. Write to a tab‐delimited text file  write.table(    clump_input,    file      = "clump_input.txt",    sep       = "\t",    quote     = FALSE,    row.names = FALSE,    col.names = TRUE  )#
+  # 7) Run PLINK for clumping  system2(    plink_path,    args = c(      "--bfile", bfile_path,      "--clump", "clump_input.txt",      "--clump-field", "P",      "--clump-snp-field", "SNP",      "--clump-p1", "5e-8",      "--clump-p2", "1",      "--clump-r2", "0.001",      "--clump-kb", "10000",      "--out", out_prefix    )  )#
+  # 8) Load the clumping results and report how many SNPs were kept  library(data.table)  clumped <- fread(paste0(out_prefix, ".clumped"), header = TRUE)  message("Number of SNPs retained after clumping: ", nrow(clumped))#
+  # 2) Extract only the SNP column  snps_table <- clumped[, .(SNP)]  kable(    snps_table,    caption = "Table of 41 SNPs retained after clumping"  )#
+  # compare SNP from Clumped_SNPs_1000G and endo10k_clumped.clumped  list2 <- c(    "rs10917151","rs71575922","rs3858429","rs11674184","rs1903068","rs1971256",    "rs10122243","rs6456259","rs10090060","rs2421985","rs12320196","rs12441483",    "rs12030576","rs10828249","rs1451383","rs73633307","rs4540228","rs10757277",    "rs7907732","rs2226158","rs10860864","rs7924571","rs66683298","rs12549438",    "rs7214750","rs11756073","rs56090796","rs57281976","rs3803042","rs2510770",    "rs55909142","rs17053711","rs1430787","rs507666","rs2967684","rs7334326",    "rs2946160","rs10983311","rs1352889","rs2036754","rs6435157"  )#
+  # Compare with your clumped SNPs:  list1 <- clumped$SNP#
+  # Are they exactly the same set?  setequal(list1, list2)  #> TRUE#
+  # If you want to see any mismatches:  setdiff(list1, list2)  # SNPs in list1 but not in list2  setdiff(list2, list1)  # SNPs in list2 but not in list1#
+  ###########################  # Calculate pseudo F-stat #  ############################
+  # 1) Simple F ≈ (β / SE)^2  clumped$F_simple <- (clumped$beta.exposure / clumped$se.exposure)^2#
+  # 2) Approximate per‐SNP R²  clumped$R2 <- with(clumped,                     (2 * eaf.exposure * (1 - eaf.exposure) * beta.exposure^2) /                       (2 * eaf.exposure * (1 - eaf.exposure) * beta.exposure^2 +                          se.exposure^2 * samplesize.exposure)  )#
+  # 3) Exact F with df1 = 1, df2 = N–2  clumped$F_exact <- with(clumped,                          R2 * (samplesize.exposure - 2) / (1 - R2)  )#
+  # 4) Quick check  head(clumped[, c("SNP","beta.exposure","se.exposure","F_simple","R2","F_exact")], 10)#
+  # 5) Mean F‐stats  cat("Mean F_simple =",  round(mean(clumped$F_simple, na.rm=TRUE),2), "\n")  cat("Mean F_exact  =",  round(mean(clumped$F_exact,  na.rm=TRUE),2), "\n")#
+  ##################  # Visualizations #  ###################
+  ## A) Bar plot: SNP count per chromosome  chr_summary <- final_expdat %>%    # extract "chrN"    mutate(chr = sub(":.*", "", chrpos)) %>%    # turn into an ordered factor    mutate(chr = factor(chr, levels = paste0("chr", 1:22))) %>%    count(chr) %>%    # drop any levels with zero counts, if you want    filter(n > 0)#
+  ggplot(chr_summary, aes(x = chr, y = n)) +    geom_col(fill = "steelblue") +    labs(      title = "Number of SNPs per Chromosome",      x = "Chromosome",      y = "Count of SNPs"    ) +    theme_minimal()#
+  ## B) Histogram of effect allele frequency (EAF)  ggplot(final_expdat, aes(x = eaf.exposure)) +    geom_histogram(bins = 20, fill = "lightgray", color = "black") +    labs(      title = "Distribution of Effect Allele Frequency (EAF)",      x = "EAF",      y = "Number of SNPs"    ) +    theme_minimal()#
+  ## C) Forest plot of β estimates with 95% CI  forest_df <- final_expdat %>%    mutate(      lower = beta.exposure - 1.96 * se.exposure,      upper = beta.exposure + 1.96 * se.exposure    ) %>%    arrange(beta.exposure) %>%    mutate(SNP = factor(SNP, levels = SNP))#
+  ggplot(forest_df, aes(x = beta.exposure, y = SNP)) +    geom_point() +    geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0) +    labs(      title = "Forest Plot of SNP Effect Estimates",      x = expression(beta~"(95% CI)"),      y = "SNP"    ) +    theme_minimal()#
+  ## D) Volcano plot: β vs –log10(p‐value)  volc_df <- clumped %>%    mutate(logp = -log10(pval.exposure))#
+  ggplot(volc_df, aes(x = beta.exposure, y = logp)) +    geom_point() +    geom_hline(yintercept = -log10(5e-8), linetype = "dashed", color = "red") +    labs(      title = "Volcano Plot of SNP Effects",      x = expression(beta),      y = expression(-log[10]~"(p-value)")    ) +    theme_minimal()#
+  ## E) Scatterplot: F_stat vs R²  ggplot(clumped, aes(x = R2, y = F_simple)) +    geom_point() +    labs(      title = expression("F"["simple"]~"vs"~R^2),      x = expression(R^2),      y = expression(F["simple"])    ) +    theme_minimal()#
+  ## F) Simplified Manhattan plot for 41 SNPs  man_df <- final_expdat %>%    separate(chrpos, into = c("chr", "bp"), sep = ":") %>%    mutate(      chr = factor(chr, levels = paste0("chr", 1:22)),      bp  = as.numeric(bp),      logp = -log10(pval.exposure)    )  # Calculate cumulative positions  chr_ticks <- man_df %>%    group_by(chr) %>%    summarize(max_bp = max(bp)) %>%    mutate(      cum_bp = cumsum(lag(max_bp, default = 0)),      center = cum_bp + max_bp / 2    )#
+  man_df <- man_df %>%    left_join(chr_ticks %>% select(chr, cum_bp), by = "chr") %>%    mutate(bp_cum = bp + cum_bp)#
+  ggplot(man_df, aes(x = bp_cum, y = logp, color = chr)) +    geom_point() +    scale_x_continuous(breaks = chr_ticks$center, labels = chr_ticks$chr) +    labs(      title = "Manhattan Plot of 41 SNPs",      x = "Genomic Position (cumulative)",      y = expression(-log[10]~"(p-value)")    ) +    theme_minimal() +    theme(legend.position = "none")
