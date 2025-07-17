@@ -53,19 +53,26 @@
 ############################################################################
   
 ## Load top 10,000 SNPs from supplementary Table 33 (including 23andMe)
-      expdat_raw <- openxlsx::read.xlsx(
-      file.path(data_dir, "NIHMS1873427-supplement-Supplementary_Materials.xlsx"),
-      sheet = "Supp33.Top10K-SNPs",
-      startRow = 2,
-      colNames = TRUE,
-      rowNames = FALSE
-)
-
-## Check columns
+  readxl::excel_sheets(here("data", "NIHMS1873427-Supplementary_Materials.xlsx"))
+  
+  # Load the sheet with the top 10,000 SNPs
+  expdat_raw <- readxl::read_excel(
+    here("data", "NIHMS1873427-Supplementary_Materials.xlsx"),
+    sheet = "Supp33.Top10K-SNPs",
+    skip = 1
+  )
+  
+  # Check column names and view first rows
   print(colnames(expdat_raw))
-  head (expdat_raw)
+  head(expdat_raw)
+  
 
 ## Format data for TwoSampleMR
+  
+  # Rename columns to avoid issues with spaces and special characters
+  names(expdat_raw) <- gsub(" ", ".", names(expdat_raw))
+  names(expdat_raw) <- gsub("\\(hg.19\\)", "Position.hg19", names(expdat_raw))
+  
   expdat_raw$phenotype <- "Endometriosis (Rahmioglu)"
   expdat <- format_data(
     expdat_raw,

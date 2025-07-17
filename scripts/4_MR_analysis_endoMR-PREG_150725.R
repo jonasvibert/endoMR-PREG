@@ -122,3 +122,10 @@ for(o in sig_outcomes) {
 
 # 4. inspect
 presso_results
+
+### EXCLUDED SNPs? -----------------------------------------------------
+# Harmonise exposure and outcome data
+harm <- harmonise_data(exposure_dat, outcome_dat)
+# Compare with your original list of 41 SNPs
+setdiff(exposure_dat$SNP, harm$SNP)
+

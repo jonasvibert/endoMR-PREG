@@ -69,3 +69,18 @@ message("Total harmonised rows: ", nrow(dat))
 out_file <- file.path(results_dir, "harmonised_rahmioglu_bpo.csv")
 write.csv(dat, out_file, row.names = FALSE)
 message("✔ Harmonised data saved to ", out_file)
+
+### 6. N° PATIENTS PER SELECTED SNP ##############################################
+snp_summary_41 <- final_instruments %>%
+  select(
+    SNP,
+    beta = beta.exposure,
+    se   = se.exposure,
+    pval = pval.exposure,
+    eaf  = eaf.exposure,
+    n    = samplesize.exposure
+  )
+
+View(snp_summary_41)     
+# OU
+print(snp_summary_41)    # Console
