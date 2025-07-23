@@ -43,6 +43,7 @@ export_csv <- function(df, name) {
 ### 4. MAIN MR ESTIMATES ########################################################
 # 4.1 Inverse-Variance Weighted (IVW)
 ivw_res <- run_mr_methods(dat, "mr_ivw")
+print(ivw_res)
 
 # 4.2 MR-Egger
 egger_res <- run_mr_methods(dat, "mr_egger_regression")
@@ -51,13 +52,13 @@ egger_res <- run_mr_methods(dat, "mr_egger_regression")
 wm_res   <- run_mr_methods(dat, "mr_weighted_median")
 
 # 4.4 All default MR methods (IVW, Egger, WM, modes…)
-all_res  <- mr(dat)
+#all_res  <- mr(dat)
 
 # Export results
 export_csv(ivw_res,  "ivw_results")
 export_csv(egger_res,"egger_results")
 export_csv(wm_res,   "weighted_median_results")
-export_csv(all_res,  "all_mr_methods")
+#export_csv(all_res,  "all_mr_methods")
 
 ### 5. SENSITIVITY ANALYSES ######################################################
 # 5.1 Heterogeneity (Cochran’s Q)
