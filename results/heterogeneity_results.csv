@@ -1,99 +1,99 @@
-"id.exposure","id.outcome","outcome","exposure","method","Q","Q_df","Q_pval"
-"yMBaCz","2qKovs","ga_all","Endometriosis (Rahmioglu)","MR Egger",417.56099947222,32,1.09355020160789e-68
-"yMBaCz","2qKovs","ga_all","Endometriosis (Rahmioglu)","Inverse variance weighted",418.833800237217,33,2.21375444271159e-68
-"yMBaCz","33O1ls","r_misc_subsamp","Endometriosis (Rahmioglu)","MR Egger",49.7174762814536,32,0.0237303488834224
-"yMBaCz","33O1ls","r_misc_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",53.7530725413152,33,0.0126908096734506
-"yMBaCz","3RvbXa","apgar1","Endometriosis (Rahmioglu)","MR Egger",45.7011859569453,32,0.0552068138678671
-"yMBaCz","3RvbXa","apgar1","Endometriosis (Rahmioglu)","Inverse variance weighted",48.3436473354895,33,0.0413083584937412
-"yMBaCz","5rVaVB","vpretb_all","Endometriosis (Rahmioglu)","MR Egger",38.9541039692628,31,0.154363494339831
-"yMBaCz","5rVaVB","vpretb_all","Endometriosis (Rahmioglu)","Inverse variance weighted",41.3493225507665,32,0.124533540915514
-"yMBaCz","61FwGz","misc_subsamp","Endometriosis (Rahmioglu)","MR Egger",34.9526169814933,32,0.329557245325188
-"yMBaCz","61FwGz","misc_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",35.5694628154719,33,0.348236947296646
-"yMBaCz","7uwzH1","bf_est","Endometriosis (Rahmioglu)","MR Egger",37.2272938991615,31,0.204166588975371
-"yMBaCz","7uwzH1","bf_est","Endometriosis (Rahmioglu)","Inverse variance weighted",37.3518374534622,32,0.236592956130539
-"yMBaCz","aED6ir","apgar5","Endometriosis (Rahmioglu)","MR Egger",48.4595373508211,32,0.0311922031870166
-"yMBaCz","aED6ir","apgar5","Endometriosis (Rahmioglu)","Inverse variance weighted",49.0589140760187,33,0.0356318900037239
-"yMBaCz","Antepartum_bleeding_filtered","Antepartum_bleeding_filtered","Endometriosis (Rahmioglu)","MR Egger",48.8861952495689,38,0.111034898170714
-"yMBaCz","Antepartum_bleeding_filtered","Antepartum_bleeding_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",50.1959331767577,39,0.10799089214358
-"yMBaCz","CotLNl","depr_subsamp","Endometriosis (Rahmioglu)","MR Egger",32.6721092028033,32,0.433785885529011
-"yMBaCz","CotLNl","depr_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",33.364753402193,33,0.449535054959611
-"yMBaCz","cXOGfH","gh_subsamp","Endometriosis (Rahmioglu)","MR Egger",39.0171859309064,31,0.152735703985078
-"yMBaCz","cXOGfH","gh_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",39.1802953606331,32,0.178779804740147
-"yMBaCz","E23J3K","nvp_sev_subsamp","Endometriosis (Rahmioglu)","MR Egger",38.3762110385607,32,0.202800640543029
-"yMBaCz","E23J3K","nvp_sev_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",39.630228966851,33,0.198222794849614
-"yMBaCz","Early_bleeding_ending_in_live_birth_filtered","Early_bleeding_ending_in_live_birth_filtered","Endometriosis (Rahmioglu)","MR Egger",41.5995982662557,38,0.316850582032655
-"yMBaCz","Early_bleeding_ending_in_live_birth_filtered","Early_bleeding_ending_in_live_birth_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",42.0278310561672,39,0.341106474314917
-"yMBaCz","Early_bleeding_with_any_outcome_filtered","Early_bleeding_with_any_outcome_filtered","Endometriosis (Rahmioglu)","MR Egger",63.4934353140473,38,0.00587351049033066
-"yMBaCz","Early_bleeding_with_any_outcome_filtered","Early_bleeding_with_any_outcome_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",64.9536519419296,39,0.00564427949181869
-"yMBaCz","EI4uY0","bf_sus","Endometriosis (Rahmioglu)","MR Egger",27.3226560310756,31,0.655873338291033
-"yMBaCz","EI4uY0","bf_sus","Endometriosis (Rahmioglu)","Inverse variance weighted",27.4299677937128,32,0.697240523250092
-"yMBaCz","F3s2Jn","ga_subsamp","Endometriosis (Rahmioglu)","MR Egger",447.449662883362,32,9.92534359151433e-75
-"yMBaCz","F3s2Jn","ga_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",449.674337084254,33,1.33081148591641e-74
-"yMBaCz","finngen_R12_N14_FEMALEINFERT","finngen_R12_N14_FEMALEINFERT","Endometriosis (Rahmioglu)","MR Egger",88.1898548737153,38,7.24693233016994e-06
-"yMBaCz","finngen_R12_N14_FEMALEINFERT","finngen_R12_N14_FEMALEINFERT","Endometriosis (Rahmioglu)","Inverse variance weighted",88.3497272974257,39,1.07873690053098e-05
-"yMBaCz","finngen_R12_O15_PLAC_DISORD","finngen_R12_O15_PLAC_DISORD","Endometriosis (Rahmioglu)","MR Egger",34.5598380906554,38,0.6293138752262
-"yMBaCz","finngen_R12_O15_PLAC_DISORD","finngen_R12_O15_PLAC_DISORD","Endometriosis (Rahmioglu)","Inverse variance weighted",34.8727437417765,39,0.658599285923248
-"yMBaCz","finngen_R12_O15_PLAC_PRAEVIA","finngen_R12_O15_PLAC_PRAEVIA","Endometriosis (Rahmioglu)","MR Egger",36.39938006439,38,0.543561395558926
-"yMBaCz","finngen_R12_O15_PLAC_PRAEVIA","finngen_R12_O15_PLAC_PRAEVIA","Endometriosis (Rahmioglu)","Inverse variance weighted",36.3999912860969,39,0.589088205584777
-"yMBaCz","finngen_R12_O15_PLAC_PREMAT_SEPAR","finngen_R12_O15_PLAC_PREMAT_SEPAR","Endometriosis (Rahmioglu)","MR Egger",31.5032430278109,38,0.762634502810975
-"yMBaCz","finngen_R12_O15_PLAC_PREMAT_SEPAR","finngen_R12_O15_PLAC_PREMAT_SEPAR","Endometriosis (Rahmioglu)","Inverse variance weighted",31.7073658688471,39,0.790121469741775
-"yMBaCz","finngen_R12_O15_PREG_ECTOP","finngen_R12_O15_PREG_ECTOP","Endometriosis (Rahmioglu)","MR Egger",45.7672070784492,38,0.180897855372629
-"yMBaCz","finngen_R12_O15_PREG_ECTOP","finngen_R12_O15_PREG_ECTOP","Endometriosis (Rahmioglu)","Inverse variance weighted",46.5992182151296,39,0.188190899922782
-"yMBaCz","gSjCHU","cs","Endometriosis (Rahmioglu)","MR Egger",85.8745735026185,30,2.73305698524442e-07
-"yMBaCz","gSjCHU","cs","Endometriosis (Rahmioglu)","Inverse variance weighted",91.6232547731487,31,6.652422002492e-08
-"yMBaCz","HH0YAQ","gdm_subsamp","Endometriosis (Rahmioglu)","MR Egger",30.80923858262,31,0.47585450704544
-"yMBaCz","HH0YAQ","gdm_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",31.407433957676,32,0.496389454186235
-"yMBaCz","J5QoQG","sga","Endometriosis (Rahmioglu)","MR Egger",38.8968330117305,31,0.155852742568739
-"yMBaCz","J5QoQG","sga","Endometriosis (Rahmioglu)","Inverse variance weighted",40.196402577032,32,0.151503203082199
-"yMBaCz","jpo3CZ","lowapgar1","Endometriosis (Rahmioglu)","MR Egger",37.5245754173085,28,0.107736145370665
-"yMBaCz","jpo3CZ","lowapgar1","Endometriosis (Rahmioglu)","Inverse variance weighted",39.3691653634739,29,0.0947919558562642
-"yMBaCz","kPZtpo","anaemia_preg_all","Endometriosis (Rahmioglu)","MR Egger",49.38014296141,32,0.0255553297782275
-"yMBaCz","kPZtpo","anaemia_preg_all","Endometriosis (Rahmioglu)","Inverse variance weighted",50.0314373115573,33,0.0290226428076485
-"yMBaCz","lZjiEg","hbw_all","Endometriosis (Rahmioglu)","MR Egger",55.6581141792421,32,0.00590523940749597
-"yMBaCz","lZjiEg","hbw_all","Endometriosis (Rahmioglu)","Inverse variance weighted",55.6624382167458,33,0.00810310419353637
-"yMBaCz","M2KfAV","lga","Endometriosis (Rahmioglu)","MR Egger",77.3441718301971,32,1.26573497229335e-05
-"yMBaCz","M2KfAV","lga","Endometriosis (Rahmioglu)","Inverse variance weighted",77.3454715531723,33,2.02175336157571e-05
-"yMBaCz","n374gz","s_misc_subsamp","Endometriosis (Rahmioglu)","MR Egger",30.6596488638958,32,0.534344075008866
-"yMBaCz","n374gz","s_misc_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",31.0147937463786,33,0.566255174064126
-"yMBaCz","NG8kqi","nvp_sev_all","Endometriosis (Rahmioglu)","MR Egger",40.4701283349979,32,0.144726174314408
-"yMBaCz","NG8kqi","nvp_sev_all","Endometriosis (Rahmioglu)","Inverse variance weighted",41.2166482898965,33,0.15422620807929
-"yMBaCz","Nk6lre","bf_dur_4c","Endometriosis (Rahmioglu)","MR Egger",47.515420448655,32,0.0380958380365888
-"yMBaCz","Nk6lre","bf_dur_4c","Endometriosis (Rahmioglu)","Inverse variance weighted",48.2694711541585,33,0.0419401349159097
-"yMBaCz","oBPtd4","pretb_all","Endometriosis (Rahmioglu)","MR Egger",195.368615064121,32,2.39107142400964e-25
-"yMBaCz","oBPtd4","pretb_all","Endometriosis (Rahmioglu)","Inverse variance weighted",196.17524056443,33,4.26266401649194e-25
-"yMBaCz","Postpartum_hemorrhage_due_to_atony_filtered","Postpartum_hemorrhage_due_to_atony_filtered","Endometriosis (Rahmioglu)","MR Egger",70.2410569151059,38,0.00112597659425175
-"yMBaCz","Postpartum_hemorrhage_due_to_atony_filtered","Postpartum_hemorrhage_due_to_atony_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",83.213666450134,39,4.83593628223854e-05
-"yMBaCz","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Endometriosis (Rahmioglu)","MR Egger",111.837146702654,38,3.37450328118936e-09
-"yMBaCz","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",116.785854773034,39,1.08604428361674e-09
-"yMBaCz","Postpartum_hemorrhage_filtered","Postpartum_hemorrhage_filtered","Endometriosis (Rahmioglu)","MR Egger",107.24511748418,38,1.60652134004576e-08
-"yMBaCz","Postpartum_hemorrhage_filtered","Postpartum_hemorrhage_filtered","Endometriosis (Rahmioglu)","Inverse variance weighted",123.962103452835,39,8.82833146857698e-11
-"yMBaCz","qKkVpd","pretb_subsamp","Endometriosis (Rahmioglu)","MR Egger",128.74718972535,31,7.12463602645658e-14
-"yMBaCz","qKkVpd","pretb_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",130.865254184915,32,6.51683232143641e-14
-"yMBaCz","QRjn67","hyp","Endometriosis (Rahmioglu)","MR Egger",24.6917318385018,31,0.781334474741237
-"yMBaCz","QRjn67","hyp","Endometriosis (Rahmioglu)","Inverse variance weighted",25.5016492708684,32,0.785215728148474
-"yMBaCz","T2rjQL","nicu","Endometriosis (Rahmioglu)","MR Egger",27.6267938002863,31,0.640359761631551
-"yMBaCz","T2rjQL","nicu","Endometriosis (Rahmioglu)","Inverse variance weighted",27.9456916900643,32,0.672043464996306
-"yMBaCz","tD5Cws","lbw_all","Endometriosis (Rahmioglu)","MR Egger",192.223187862332,32,9.06011166567016e-25
-"yMBaCz","tD5Cws","lbw_all","Endometriosis (Rahmioglu)","Inverse variance weighted",192.287401960924,33,2.19165699311849e-24
-"yMBaCz","TUD4nM","lowapgar5","Endometriosis (Rahmioglu)","MR Egger",51.4837180129034,32,0.015956620787621
-"yMBaCz","TUD4nM","lowapgar5","Endometriosis (Rahmioglu)","Inverse variance weighted",53.5239777778239,33,0.0133783897271711
-"yMBaCz","UtSDHF","rup_memb","Endometriosis (Rahmioglu)","MR Egger",62.3322747666223,32,0.00104304330618193
-"yMBaCz","UtSDHF","rup_memb","Endometriosis (Rahmioglu)","Inverse variance weighted",63.7609793008367,33,0.00102983624458172
-"yMBaCz","vvK2Tm","el_cs","Endometriosis (Rahmioglu)","MR Egger",54.4026770706594,27,0.00135791160377745
-"yMBaCz","vvK2Tm","el_cs","Endometriosis (Rahmioglu)","Inverse variance weighted",59.444638967418,28,0.000479318002288858
-"yMBaCz","WERzQU","sb_subsamp","Endometriosis (Rahmioglu)","MR Egger",35.308796281015,32,0.314579696760502
-"yMBaCz","WERzQU","sb_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",35.7332468506814,33,0.341195031667621
-"yMBaCz","wFyxpj","induction","Endometriosis (Rahmioglu)","MR Egger",112.196348769167,30,2.01006129453216e-11
-"yMBaCz","wFyxpj","induction","Endometriosis (Rahmioglu)","Inverse variance weighted",114.760097621911,31,1.51581196636865e-11
-"yMBaCz","x17cXM","pe_subsamp","Endometriosis (Rahmioglu)","MR Egger",26.3200182959745,31,0.705853062242691
-"yMBaCz","x17cXM","pe_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",28.2947448150213,32,0.654708413793494
-"yMBaCz","xPRCER","zbw_all","Endometriosis (Rahmioglu)","MR Egger",386.356564457089,32,2.04886681248116e-62
-"yMBaCz","xPRCER","zbw_all","Endometriosis (Rahmioglu)","Inverse variance weighted",387.088966809847,33,5.13660888566141e-62
-"yMBaCz","xzn8QT","bf_ini","Endometriosis (Rahmioglu)","MR Egger",41.3566010356851,31,0.101203170247553
-"yMBaCz","xzn8QT","bf_ini","Endometriosis (Rahmioglu)","Inverse variance weighted",41.5296835155778,32,0.120679525855664
-"yMBaCz","yvSSbg","posttb_all","Endometriosis (Rahmioglu)","MR Egger",204.872572278906,32,4.17567449464673e-27
-"yMBaCz","yvSSbg","posttb_all","Endometriosis (Rahmioglu)","Inverse variance weighted",204.878121364662,33,1.06835261629411e-26
-"yMBaCz","ZXKpHN","em_cs","Endometriosis (Rahmioglu)","MR Egger",60.7671527794003,30,0.000742655863257327
-"yMBaCz","ZXKpHN","em_cs","Endometriosis (Rahmioglu)","Inverse variance weighted",67.6671242209446,31,0.000153364971395957
-"yMBaCz","ZXtaw6","hdp_subsamp","Endometriosis (Rahmioglu)","MR Egger",33.3442272373716,30,0.307799847159594
-"yMBaCz","ZXtaw6","hdp_subsamp","Endometriosis (Rahmioglu)","Inverse variance weighted",35.944994587239,31,0.247888300636795
+"outcome","method","Q","Q_df","Q_pval"
+"Anaemia in pregnancy (all)","MR Egger",49.38,32,"0.026"
+"Anaemia in pregnancy (all)","Inverse variance weighted",50.031,33,"0.029"
+"Antepartum_bleeding","MR Egger",48.792,38,"0.113"
+"Antepartum_bleeding","Inverse variance weighted",48.851,39,"0.134"
+"Apgar score at 1 min","MR Egger",45.701,32,"0.055"
+"Apgar score at 1 min","Inverse variance weighted",48.344,33,"0.041"
+"Apgar score at 5 min","MR Egger",48.46,32,"0.031"
+"Apgar score at 5 min","Inverse variance weighted",49.059,33,"0.036"
+"Breastfeeding ≥4 months","MR Egger",47.515,32,"0.038"
+"Breastfeeding ≥4 months","Inverse variance weighted",48.269,33,"0.042"
+"Exclusive breastfeeding","MR Egger",37.227,31,"0.204"
+"Exclusive breastfeeding","Inverse variance weighted",37.352,32,"0.237"
+"Breastfeeding initiation","MR Egger",41.357,31,"0.101"
+"Breastfeeding initiation","Inverse variance weighted",41.53,32,"0.121"
+"Breastfeeding cessation","MR Egger",27.323,31,"0.656"
+"Breastfeeding cessation","Inverse variance weighted",27.43,32,"0.697"
+"Caesarean section (all)","Inverse variance weighted",91.623,31,"6.65e-08"
+"Caesarean section (all)","MR Egger",85.875,30,"2.73e-07"
+"Postpartum depression (subsample)","MR Egger",32.672,32,"0.434"
+"Postpartum depression (subsample)","Inverse variance weighted",33.365,33,"0.45"
+"Early_bleeding_ending_in_live_birth","MR Egger",42.568,38,"0.281"
+"Early_bleeding_ending_in_live_birth","Inverse variance weighted",42.568,39,"0.32"
+"Early_bleeding_with_any_outcome","MR Egger",68.613,38,"0.002"
+"Early_bleeding_with_any_outcome","Inverse variance weighted",68.903,39,"0.002"
+"Elective caesarean section","MR Egger",54.403,27,"0.001"
+"Elective caesarean section","Inverse variance weighted",59.445,28,"4.79e-04"
+"Emergency caesarean section","MR Egger",60.767,30,"7.43e-04"
+"Emergency caesarean section","Inverse variance weighted",67.667,31,"1.53e-04"
+"Female infertility","MR Egger",88.19,38,"7.25e-06"
+"Female infertility","Inverse variance weighted",88.35,39,"1.08e-05"
+"Other placental disorders","Inverse variance weighted",34.873,39,"0.659"
+"Other placental disorders","MR Egger",34.56,38,"0.629"
+"Placenta praevia","MR Egger",36.399,38,"0.544"
+"Placenta praevia","Inverse variance weighted",36.4,39,"0.589"
+"Placental abruption","Inverse variance weighted",31.707,39,"0.79"
+"Placental abruption","MR Egger",31.503,38,"0.763"
+"Ectopic pregnancy","Inverse variance weighted",46.599,39,"0.188"
+"Ectopic pregnancy","MR Egger",45.767,38,"0.181"
+"Gestational age (all)","MR Egger",417.561,32,"1.09e-68"
+"Gestational age (all)","Inverse variance weighted",418.834,33,"2.21e-68"
+"Gestational age (subsample)","MR Egger",447.45,32,"9.93e-75"
+"Gestational age (subsample)","Inverse variance weighted",449.674,33,"1.33e-74"
+"Gestational diabetes (subsample)","MR Egger",30.809,31,"0.476"
+"Gestational diabetes (subsample)","Inverse variance weighted",31.407,32,"0.496"
+"Gestational hypertension (subsample)","MR Egger",39.017,31,"0.153"
+"Gestational hypertension (subsample)","Inverse variance weighted",39.18,32,"0.179"
+"High birthweight (>4000 g)","MR Egger",55.658,32,"0.006"
+"High birthweight (>4000 g)","Inverse variance weighted",55.662,33,"0.008"
+"Hypertensive disorders of pregnancy (subsample)","MR Egger",33.344,30,"0.308"
+"Hypertensive disorders of pregnancy (subsample)","Inverse variance weighted",35.945,31,"0.248"
+"Hyperemesis gravidarum","Inverse variance weighted",25.502,32,"0.785"
+"Hyperemesis gravidarum","MR Egger",24.692,31,"0.781"
+"Induction of labour","MR Egger",112.196,30,"2.01e-11"
+"Induction of labour","Inverse variance weighted",114.76,31,"1.52e-11"
+"Low birthweight (<2500 g)","Inverse variance weighted",192.287,33,"2.19e-24"
+"Low birthweight (<2500 g)","MR Egger",192.223,32,"9.06e-25"
+"Large for gestational age","MR Egger",77.344,32,"1.27e-05"
+"Large for gestational age","Inverse variance weighted",77.345,33,"2.02e-05"
+"Low Apgar score at 1 min","MR Egger",37.525,28,"0.108"
+"Low Apgar score at 1 min","Inverse variance weighted",39.369,29,"0.095"
+"Low Apgar score at 5 min","MR Egger",51.484,32,"0.016"
+"Low Apgar score at 5 min","Inverse variance weighted",53.524,33,"0.013"
+"Miscarriage (subsample)","Inverse variance weighted",35.569,33,"0.348"
+"Miscarriage (subsample)","MR Egger",34.953,32,"0.33"
+"NICU admission","MR Egger",27.627,31,"0.64"
+"NICU admission","Inverse variance weighted",27.946,32,"0.672"
+"Severe nausea/vomiting (all)","MR Egger",40.47,32,"0.145"
+"Severe nausea/vomiting (all)","Inverse variance weighted",41.217,33,"0.154"
+"Severe nausea/vomiting (subsample)","MR Egger",38.376,32,"0.203"
+"Severe nausea/vomiting (subsample)","Inverse variance weighted",39.63,33,"0.198"
+"Preeclampsia (subsample)","Inverse variance weighted",28.295,32,"0.655"
+"Preeclampsia (subsample)","MR Egger",26.32,31,"0.706"
+"Postpartum_hemorrhage","MR Egger",92.417,38,"1.98e-06"
+"Postpartum_hemorrhage","Inverse variance weighted",110.921,39,"8.04e-09"
+"Postpartum_hemorrhage_due_to_atony","Inverse variance weighted",79.816,39,"1.26e-04"
+"Postpartum_hemorrhage_due_to_atony","MR Egger",59.262,38,"0.015"
+"Postpartum_hemorrhage_due_to_retained_placenta","MR Egger",100.071,38,"1.73e-07"
+"Postpartum_hemorrhage_due_to_retained_placenta","Inverse variance weighted",101.268,39,"1.95e-07"
+"Post-term birth","Inverse variance weighted",204.878,33,"1.07e-26"
+"Post-term birth","MR Egger",204.873,32,"4.18e-27"
+"Preterm birth (all)","MR Egger",195.369,32,"2.39e-25"
+"Preterm birth (all)","Inverse variance weighted",196.175,33,"4.26e-25"
+"Preterm birth (subsample)","MR Egger",128.747,31,"7.12e-14"
+"Preterm birth (subsample)","Inverse variance weighted",130.865,32,"6.52e-14"
+"Recurrent miscarriage (subsample)","MR Egger",49.717,32,"0.024"
+"Recurrent miscarriage (subsample)","Inverse variance weighted",53.753,33,"0.013"
+"Premature rupture of membranes","MR Egger",62.332,32,"0.001"
+"Premature rupture of membranes","Inverse variance weighted",63.761,33,"0.001"
+"Single miscarriage (subsample)","Inverse variance weighted",31.015,33,"0.566"
+"Single miscarriage (subsample)","MR Egger",30.66,32,"0.534"
+"Stillbirth (subsample)","MR Egger",35.309,32,"0.315"
+"Stillbirth (subsample)","Inverse variance weighted",35.733,33,"0.341"
+"Small for gestational age","Inverse variance weighted",40.196,32,"0.152"
+"Small for gestational age","MR Egger",38.897,31,"0.156"
+"Very preterm birth (all)","MR Egger",38.954,31,"0.154"
+"Very preterm birth (all)","Inverse variance weighted",41.349,32,"0.125"
+"Z-score birthweight (all)","MR Egger",386.357,32,"2.05e-62"
+"Z-score birthweight (all)","Inverse variance weighted",387.089,33,"5.14e-62"
