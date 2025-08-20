@@ -1,50 +1,50 @@
-"id.exposure","id.outcome","outcome","exposure","method","nsnp","b","se","pval"
-"6w7XeM","0kA51V","lga","Endometriosis (Rahmioglu)","Weighted median",34,0.121366880478392,0.0845038538204676,0.150937206373677
-"6w7XeM","2I1YJD","bf_ini","Endometriosis (Rahmioglu)","Weighted median",33,0.0091012460341626,0.0670368081699923,0.892007134205857
-"6w7XeM","3h56Fg","cs","Endometriosis (Rahmioglu)","Weighted median",32,0.0165077152831793,0.0521644676566696,0.751657050029737
-"6w7XeM","4prKwb","zbw_all","Endometriosis (Rahmioglu)","Weighted median",34,0.0403882180296447,0.0198220793179595,0.0415962681325503
-"6w7XeM","96UvR7","apgar1","Endometriosis (Rahmioglu)","Weighted median",34,-0.0695203675889648,0.030862782429362,0.0242867043649228
-"6w7XeM","Antepartum_bleeding_filtered","Antepartum_bleeding_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.0788265135781763,0.115060173103739,0.493287461443152
-"6w7XeM","blCqsr","rup_memb","Endometriosis (Rahmioglu)","Weighted median",34,0.135127974720916,0.0586865230647824,0.0213048267533328
-"6w7XeM","dkxZro","posttb_all","Endometriosis (Rahmioglu)","Weighted median",34,0.127096272736754,0.058823748310652,0.0307240406251244
-"6w7XeM","dTJJfH","bf_dur_4c","Endometriosis (Rahmioglu)","Weighted median",34,0.0094192398711708,0.0241606699715234,0.696641264866804
-"6w7XeM","DvrPg2","hbw_all","Endometriosis (Rahmioglu)","Weighted median",34,0.117126005609612,0.093609064475553,0.210852384381642
-"6w7XeM","Early_bleeding_ending_in_live_birth_filtered","Early_bleeding_ending_in_live_birth_filtered","Endometriosis (Rahmioglu)","Weighted median",40,-0.013029168603921,0.0843100579596964,0.877184982222404
-"6w7XeM","Early_bleeding_with_any_outcome_filtered","Early_bleeding_with_any_outcome_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.0372800344320155,0.0442615501438504,0.399638627271463
-"6w7XeM","finngen_R12_N14_FEMALEINFERT_filtered","finngen_R12_N14_FEMALEINFERT_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.509695814575025,0.0573207010670437,6.0017368120516e-19
-"6w7XeM","finngen_R12_O15_PLAC_DISORD_filtered","finngen_R12_O15_PLAC_DISORD_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.271118254233641,0.359162931401607,0.450332113282493
-"6w7XeM","finngen_R12_O15_PLAC_PRAEVIA_filtered","finngen_R12_O15_PLAC_PRAEVIA_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.612779688867977,0.15128087640622,5.10844930122803e-05
-"6w7XeM","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.41892281360414,0.202520740914178,0.038589013494794
-"6w7XeM","finngen_R12_O15_PREG_ECTOP_filtered","finngen_R12_O15_PREG_ECTOP_filtered","Endometriosis (Rahmioglu)","Weighted median",40,0.0432452735486042,0.0787485099782172,0.582897902141091
-"6w7XeM","FZW3Ho","bf_est","Endometriosis (Rahmioglu)","Weighted median",33,0.00881460007035346,0.0625492222933354,0.887931074999549
-"6w7XeM","GEl9cQ","ga_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.0485768306382952,0.0409521421963754,0.235549115099584
-"6w7XeM","il3bMJ","hdp_subsamp","Endometriosis (Rahmioglu)","Weighted median",32,0.000576273274397852,0.0480860826960634,0.990438220026404
-"6w7XeM","JJxQYV","nicu","Endometriosis (Rahmioglu)","Weighted median",33,0.0178914559170886,0.0954228676736581,0.851271349482158
-"6w7XeM","Jv7Xvy","nvp_sev_all","Endometriosis (Rahmioglu)","Weighted median",34,0.014014260837082,0.0242838348476163,0.56387024240514
-"6w7XeM","KQQ365","ga_all","Endometriosis (Rahmioglu)","Weighted median",34,0.121072054612542,0.0400785483118483,0.00252050165365258
-"6w7XeM","lNftSh","pretb_subsamp","Endometriosis (Rahmioglu)","Weighted median",33,-0.0904775896960508,0.0651494759892823,0.164902924956106
-"6w7XeM","MCpsQP","sga","Endometriosis (Rahmioglu)","Weighted median",33,-0.0725789006446228,0.087917705787756,0.409069486448635
-"6w7XeM","N36XnG","pe_subsamp","Endometriosis (Rahmioglu)","Weighted median",33,-0.0119882116472899,0.0576572312013969,0.835289805738368
-"6w7XeM","nBN2qX","depr_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,-0.013512348799273,0.060579622981777,0.823495771360087
-"6w7XeM","NjGmOE","el_cs","Endometriosis (Rahmioglu)","Weighted median",29,0.130136763668172,0.114057264733891,0.25387931950123
-"6w7XeM","NWVg7R","bf_sus","Endometriosis (Rahmioglu)","Weighted median",33,-0.0128485725800431,0.0642640334805944,0.841532110133435
-"6w7XeM","OA1ots","sb_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,-0.0903698828767816,0.0952944753210625,0.342965365022753
-"6w7XeM","odm5kP","misc_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.0034328290933134,0.0295034230158653,0.90737231777417
-"6w7XeM","pJOmYG","vpretb_all","Endometriosis (Rahmioglu)","Weighted median",33,-0.299995315333479,0.225074600992814,0.182574276711322
-"6w7XeM","Postpartum_hemorrhage_due_to_atony_filtered","Postpartum_hemorrhage_due_to_atony_filtered","Endometriosis (Rahmioglu)","Weighted median",40,-0.0763230437166134,0.0679959145981525,0.261664721953984
-"6w7XeM","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Postpartum_hemorrhage_due_to_retained_placenta_filtered","Endometriosis (Rahmioglu)","Weighted median",40,-0.119910188742919,0.102751926647199,0.243215516843592
-"6w7XeM","Postpartum_hemorrhage_filtered","Postpartum_hemorrhage_filtered","Endometriosis (Rahmioglu)","Weighted median",40,-0.0228836093889379,0.0574172147932155,0.6902250864044
-"6w7XeM","Pzl0oQ","r_misc_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.125805276286325,0.103185258282272,0.222761638134506
-"6w7XeM","qG07NR","em_cs","Endometriosis (Rahmioglu)","Weighted median",32,0.0282958140007063,0.0908157153372332,0.755364310400849
-"6w7XeM","RLyVRT","apgar5","Endometriosis (Rahmioglu)","Weighted median",34,-0.0433603586023332,0.0188589927264931,0.0214942997399301
-"6w7XeM","rQI76h","pretb_all","Endometriosis (Rahmioglu)","Weighted median",34,-0.153891133224872,0.0546138800439414,0.00483535274042844
-"6w7XeM","seRgFJ","anaemia_preg_all","Endometriosis (Rahmioglu)","Weighted median",34,0.0631141492418876,0.133840730322663,0.637239739581464
-"6w7XeM","t5Ta3g","hyp","Endometriosis (Rahmioglu)","Weighted median",33,-0.0372642540420508,0.113351152812071,0.742344241228963
-"6w7XeM","TbhGdg","gdm_subsamp","Endometriosis (Rahmioglu)","Weighted median",33,0.0216716926843663,0.051307052983933,0.672738859871961
-"6w7XeM","TlnvQ1","lbw_all","Endometriosis (Rahmioglu)","Weighted median",34,-0.110715050800351,0.0697409758289874,0.112395385420765
-"6w7XeM","vH4IOa","gh_subsamp","Endometriosis (Rahmioglu)","Weighted median",33,-0.0695085589212984,0.0560264265142492,0.214739209458439
-"6w7XeM","Vyc8os","lowapgar5","Endometriosis (Rahmioglu)","Weighted median",34,0.388793386909542,0.271242001809162,0.151748716534376
-"6w7XeM","W7SXw5","nvp_sev_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.00463375053327043,0.0262772946502836,0.860026468374446
-"6w7XeM","wGS6aD","lowapgar1","Endometriosis (Rahmioglu)","Weighted median",30,0.140532774429143,0.121323899894915,0.246730531501227
-"6w7XeM","wk52AI","s_misc_subsamp","Endometriosis (Rahmioglu)","Weighted median",34,0.0263238309670611,0.0353057343760912,0.455911215175442
-"6w7XeM","wmBXa0","induction","Endometriosis (Rahmioglu)","Weighted median",32,-0.106889441457067,0.0749643305821662,0.153905672456959
+"outcome","method","nsnp","b","se","pval"
+"Anaemia in pregnancy (all)","Weighted median",34,"0.063",0.136,"0.642"
+"Antepartum_bleeding","Weighted median",40,"10.381",4.026,"0.01"
+"Apgar score at 1 min","Weighted median",34,"-0.07",0.03,"0.02"
+"Apgar score at 5 min","Weighted median",34,"-0.043",0.019,"0.022"
+"Breastfeeding ≥4 months","Weighted median",34,"0.009",0.024,"0.691"
+"Exclusive breastfeeding","Weighted median",33,"0.009",0.063,"0.89"
+"Breastfeeding initiation","Weighted median",33,"0.009",0.068,"0.894"
+"Breastfeeding cessation","Weighted median",33,"-0.013",0.063,"0.837"
+"Caesarean section (all)","Weighted median",32,"0.017",0.052,"0.752"
+"Postpartum depression (subsample)","Weighted median",34,"-0.014",0.063,"0.83"
+"Early_bleeding_ending_in_live_birth","Weighted median",40,"10.334",4.152,"0.013"
+"Early_bleeding_with_any_outcome","Weighted median",40,"-7.981",3.193,"0.012"
+"Elective caesarean section","Weighted median",29,"0.13",0.118,"0.269"
+"Emergency caesarean section","Weighted median",32,"0.028",0.094,"0.763"
+"Female infertility","Weighted median",40,"0.51",0.058,"1.44e-18"
+"Other placental disorders","Weighted median",40,"0.271",0.351,"0.439"
+"Placenta praevia","Weighted median",40,"0.613",0.143,"1.73e-05"
+"Placental abruption","Weighted median",40,"0.419",0.207,"0.043"
+"Ectopic pregnancy","Weighted median",40,"0.043",0.077,"0.575"
+"Gestational age (all)","Weighted median",34,"0.121",0.04,"0.002"
+"Gestational age (subsample)","Weighted median",34,"0.049",0.041,"0.241"
+"Gestational diabetes (subsample)","Weighted median",33,"0.022",0.053,"0.683"
+"Gestational hypertension (subsample)","Weighted median",33,"-0.07",0.056,"0.214"
+"High birthweight (>4000 g)","Weighted median",34,"0.117",0.088,"0.182"
+"Hypertensive disorders of pregnancy (subsample)","Weighted median",32,"5.76e-04",0.045,"0.99"
+"Hyperemesis gravidarum","Weighted median",33,"-0.037",0.111,"0.738"
+"Induction of labour","Weighted median",32,"-0.107",0.076,"0.161"
+"Low birthweight (<2500 g)","Weighted median",34,"-0.111",0.071,"0.12"
+"Large for gestational age","Weighted median",34,"0.121",0.081,"0.134"
+"Low Apgar score at 1 min","Weighted median",30,"0.141",0.121,"0.247"
+"Low Apgar score at 5 min","Weighted median",34,"0.389",0.257,"0.13"
+"Miscarriage (subsample)","Weighted median",34,"0.003",0.029,"0.907"
+"NICU admission","Weighted median",33,"0.018",0.095,"0.851"
+"Severe nausea/vomiting (all)","Weighted median",34,"0.014",0.024,"0.554"
+"Severe nausea/vomiting (subsample)","Weighted median",34,"0.005",0.025,"0.853"
+"Preeclampsia (subsample)","Weighted median",33,"-0.012",0.058,"0.837"
+"Postpartum_hemorrhage","Weighted median",40,"7.09",1.391,"3.45e-07"
+"Postpartum_hemorrhage_due_to_atony","Weighted median",40,"7.286",1.941,"1.74e-04"
+"Postpartum_hemorrhage_due_to_retained_placenta","Weighted median",40,"6.803",1.365,"6.23e-07"
+"Post-term birth","Weighted median",34,"0.127",0.061,"0.036"
+"Preterm birth (all)","Weighted median",34,"-0.154",0.053,"0.004"
+"Preterm birth (subsample)","Weighted median",33,"-0.09",0.064,"0.159"
+"Recurrent miscarriage (subsample)","Weighted median",34,"0.126",0.099,"0.205"
+"Premature rupture of membranes","Weighted median",34,"0.135",0.058,"0.019"
+"Single miscarriage (subsample)","Weighted median",34,"0.026",0.034,"0.443"
+"Stillbirth (subsample)","Weighted median",34,"-0.09",0.092,"0.326"
+"Small for gestational age","Weighted median",33,"-0.073",0.091,"0.428"
+"Very preterm birth (all)","Weighted median",33,"-0.3",0.234,"0.199"
+"Z-score birthweight (all)","Weighted median",34,"0.04",0.021,"0.055"

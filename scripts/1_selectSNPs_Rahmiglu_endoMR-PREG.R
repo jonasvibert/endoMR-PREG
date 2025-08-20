@@ -11,12 +11,6 @@
 ## Clear the workspace
   rm(list = ls())
 
-## Set API token for IEU GWAS database access
-  Sys.setenv(IEU_API_TOKEN = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImFwaS1qd3QiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhcGkub3Blbmd3YXMuaW8iLCJhdWQiOiJhcGkub3Blbmd3YXMuaW8iLCJzdWIiOiJqb25hcy52aWJlcnRAY2h1di5jaCIsImlhdCI6MTc0ODYxNTY4MSwiZXhwIjoxNzQ5ODI1MjgxfQ.kygMDZXhsXM6C_HWUnMtFw9xKUoAws6S9cwPTfuJ1leuRwqxs3wEo_iS87K89t8alefLqKEA408-oRB5vxj330gDIqr_SIY6lvPWooPTlw_eg945zS77XWtJm8jSa2tRyJYr6sTtJUvZBsyEp9cGTIBTYNSHzWKpAly9bdbFI0yEMTeDby84ps4qGtlcfqzChkg9YwitBu_-nr6ZlteNaYk6ydP-QICXETB8ypVfEnZOiqInLtEyOQt0oEHKrz6IPSUsqoRcIaCh6zSOuT3TCXQOMiwzX-7bw10ataPfjVJehlLAQmTvDuhjENwtRwicnQoA_hpMVjB2SjtzJv8MUw")
-
-## Set CRAN repository (University of Bristol mirror)
-  options(repos = c(CRAN ="http://www.stats.bris.ac.uk/R/"))
-
 ## Set digits for numeric display
   options(digits = 10)
 
@@ -66,7 +60,6 @@
   print(colnames(expdat_raw))
   head(expdat_raw)
   
-
 ## Format data for TwoSampleMR
   
   # Rename columns to avoid issues with spaces and special characters
@@ -86,7 +79,7 @@
     pval_col           = "P-value",
     samplesize_col     = "Sample.Size",
     chr_col            = "Chromosome",              
-    pos_col            = "Position.(hg.19)",        
+    pos_col            = "Position.hg19",        
     phenotype_col      = "phenotype",               
     id_col             = "id.exposure"
   )
@@ -154,13 +147,11 @@ bim_data[, chrpos := paste0("chr", CHR, ":", BP)]
   head(clumped)
 
 ## Save the formatted exposure dataset 
-  write.table(expdat_ready, file = "./data/endo_dat.txt", quote = FALSE, row.names = FALSE, sep = "\t")
-  cat("Exposure data saved as './data/endo_dat.txt'\n")
+  write.table(expdat_ready, file = file.path(data_dir, "endo_dat.txt"), quote = FALSE, row.names = FALSE, sep = "\t")
 
 #Save and unique list of rsIDs
   rsid <- unique(expdat_ready$SNP)
-  write.table(rsid, file = "./data/rsid.txt", row.names = FALSE, col.names = FALSE, quote = FALSE)
-  cat("List of rsIDs saved as './data/rsid.txt'\n")
+  write.table(rsid, file = file.path(data_dir, "rsid.txt"), row.names = FALSE, col.names = FALSE, quote = FALSE)
 
 #Save table with list of rsIDs
   data.table::fwrite(
@@ -168,10 +159,7 @@ bim_data[, chrpos := paste0("chr", CHR, ":", BP)]
     file.path(results_dir, "endometriosis_clumped_snps.tsv"),
     sep = "\t"
   )
-  
-# Display the full table in R
-  View(clumped)
-  
+
   
   ############################################################################
   #                      LD-Based Clumping Using PLINK and UKbiobank        #
@@ -327,7 +315,7 @@ bim_data[, chrpos := paste0("chr", CHR, ":", BP)]
   
   # 3. Calculate multi‐SNP F‑statistic
   k       <- nrow(clumped2)                     # number of instruments
-  N       <- unique(clumped2$samplesize.exposure)
+  N <- as.integer(median(clumped2$samplesize.exposure, na.rm = TRUE))
   F_multi <- (total_R2 / k) * ((N - k - 1) / (1 - total_R2))
   
   # 4. Compute mean per‐SNP F‑statistic
@@ -343,4 +331,6 @@ bim_data[, chrpos := paste0("chr", CHR, ":", BP)]
   cat(sprintf(
     "Mean per‑SNP F‑statistic            = %.3f\n", mean_F
   ))
+  
+  
   

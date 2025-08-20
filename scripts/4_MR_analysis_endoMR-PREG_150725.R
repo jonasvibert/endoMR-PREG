@@ -27,7 +27,76 @@ dat <- data.table::fread(harm_file)
 stopifnot(all(c("id.exposure", "id.outcome", "beta.exposure", "beta.outcome") %in% colnames(dat)))
 
 phenotypes <- unique(dat$outcome)
-message("✔ Loaded ", nrow(dat), " rows across ", length(phenotypes), " phenotypes")
+
+### 2b. OUTCOME LABELS ###########################################################
+# Dictionary of human-readable outcome names
+outcome_labels <- c(
+  pretb_all      = "Preterm birth (all)",
+  el_cs          = "Elective caesarean section",
+  rup_memb       = "Premature rupture of membranes",
+  pretb_subsamp  = "Preterm birth (subsample)",
+  apgar1         = "Apgar score at 1 min",
+  vpretb_all     = "Very preterm birth (all)",
+  em_cs          = "Emergency caesarean section",
+  lowapgar1      = "Low Apgar score at 1 min",
+  pe_subsamp     = "Preeclampsia (subsample)",
+  lbw_all        = "Low birthweight (<2500 g)",
+  ga_all         = "Gestational age (all)",
+  gh_subsamp     = "Gestational hypertension (subsample)",
+  ga_subsamp     = "Gestational age (subsample)",
+  lga            = "Large for gestational age",
+  zbw_all        = "Z-score birthweight (all)",
+  nvp_sev_subsamp= "Severe nausea/vomiting (subsample)",
+  nvp_sev_all    = "Severe nausea/vomiting (all)",
+  sb_subsamp     = "Stillbirth (subsample)",
+  gdm_subsamp    = "Gestational diabetes (subsample)",
+  apgar5         = "Apgar score at 5 min",
+  hdp_subsamp    = "Hypertensive disorders of pregnancy (subsample)",
+  r_misc_subsamp = "Recurrent miscarriage (subsample)",
+  bf_dur_4c      = "Breastfeeding ≥4 months",
+  depr_subsamp   = "Postpartum depression (subsample)",
+  hbw_all        = "High birthweight (>4000 g)",
+  nicu           = "NICU admission",
+  lowapgar5      = "Low Apgar score at 5 min",
+  bf_sus         = "Breastfeeding cessation",
+  posttb_all     = "Post-term birth",
+  misc_subsamp   = "Miscarriage (subsample)",
+  bf_ini         = "Breastfeeding initiation",
+  bf_est         = "Exclusive breastfeeding",
+  s_misc_subsamp = "Single miscarriage (subsample)",
+  cs             = "Caesarean section (all)",
+  hyp            = "Hyperemesis gravidarum",
+  anaemia_preg_all = "Anaemia in pregnancy (all)",
+  sga            = "Small for gestational age",
+  induction      = "Induction of labour",
+  finngen_R12_N14_FEMALEINFERT = "Female infertility",
+  finngen_R12_O15_PLAC_PRAEVIA = "Placenta praevia",
+  finngen_R12_O15_PLAC_PREMAT_SEPAR = "Placental abruption",
+  finngen_R12_O15_PLAC_DISORD = "Other placental disorders",
+  finngen_R12_O15_PREG_ECTOP   = "Ectopic pregnancy",
+  Early_bleeding_with_any_outcome_filtered = "Early bleeding (any outcome)",
+  Postpartum_hemorrhage_due_to_retained_placenta_filtered = "PPH – retained placenta",
+  Early_bleeding_ending_in_live_birth_filtered = "Early bleeding – live birth",
+  Postpartum_hemorrhage_filtered = "Postpartum haemorrhage",
+  Postpartum_hemorrhage_due_to_atony_filtered = "PPH – atony",
+  Antepartum_bleeding_filtered = "Antepartum bleeding"
+)
+
+# Add a readable outcome column
+# Transformer le dictionnaire en data.frame
+labels_df <- data.frame(
+  outcome = names(outcome_labels),
+  outcome_full = unname(outcome_labels),
+  stringsAsFactors = FALSE
+)
+
+# Fusionner sur outcome
+dat <- merge(dat, labels_df, by = "outcome", all.x = TRUE)
+
+# Si pas de correspondance, fallback au brut
+dat$outcome_full[is.na(dat$outcome_full)] <- dat$outcome[is.na(dat$outcome_full)]
+
+phenotypes <- unique(dat$outcome_full)
 # View phenotypes
 print(phenotypes)
 
@@ -37,13 +106,40 @@ run_mr_methods <- function(data, methods) {
   as.data.frame(res)
 }
 export_csv <- function(df, name) {
+  # Add labels if outcome_full is missing
+  if ("outcome" %in% colnames(df) && !"outcome_full" %in% colnames(df)) {
+    df <- merge(df, labels_df, by = "outcome", all.x = TRUE)
+    df$outcome_full[is.na(df$outcome_full)] <- df$outcome[is.na(df$outcome_full)]
+  }
+  
+  # Drop unnecessary columns
+  drop_cols <- c("id.exposure", "id.outcome", "outcome", "exposure")
+  df <- df[, !(names(df) %in% drop_cols), drop = FALSE]
+  
+  # Rename outcome_full → outcome
+  if ("outcome_full" %in% colnames(df)) {
+    names(df)[names(df) == "outcome_full"] <- "outcome"
+    col_order <- c("outcome", setdiff(names(df), "outcome"))
+    df <- df[, col_order, drop = FALSE]
+  }
+  
+  # Format numeric columns: round normally, use scientific if very small
+  num_cols <- sapply(df, is.numeric)
+  df[num_cols] <- lapply(df[num_cols], function(x) {
+    sapply(x, function(val) {
+      if (is.na(val)) return(NA)
+      if (abs(val) < 0.001) format(val, scientific = TRUE, digits = 3)
+      else round(val, 3)
+    })
+  })
+  
+  # Export
   write.csv(df, file.path(results_dir, paste0(name, ".csv")), row.names = FALSE)
 }
 
 ### 4. MAIN MR ESTIMATES ########################################################
 # 4.1 Inverse-Variance Weighted (IVW)
 ivw_res <- run_mr_methods(dat, "mr_ivw")
-print(ivw_res)
 
 # 4.2 MR-Egger
 egger_res <- run_mr_methods(dat, "mr_egger_regression")
@@ -52,36 +148,32 @@ egger_res <- run_mr_methods(dat, "mr_egger_regression")
 wm_res   <- run_mr_methods(dat, "mr_weighted_median")
 
 # 4.4 All default MR methods (IVW, Egger, WM, modes…)
-#all_res  <- mr(dat)
+all_res  <- mr(dat)
 
 # Export results
 export_csv(ivw_res,  "ivw_results")
 export_csv(egger_res,"egger_results")
 export_csv(wm_res,   "weighted_median_results")
-#export_csv(all_res,  "all_mr_methods")
+export_csv(all_res,  "all_mr_methods")
 
 ### 5. SENSITIVITY ANALYSES ######################################################
 # 5.1 Heterogeneity (Cochran’s Q)
 het_res <- mr_heterogeneity(dat)
-export_csv(het_res, "heterogeneity_results")
 
 # 5.2 Horizontal pleiotropy (Egger intercept)
 plt_res <- mr_pleiotropy_test(dat)
-export_csv(plt_res, "pleiotropy_results")
 
 # 5.3 Single-SNP effects
 single_res <- mr_singlesnp(dat)
-export_csv(single_res, "singlesnp_results")
 
 # 5.4 Leave-one-out by SNP
 loo_snp_res <- mr_leaveoneout(dat)
-export_csv(loo_snp_res, "leaveoneout_snp_results")
 
-# Quick prints
-print(head(het_res))
-print(head(plt_res))
-print(head(single_res))
-print(head(loo_snp_res))
+# Export
+export_csv(het_res, "heterogeneity_results")
+export_csv(plt_res, "pleiotropy_results")
+export_csv(single_res, "singlesnp_results")
+export_csv(loo_snp_res, "leaveoneout_snp_results")
 
 ### 6. MR-PRESSO OUTLIER DETECTION
 
@@ -123,10 +215,18 @@ for(o in sig_outcomes) {
 
 # 4. inspect
 presso_results
-
+  
+# Export a compact summary for each outcome
+for (o in names(presso_results)) {
+  res <- presso_results[[o]]
+  if (!is.null(res)) {
+    export_csv(as.data.frame(res$`Main`), paste0("presso_", o, "_main"))
+    if (!is.null(res$`OutlierTest`)) {
+      export_csv(as.data.frame(res$`OutlierTest`), paste0("presso_", o, "_outliers"))
+    }
+  }
+}
 ### EXCLUDED SNPs? -----------------------------------------------------
-# Harmonise exposure and outcome data
-harm <- harmonise_data(exposure_dat, outcome_dat)
 # Compare with your original list of 41 SNPs
-setdiff(exposure_dat$SNP, harm$SNP)
+setdiff(exposure_dat$SNP, dat$SNP)
 
