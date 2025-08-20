@@ -1,20 +1,28 @@
 # EndoMR-PREG: Mendelian Randomization Analysis
 
-## Endometriosis and Pregnancy Outcomes Study
+## Association of Genetic Liability to Endometriosis with Pregnancy Outcomes
 
 [![GitHub](https://img.shields.io/github/license/jonasvibert/endoMR-PREG)](LICENSE)
 [![R](https://img.shields.io/badge/R-%3E%3D4.0-blue)](https://www.r-project.org/)
 [![DOI](https://img.shields.io/badge/DOI-pending-lightgrey)](.)
 
-A comprehensive two-sample Mendelian randomization analysis investigating the causal relationship between genetic liability to endometriosis and various pregnancy outcomes.
+**Authors**: Jonas Vibert¹, Carolina Borges², Zoltán Kutalik³, David Baud¹, Deborah A. Lawlor², Nicola Pluchino¹
+
+¹Department of Obstetrics and Gynecology, Lausanne University Hospital, Switzerland  
+²MRC Integrative Epidemiology Unit, University of Bristol, UK  
+³University Center for Primary Care and Public Health, Lausanne, Switzerland
+
+A comprehensive two-sample Mendelian randomization study investigating causal relationships between genetic liability to endometriosis and **49 maternal and fetal outcomes**.
 
 ## 🎯 Key Findings
 
-**Significant causal associations identified**:
-- **Female infertility** (FinnGen)
-- **Premature rupture of membranes**
-- **Placenta praevia** (FinnGen)
-- **Placental abruption** (FinnGen)
+**Significant causal association (Bonferroni-corrected)**:
+- **Placenta praevia**: OR 1.62 (95% CI: 1.33–1.97, P = 1.5×10⁻⁶)
+
+**Internal validation**:
+- **Female infertility**: OR 1.63 (95% CI: 1.48–1.80, P = 6.1×10⁻²²)
+
+**No significant associations** with hypertensive disorders, gestational diabetes, postpartum hemorrhage, preterm birth, or most other pregnancy outcomes after correction.
 
 ## 📁 Repository Structure
 
@@ -96,9 +104,9 @@ For detailed information, see the [`docs/`](docs/) directory:
 ## 🔬 Methods Overview
 
 - **Design**: Two-sample Mendelian randomization
-- **Exposure**: Endometriosis genetic liability (41 SNPs)
-- **Outcomes**: 25+ pregnancy-related traits
-- **Population**: European ancestry
+- **Exposure**: Endometriosis genetic liability (41 independent SNPs, mean F = 279)
+- **Outcomes**: 49 maternal and fetal pregnancy outcomes
+- **Population**: European ancestry (~58,000 cases, 733,000 controls)
 - **Software**: TwoSampleMR package in R
 
 **Statistical approaches**:
@@ -111,10 +119,11 @@ For detailed information, see the [`docs/`](docs/) directory:
 
 | Outcome | OR (95% CI) | P-value | Method |
 |---------|-------------|---------|---------|
-| Female infertility | [Add] | [Add] | IVW |
-| PROM | [Add] | [Add] | IVW |
-| Placenta praevia | [Add] | [Add] | IVW |
-| Placental abruption | [Add] | [Add] | IVW |
+| **Placenta praevia** | **1.62 (1.33–1.97)** | **1.5×10⁻⁶** | IVW |
+| **Female infertility** | **1.63 (1.48–1.80)** | **6.1×10⁻²²** | IVW |
+| Premature rupture of membranes | 1.12 (1.01–1.23) | 0.026 | IVW |
+| Placental abruption | 1.36 (1.03–1.81) | 0.031 | IVW |
+| Preterm birth (all) | 0.82 (0.71–0.95) | 0.007 | IVW |
 
 *Full results available in [`results/`](results/) directory*
 
@@ -145,9 +154,11 @@ GitHub: https://github.com/jonasvibert/endoMR-PREG
 ```
 
 **Original data sources to cite**:
-- Endometriosis GWAS: Rahmioglu et al. (2018)
-- FinnGen: Kurki et al. (2023)
-- TwoSampleMR: Hemani et al. (2018)
+- Endometriosis GWAS: Rahmioglu et al. (2023) Nature Genetics
+- MR-PREG consortium: McBride et al. (2025)
+- FinnGen: Kurki et al. (2023) Nature
+- Postpartum hemorrhage: Westergaard et al. (2024) Nature Genetics
+- TwoSampleMR: Hemani et al. (2018) eLife
 
 ## 🤝 Contributing
 
@@ -158,9 +169,10 @@ Contributions welcome! Please:
 
 ## 📧 Contact
 
-**Author**: [Your Name]  
-**Email**: [Your Email]  
-**Institution**: [Your Institution]
+**Corresponding Author**: Jonas Vibert, MD  
+**Email**: jonas.vibert@chuv.ch  
+**ORCID**: https://orcid.org/0009-0000-2449-7734  
+**Institution**: Lausanne University Hospital
 
 ## ⚖️ License
 
@@ -168,9 +180,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- MR-PREG consortium and participants
 - FinnGen consortium and participants
-- UK Biobank and participants
-- Original GWAS authors and consortiums
+- Westergaard et al. for postpartum hemorrhage GWAS
+- Rahmioglu et al. for endometriosis GWAS
+- All study participants and original GWAS consortiums
 - TwoSampleMR development team
 
 ---
