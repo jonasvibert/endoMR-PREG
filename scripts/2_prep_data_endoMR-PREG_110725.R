@@ -137,7 +137,7 @@ process_pph <- function(base) {
 res_pph <- lapply(file_list_pph, process_pph)
 names(res_pph) <- file_list_pph
 
-# QC summary 
+# QC summary (same style as FinnGen)
 qc_pph <- dplyr::bind_rows(lapply(res_pph, `[[`, "raw")) %>%
   dplyr::group_by(outcome) %>%
   dplyr::summarize(
@@ -147,6 +147,7 @@ qc_pph <- dplyr::bind_rows(lapply(res_pph, `[[`, "raw")) %>%
     .groups   = "drop"
   )
 print(qc_pph)
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────

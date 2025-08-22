@@ -193,7 +193,7 @@ outcome_labels <- c(
 )
 
 # Remplacer les codes par les noms complets
-ivw_tab <- ivw_tab %>%
+ivw_res <- ivw_res %>%
   mutate(Outcome = recode(Outcome, !!!outcome_labels))
 
 # Renommer les colonnes pour plus de clarté
@@ -350,4 +350,88 @@ print(sens_tab, n = Inf, width = Inf)
 # ---- Export to Excel (simple) ----
 write.xlsx(sens_tab, "mr_sensitivity_summary.xlsx", asTable = TRUE)
 cat("\nSaved: mr_sensitivity_summary.xlsx\n")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7) outcome summary table for MR datasets -------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+
+library(dplyr)
+library(stringr)
+
+## ---- 1) MR-PREG ----
+case_col <- names(mr_preg_dat)[str_detect(names(mr_preg_dat), "^n(case|_case)\\.?outcome$")] %>% dplyr::first()
+ctrl_col <- names(mr_preg_dat)[str_detect(names(mr_preg_dat), "^n(control|_control)\\.?outcome$")] %>% dplyr::first()
+
+mrpreg_summary <- mr_preg_dat %>%
+  group_by(outcome) %>%
+  summarise(
+    nsnp         = n_distinct(SNP),
+    N_total      = suppressWarnings(as.integer(median(samplesize.outcome, na.rm = TRUE))),
+    N_total_min  = suppressWarnings(as.integer(min(samplesize.outcome, na.rm = TRUE))),
+    N_total_max  = suppressWarnings(as.integer(max(samplesize.outcome, na.rm = TRUE))),
+    cases        = if (!is.null(case_col)) suppressWarnings(as.integer(median(.data[[case_col]], na.rm = TRUE))) else NA_integer_,
+    controls     = if (!is.null(ctrl_col)) suppressWarnings(as.integer(median(.data[[ctrl_col]], na.rm = TRUE))) else NA_integer_,
+    .groups = "drop"
+  ) %>%
+  mutate(source = "MR-PREG") %>%
+  relocate(source)
+
+## ---- 2) Westergaard PPH ----
+pph_summary <- bind_rows(lapply(res_pph, `[[`, "raw")) %>%
+  group_by(outcome) %>%
+  summarise(
+    nsnp    = n_distinct(rsid),
+    cohorts = suppressWarnings(as.integer(median(n, na.rm = TRUE))),
+    N_total  = NA_integer_,
+    cases    = NA_integer_,
+    controls = NA_integer_,
+    .groups = "drop"
+  ) %>%
+  mutate(source = "Westergaard (PPH)") %>%
+  relocate(source)
+
+## ---- 3) FinnGen ----
+finngen_summary <- bind_rows(lapply(res_fg, `[[`, "raw")) %>%
+  group_by(outcome) %>%
+  summarise(
+    nsnp = n_distinct(rsid),
+    N_total  = NA_integer_,
+    cases    = NA_integer_,
+    controls = NA_integer_,
+    .groups = "drop"
+  ) %>%
+  mutate(source = "FinnGen R12") %>%
+  relocate(source)
+
+## ---- 4) Combine all ----
+outcome_summary <- bind_rows(
+  mrpreg_summary %>% select(source, outcome, nsnp, N_total, cases, controls),
+  pph_summary %>% select(source, outcome, nsnp, N_total, cases, controls),
+  finngen_summary %>% select(source, outcome, nsnp, N_total, cases, controls)
+) %>%
+  arrange(source, outcome)
+
+## ---- 5) Print directly in console ----
+print(outcome_summary, n = nrow(outcome_summary))
+
+## ---- 6) Print ranges for manuscript text ----
+mrpreg_range <- mrpreg_summary %>%
+  summarise(
+    minN = min(N_total_min, na.rm = TRUE),
+    maxN = max(N_total_max, na.rm = TRUE)
+  ) %>%
+  mutate(
+    range_text = paste0("N = ", scales::comma(minN), " to N = ", scales::comma(maxN))
+  ) %>%
+  pull(range_text)
+
+cat("\n--- Section 2.1 MR-PREG ---\n")
+cat("Total sample sizes ranged from ", mrpreg_range, ".\n", sep = "")
+
+cat("\n--- Section 2.2 FinnGen ---\n")
+cat("Sample sizes to be added from FinnGen metadata.\n")
+
+cat("\n--- Section 2.3 Westergaard PPH ---\n")
+cat("Provide subtype-specific totals or use overall study totals (overall PPH ≈ 175,000).\n")
+
 

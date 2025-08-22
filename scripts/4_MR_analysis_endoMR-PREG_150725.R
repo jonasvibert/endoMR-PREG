@@ -24,7 +24,7 @@ harm_file   <- here::here("results", "harmonised_rahmioglu_bpo.csv")
 
 ### 2. LOAD and sanity checks ####################################################
 dat <- data.table::fread(harm_file)
-stopifnot(all(c("id.exposure", "id.outcome", "beta.exposure", "beta.outcome") %in% colnames(dat)))
+stopifnot(all(c("id.exposure", "beta.exposure", "beta.outcome") %in% colnames(dat)))
 
 phenotypes <- unique(dat$outcome)
 
@@ -140,6 +140,7 @@ export_csv <- function(df, name) {
 ### 4. MAIN MR ESTIMATES ########################################################
 # 4.1 Inverse-Variance Weighted (IVW)
 ivw_res <- run_mr_methods(dat, "mr_ivw")
+ivw_res_raw <- ivw_res
 
 # 4.2 MR-Egger
 egger_res <- run_mr_methods(dat, "mr_egger_regression")
@@ -169,11 +170,85 @@ single_res <- mr_singlesnp(dat)
 # 5.4 Leave-one-out by SNP
 loo_snp_res <- mr_leaveoneout(dat)
 
+# 5.5 Leave-one-out by cohorts
+if (file.exists("stu_out_dat.txt")) {
+  
+  # 0) Load TSV/CSV robustly
+  mr_data <- tryCatch(
+    readr::read_delim("stu_out_dat.txt", delim = "\t", col_types = cols()),
+    error = function(e) readr::read_delim("stu_out_dat.txt", delim = ",", col_types = cols())
+  ) %>% as.data.frame()
+  
+  # 1) Minimal sanity checks
+  need_cols <- c("SNP","beta.exposure","se.exposure","beta.outcome","se.outcome",
+                 "id.exposure","id.outcome","exposure","outcome","study")
+  missing_cols <- setdiff(need_cols, names(mr_data))
+  if (length(missing_cols) > 0) {
+    stop("stu_out_dat.txt: missing columns: ", paste(missing_cols, collapse = ", "))
+  }
+  
+  # 2) Add human-readable outcome labels if possible
+  mr_data <- merge(mr_data, labels_df, by = "outcome", all.x = TRUE)
+  mr_data$outcome_full[is.na(mr_data$outcome_full)] <- mr_data$outcome[is.na(mr_data$outcome_full)]
+  
+  # 3) Leave-one-out function per outcome
+  loo_one_outcome <- function(df_outcome) {
+    cohorts <- unique(df_outcome$study)
+    
+    rows <- lapply(cohorts, function(coh) {
+      sub <- df_outcome[df_outcome$study != coh, , drop = FALSE]
+      
+      # Require at least 3 independent SNPs for a stable estimate
+      if (dplyr::n_distinct(sub$SNP) < 3) return(NULL)
+      
+      # Ensure consistent identifiers
+      sub$id.exposure  <- as.character(sub$id.exposure[1])
+      sub$id.outcome   <- as.character(sub$id.outcome[1])
+      sub$exposure     <- as.character(sub$exposure[1])
+      sub$outcome      <- as.character(sub$outcome[1])
+      sub$outcome_full <- as.character(sub$outcome_full[1])
+      
+      # Run MR IVW (other methods can be added if needed)
+      res <- tryCatch(
+        TwoSampleMR::mr(sub, method_list = "mr_ivw"),
+        error = function(e) NULL
+      )
+      if (is.null(res) || nrow(res) == 0) return(NULL)
+      
+      res$left_out_cohort <- coh
+      # Add some useful metrics
+      res$nsnp_after_exclusion <- dplyr::n_distinct(sub$SNP)
+      res$outcome_full <- sub$outcome_full[1]
+      res
+    })
+    
+    dplyr::bind_rows(rows)
+  }
+  
+  # 4) Apply leave-one-out by outcome (id.outcome)
+  loo_list <- lapply(split(mr_data, mr_data$id.outcome), loo_one_outcome)
+  loo_cohort_df <- dplyr::bind_rows(loo_list)
+  
+  # 5) Clean up columns for export (keep readable)
+  if (!is.null(loo_cohort_df) && nrow(loo_cohort_df) > 0) {
+    # Order columns and rename outcome_full -> outcome for consistency
+    col_keep <- c("outcome_full","left_out_cohort","method","nsnp_after_exclusion",
+                  "b","se","pval","Q","Q_df","Q_pval",
+                  setdiff(names(loo_cohort_df),
+                          c("outcome_full","left_out_cohort","method","nsnp_after_exclusion",
+                            "b","se","pval","Q","Q_df","Q_pval")))
+    col_keep <- unique(col_keep[col_keep %in% names(loo_cohort_df)])
+    loo_cohort_df <- loo_cohort_df[, col_keep, drop = FALSE]
+    names(loo_cohort_df)[names(loo_cohort_df) == "outcome_full"] <- "outcome"
+  }
+}
+
 # Export
 export_csv(het_res, "heterogeneity_results")
 export_csv(plt_res, "pleiotropy_results")
 export_csv(single_res, "singlesnp_results")
 export_csv(loo_snp_res, "leaveoneout_snp_results")
+export_csv(loo_cohort_df, "leaveoneout_by_cohort")
 
 ### 6. MR-PRESSO OUTLIER DETECTION
 
@@ -182,9 +257,9 @@ ivw_res <- read.csv(file.path(results_dir, "ivw_results.csv"), stringsAsFactors 
 dat      <- data.table::fread(harm_file) %>% as.data.frame()
 
 # 2. pick only the outcomes with a significant IVW (p < 0.05)
-sig_outcomes <- ivw_res %>%
-  filter(method == "Inverse variance weighted", pval < 0.05) %>%
-  pull(id.outcome) %>%
+sig_outcomes <- ivw_res_raw %>%
+  dplyr::filter(method == "Inverse variance weighted", pval < 0.05) %>%
+  dplyr::pull(id.outcome) %>%
   unique()
 
 # 3. run MR-PRESSO on each, with fewer permutations
@@ -226,7 +301,4 @@ for (o in names(presso_results)) {
     }
   }
 }
-### EXCLUDED SNPs? -----------------------------------------------------
-# Compare with your original list of 41 SNPs
-setdiff(exposure_dat$SNP, dat$SNP)
 
