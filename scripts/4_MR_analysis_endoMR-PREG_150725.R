@@ -95,6 +95,17 @@ dat <- merge(dat, labels_df, by = "outcome", all.x = TRUE)
 
 # Si pas de correspondance, fallback au brut
 dat$outcome_full[is.na(dat$outcome_full)] <- dat$outcome[is.na(dat$outcome_full)]
+dat$id.outcome <- dat$outcome
+
+# Nettoyage : exclure les lignes problématiques
+dat <- dat %>%
+  dplyr::filter(
+    !is.na(beta.outcome),
+    !is.na(se.outcome),
+    !is.infinite(se.outcome),
+    !is.na(pval.outcome),
+    se.outcome > 0
+  )
 
 phenotypes <- unique(dat$outcome_full)
 # View phenotypes
@@ -106,21 +117,9 @@ run_mr_methods <- function(data, methods) {
   as.data.frame(res)
 }
 export_csv <- function(df, name) {
-  # Add labels if outcome_full is missing
   if ("outcome" %in% colnames(df) && !"outcome_full" %in% colnames(df)) {
     df <- merge(df, labels_df, by = "outcome", all.x = TRUE)
     df$outcome_full[is.na(df$outcome_full)] <- df$outcome[is.na(df$outcome_full)]
-  }
-  
-  # Drop unnecessary columns
-  drop_cols <- c("id.exposure", "id.outcome", "outcome", "exposure")
-  df <- df[, !(names(df) %in% drop_cols), drop = FALSE]
-  
-  # Rename outcome_full → outcome
-  if ("outcome_full" %in% colnames(df)) {
-    names(df)[names(df) == "outcome_full"] <- "outcome"
-    col_order <- c("outcome", setdiff(names(df), "outcome"))
-    df <- df[, col_order, drop = FALSE]
   }
   
   # Format numeric columns: round normally, use scientific if very small
@@ -188,8 +187,11 @@ if (file.exists("stu_out_dat.txt")) {
   }
   
   # 2) Add human-readable outcome labels if possible
-  mr_data <- merge(mr_data, labels_df, by = "outcome", all.x = TRUE)
-  mr_data$outcome_full[is.na(mr_data$outcome_full)] <- mr_data$outcome[is.na(mr_data$outcome_full)]
+  if (!"outcome_full" %in% names(mr_data)) {
+    mr_data <- merge(mr_data, labels_df, by = "outcome", all.x = TRUE)
+    mr_data$outcome_full[is.na(mr_data$outcome_full)] <- mr_data$outcome[is.na(mr_data$outcome_full)]
+  }
+
   
   # 3) Leave-one-out function per outcome
   loo_one_outcome <- function(df_outcome) {
@@ -301,4 +303,3 @@ for (o in names(presso_results)) {
     }
   }
 }
-

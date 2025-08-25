@@ -47,11 +47,11 @@
 ############################################################################
   
 ## Load top 10,000 SNPs from supplementary Table 33 (including 23andMe)
-  readxl::excel_sheets(here("data", "NIHMS1873427-Supplementary_Materials.xlsx"))
+  readxl::excel_sheets(here("data", "EXPOSURE_RAHMIGLU", "NIHMS1873427-Supplementary_Materials.xlsx"))
   
   # Load the sheet with the top 10,000 SNPs
   expdat_raw <- readxl::read_excel(
-    here("data", "NIHMS1873427-Supplementary_Materials.xlsx"),
+    here("data", "EXPOSURE_RAHMIGLU", "NIHMS1873427-Supplementary_Materials.xlsx"),
     sheet = "Supp33.Top10K-SNPs",
     skip = 1
   )

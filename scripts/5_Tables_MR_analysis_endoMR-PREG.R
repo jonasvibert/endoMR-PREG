@@ -139,7 +139,7 @@ if (requireNamespace("knitr", quietly = TRUE)) {
 library(dplyr)
 library(openxlsx)
 
-# Dictionnaire de noms complets pour les outcomes
+# Clean outcome labels
 outcome_labels <- c(
   pretb_all      = "Preterm birth (all)",
   el_cs          = "Elective caesarean section",
@@ -192,29 +192,38 @@ outcome_labels <- c(
   Antepartum_bleeding_filtered = "Antepartum bleeding"
 )
 
-# Remplacer les codes par les noms complets
-ivw_res <- ivw_res %>%
-  mutate(Outcome = recode(Outcome, !!!outcome_labels))
+# Check object
+if (!exists("ivw_res")) stop("Object 'ivw_res' not found")
 
-# Renommer les colonnes pour plus de clarté
-ivw_tab_pub <- ivw_tab %>%
-  rename(
-    `Data source`    = Source,
-    `Outcome`        = Outcome,
-    `No. SNPs`       = SNPs,
-    `OR`             = OR_fmt,
-    `95% CI`         = CI_fmt,
-    `P`              = p_fmt,
-    `P (Bonferroni)` = pBonf_fmt,
-    `Q (FDR)`        = qFDR_fmt,
-    `Significance`   = Signif
+# Format and rename for publication
+ivw_tab_pub <- ivw_res %>%
+  filter(method == "Inverse variance weighted") %>%
+  mutate(
+    `Data source` = ifelse(grepl("^finngen", outcome), "FinnGen", "MR-PREG"),
+    OR_val = exp(b),
+    CI_low = exp(b - 1.96 * se),
+    CI_high = exp(b + 1.96 * se),
+    `OR` = sprintf("%.2f", OR_val),
+    `95%% CI` = sprintf("(%.2f–%.2f)", CI_low, CI_high),
+    `P` = sprintf("%.2e", pval),
+    `P (Bonferroni)` = ifelse(pval * n() < 0.05, "<0.05", sprintf("%.2e", pval * n())),
+    `Q (FDR)` = sprintf("%.2e", p.adjust(pval, method = "fdr")),
+    `Significance` = case_when(
+      pval < 0.05 & pval * n() < 0.05 ~ "Yes (Bonf)",
+      pval < 0.05 ~ "Yes",
+      TRUE ~ "No"
+    ),
+    Outcome = recode(outcome, !!!outcome_labels)
+  ) %>%
+  select(
+    `Data source`, Outcome, `No. SNPs` = nsnp, `OR`, `95%% CI`, `P`, `P (Bonferroni)`, `Q (FDR)`, `Significance`
   )
 
-# Afficher dans la console
-print(ivw_tab_pub, n = Inf, width = Inf)
+# Preview
+print(ivw_tab_pub)
 
-# Exporter vers Excel
-write.xlsx(ivw_tab_pub, "ivw_primary_summary_named.xlsx", asTable = TRUE)
+# Export
+write.xlsx(ivw_tab_pub, file = "results/ivw_results_table3.xlsx", overwrite = TRUE)
 
 
 ###############################################
@@ -325,11 +334,11 @@ egger_slim <- egger_res %>%
     Egger_P  = fmt_p(pval)
   )
 
+
 # ---- Join all and label outcomes ----
 sens_tab <- ivw_slim %>%
   left_join(wm_slim,    by = "outcome") %>%
   left_join(egger_slim, by = "outcome") %>%
-  left_join(egger_int_slim, by = "outcome") %>%
   mutate(
     `Data source` = detect_source(outcome),
     Outcome = recode(outcome, !!!outcome_labels)
