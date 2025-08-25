@@ -144,7 +144,7 @@ for (outcome_name in outcomes_to_plot) {
 
 
 ###############################################################################
-# Forest plot summary for all IVW results from all_results
+# v2 Forest plot summary for all IVW results from all_results
 ###############################################################################
 
 library(metafor)
@@ -227,8 +227,6 @@ df$outcome_clean[is.na(df$outcome_clean)] <- df$outcome[is.na(df$outcome_clean)]
 print(head(df$outcome_clean))
 print(head(df$outcome))
 
-
-
 # Arrange by descending OR
 df <- df %>% arrange(desc(OR))
 
@@ -237,7 +235,7 @@ n <- nrow(df)
 plot_height <- 100 + 25 * n  # adjust as needed
 
 # Output file
-png("plots/forest_metafor_ivw.png", width = 1400, height = plot_height, res = 120)
+png("plots/forest_metafor_ivw_v2.png", width = 1400, height = plot_height, res = 120)
 
 # Forest plot
 forest(
@@ -256,16 +254,56 @@ forest(
   ilab.xpos = c(3.1, 3.9, 4.7, 5.4),
   pch = 16,
   atransf = exp,
-  at = log(c(0.5, 1, 2, 3)),
-  xlim = c(-3, 6),
+  at = log(c(0.5, 1, 2)),
+  xlim = c(-6, 7.5),
   rows = seq(n, 1),
   ylim = c(0, n + 4)
 )
 # Add column headers
-text(-3, n + 2.5, "Outcome", font = 2, pos = 4)
-text(3.1, n + 2.5, "OR", font = 2)
-text(3.9, n + 2.5, "95% CI", font = 2)
-text(4.7, n + 2.5, "p-value", font = 2)
-text(5.4, n + 2.5, "SNPs", font = 2)
+text(-6, n + 2.5, "Outcome", font = 2, pos = 4)
+text(3.5, n + 2.5, "OR", font = 2)
+text(4.5, n + 2.5, "95% CI", font = 2)
+text(5.5, n + 2.5, "p-value", font = 2)
+text(6.2, n + 2.5, "SNPs", font = 2)
 
 dev.off()
+
+
+
+
+# Dimensions du plot
+png("plots/forest_metafor_ivw_v2.png", width = 1600, height = plot_height, res = 120)
+
+# Forest plot ajusté
+forest(
+  x = df$b,
+  sei = df$se,
+  slab = sprintf("  %s", df$outcome_clean),
+  xlab = "Odds Ratio",
+  annotate = FALSE,
+  header = FALSE,
+  ilab = data.frame(
+    sprintf("%.2f", df$OR),
+    sprintf("(%.2f, %.2f)", df$CI_low, df$CI_high),
+    sprintf("%.2e", df$pval),
+    df$nsnp
+  ),
+  ilab.xpos = c(3.8, 4.7, 5.6, 6.3),  
+  pch = 16,
+  atransf = exp,
+  at = log(c(0.5, 1, 2, 3)),  
+  xlim = c(-6, 7.5),         
+  rows = seq(n, 1),
+  ylim = c(0, n + 4),
+  cex = 0.9
+)
+
+# En-têtes de colonnes
+text(-6, n + 2.5, "Outcome", font = 2, pos = 4, cex = 0.95)
+text(3.8, n + 2.5, "OR", font = 2, cex = 0.95)
+text(4.7, n + 2.5, "95% CI", font = 2, cex = 0.95)
+text(5.6, n + 2.5, "p-value", font = 2, cex = 0.95)
+text(6.3, n + 2.5, "SNPs", font = 2, cex = 0.95)
+
+dev.off()
+
