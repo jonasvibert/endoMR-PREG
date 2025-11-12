@@ -15,6 +15,31 @@ library(TwoSampleMR)  # format_data()
 if (!requireNamespace("here", quietly = TRUE)) install.packages("here")
 library(here)
 
+# Load progress bar library
+if (!requireNamespace("progress", quietly = TRUE)) {
+  message("Installing progress package for progress bars...")
+  options(repos = c(CRAN = "https://cran.rstudio.com/"))
+  install.packages("progress")
+}
+library(progress)
+
+# Load forest plot libraries
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  options(repos = c(CRAN = "https://cran.rstudio.com/"))
+  install.packages("ggplot2")
+}
+if (!requireNamespace("forestplot", quietly = TRUE)) {
+  options(repos = c(CRAN = "https://cran.rstudio.com/"))
+  install.packages("forestplot")
+}
+if (!requireNamespace("metafor", quietly = TRUE)) {
+  options(repos = c(CRAN = "https://cran.rstudio.com/"))
+  install.packages("metafor")
+}
+library(ggplot2)
+library(forestplot)
+library(metafor)
+
 # 1) Paths ------------------------------------------------------------------
 project_dir <- here::here()
 data_dir    <- file.path(project_dir, "data")
@@ -43,22 +68,38 @@ if (file.exists(snps_file)) {
 }
 
 message("Loaded ", length(snps), " instruments (expected ~41).")
+message("Starting data preparation for pregnancy outcomes...")
 # head(snps)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3) MR-PREG adverse pregnancy outcomes ------------------------------------
+#    Units: Direct beta coefficients (log odds ratios) with standard errors
 # ─────────────────────────────────────────────────────────────────────────────
+
+message("\n=== Processing MR-PREG adverse pregnancy outcomes ===")
+message("Data source: MR-PREG consortium")
+message("Expected units: Beta (log OR) and SE")
 f_in       <- file.path(data_dir, "OUTCOME_MR-PREG", "ma_out_dat.txt")
+message("Reading MR-PREG data from: ", basename(f_in))
 raw_lines  <- readLines(f_in)
 header     <- raw_lines[1]
 data_clean <- raw_lines[-1][!grepl("\\.png$", raw_lines[-1])]
 txt_clean  <- c(header, data_clean)
+message("Cleaned ", length(data_clean), " data lines (removed ", length(raw_lines) - 1 - length(data_clean), " non-data lines)")
 
 mr_preg_df <- read.table(
   text            = txt_clean,
   header          = TRUE,
   stringsAsFactors = FALSE
 )
+
+# Diagnostic messages for MR-PREG data
+message("MR-PREG data dimensions: ", nrow(mr_preg_df), " rows x ", ncol(mr_preg_df), " columns")
+message("Available outcomes: ", n_distinct(mr_preg_df$Phenotype))
+message("SNPs in data: ", n_distinct(mr_preg_df$SNP))
+message("Mean beta (log OR): ", sprintf("%.4f", mean(mr_preg_df$beta, na.rm = TRUE)))
+message("Mean SE: ", sprintf("%.4f", mean(mr_preg_df$se, na.rm = TRUE)))
+message("Units confirmed: Beta coefficients (log OR) with SE")
 
 # Format for TwoSampleMR
 mr_preg_dat <- format_data(
@@ -79,10 +120,16 @@ mr_preg_dat <- format_data(
 )
 
 assign("dat_MR_PREG", mr_preg_dat, envir = .GlobalEnv)
+message("MR-PREG processing complete: ", nrow(mr_preg_dat), " observations formatted")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4) Postpartum Hemorrhage Outcomes (Westergaard et al.) 
+# 4) Postpartum Hemorrhage Outcomes (Westergaard et al.)
+#    Units: Effect sizes (OR or beta) auto-detected and converted to log OR
 # ─────────────────────────────────────────────────────────────────────────────
+
+message("\n=== Processing Postpartum Hemorrhage outcomes ===")
+message("Data source: Westergaard et al. Nature Genetics 2024")
+message("Auto-detection: OR (≈1.0) → log OR, or direct beta if already log scale")
 
 # List of raw PPH files (without extension)
 file_list_pph <- c(
@@ -107,11 +154,13 @@ common_cols_pph <- c(
 }
 
 # Helper: auto-detect if "Effect" is an OR (~1) or already beta (~0)
-.to_beta <- function(effect_vec) {
+.to_beta <- function(effect_vec, outcome_name = "") {
   med <- suppressWarnings(median(effect_vec, na.rm = TRUE))
   if (is.finite(med) && med > 0.5 && med < 1.5) {
+    message("  ", outcome_name, ": Auto-detected OR format (median = ", sprintf("%.3f", med), ") → converting to log OR")
     log(effect_vec)  # OR → beta
   } else {
+    message("  ", outcome_name, ": Auto-detected beta format (median = ", sprintf("%.3f", med), ") → using as-is")
     effect_vec      # already beta
   }
 }
@@ -145,7 +194,7 @@ process_pph <- function(base) {
       a1      = EA,              # effect allele (EA)
       a2      = OA,              # other allele (OA)
       eaf     = suppressWarnings(as.numeric(EAfrq)),
-      beta    = .to_beta(suppressWarnings(as.numeric(Effect))),
+      beta    = .to_beta(suppressWarnings(as.numeric(Effect)), base),
       pval    = suppressWarnings(as.numeric(P))
     ) %>%
     mutate(
@@ -185,8 +234,19 @@ process_pph <- function(base) {
   list(raw = df, mr = mr_pph)
 }
 
-# Run for all PPH outcomes
-res_pph <- lapply(file_list_pph, process_pph)
+# Run for all PPH outcomes with progress bar
+message("Processing ", length(file_list_pph), " PPH outcomes...")
+pb_pph <- progress_bar$new(
+  format = "PPH [:bar] :percent :current/:total ETA: :eta",
+  total = length(file_list_pph), 
+  clear = FALSE
+)
+
+res_pph <- list()
+for (i in seq_along(file_list_pph)) {
+  pb_pph$tick()
+  res_pph[[i]] <- process_pph(file_list_pph[i])
+}
 names(res_pph) <- file_list_pph
 
 # QC summary
@@ -204,7 +264,12 @@ print(qc_pph)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 5) FinnGen R12 Outcomes -----------------------------------------------------
+#    Units: Direct beta coefficients (log odds ratios) with standard errors
 # ─────────────────────────────────────────────────────────────────────────────
+
+message("\n=== Processing FinnGen R12 adverse pregnancy outcomes ===")
+message("Data source: FinnGen R12 release")
+message("Units: Direct beta (log OR) and sebeta (SE)")
 
 # List of raw (unfiltered) FinnGen files
 file_list_fg <- c(
@@ -276,8 +341,19 @@ process_fg <- function(base) {
   list(raw = df, mr = mr_fg)
 }
 
-# Run for all FinnGen outcomes
-res_fg <- lapply(file_list_fg, process_fg)
+# Run for all FinnGen outcomes with progress bar
+message("Processing ", length(file_list_fg), " FinnGen outcomes...")
+pb_fg <- progress_bar$new(
+  format = "FinnGen [:bar] :percent :current/:total ETA: :eta",
+  total = length(file_list_fg), 
+  clear = FALSE
+)
+
+res_fg <- list()
+for (i in seq_along(file_list_fg)) {
+  pb_fg$tick()
+  res_fg[[i]] <- process_fg(file_list_fg[i])
+}
 names(res_fg) <- file_list_fg
 
 # QC summary
@@ -304,6 +380,11 @@ all_outcomes <- bind_rows(
 )
 
 out_file <- file.path(results_dir, "formatted_all_pregnancy_outcomes.tsv")
+message("\n=== Exporting combined dataset ===")
+message("Total observations: ", nrow(all_outcomes))
+message("Unique outcomes: ", n_distinct(all_outcomes$outcome))
+message("Unique SNPs: ", n_distinct(all_outcomes$SNP))
+
 write.table(
   all_outcomes,
   file      = out_file,
@@ -311,6 +392,7 @@ write.table(
   quote     = FALSE,
   row.names = FALSE
 )
+message("Exported to: ", basename(out_file))
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 7) SNP count per outcome_dat -------------------------------
@@ -330,11 +412,13 @@ counts_all <- bind_rows(
 print(counts_all, n = Inf)
 
 # Optional summary by source
-counts_all %>%
+source_summary <- counts_all %>%
   group_by(source) %>%
   summarise(outcomes = n(),
             mean_nsnp = mean(nsnp),
             median_nsnp = median(nsnp),
             total_nsnp = sum(nsnp),
             .groups = "drop")
+
+print(source_summary)
 

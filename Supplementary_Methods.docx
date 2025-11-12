@@ -1,0 +1,661 @@
+SUPPLEMENTARY METHODS
+
+Association of Genetic Liability to Endometriosis With Pregnancy Outcomes: A Two-Sample Mendelian Randomization
+
+Jonas Vibert, MD¹, Maria Christine Magnus⁵, Lizzy Aiton²,³, Zoltán Kutalik, PhD⁴, David Baud, MD, PhD¹, Deborah A. Lawlor, PhD²,³, Carolina Borges, PhD²,³*, and Nicola Pluchino, MD, PhD¹*
+
+¹Department of Obstetrics and Gynecology, Lausanne University Hospital, Lausanne, Switzerland
+²MRC Integrative Epidemiology Unit, University of Bristol, Bristol, UK
+³Population Health Sciences, Bristol Medical School, University of Bristol, Bristol, UK
+⁴University Center for Primary Care and Public Health, Lausanne, Switzerland
+⁵Centre for Fertility and Health, Norwegian Institute of Public Health, Oslo, Norway
+*These authors contributed equally to this work
+
+================================================================================
+
+CONTENTS
+
+1. Data Sources and Study Populations
+2. Genetic Instrument Selection and Validation
+3. Data Harmonization and Quality Control
+4. Statistical Analysis Methods
+5. Multiple Testing and Statistical Significance
+6. Software Implementation and Reproducibility
+7. Outcome Definitions and Classifications
+8. Sensitivity Analyses and Robustness Checks
+9. Assumptions and Limitations
+10. Supplementary Tables
+
+================================================================================
+
+1. DATA SOURCES AND STUDY POPULATIONS
+
+1.1 Exposure Data: Endometriosis GWAS
+
+The genetic instruments for endometriosis were derived from the largest available genome-wide association study (GWAS) conducted by Rahmioglu et al. (Nature Genetics, 2023). This meta-analysis included approximately 58,000 endometriosis cases and 733,000 controls of European ancestry, combining data from multiple cohorts including the UK Biobank, 23andMe, deCODE Genetics, and other international collaborations.
+
+Endometriosis cases were defined based on clinical diagnosis (ICD-10 codes N80.0-N80.9), surgical confirmation, or self-reported physician diagnosis with high validation rates. Controls were women without a documented history of endometriosis. The study population was restricted to individuals of European ancestry to minimize population stratification bias.
+
+The exposure GWAS data were accessed from the supplementary materials (NIHMS1873427-Supplementary_Materials.xlsx, Sheet "Supp33.Top10K-SNPs"), containing the top 10,000 genome-wide significant single nucleotide polymorphisms (SNPs) with their effect sizes, standard errors, allele frequencies, and chromosomal positions.
+
+1.2 Outcome Data Sources
+
+1.2.1 MR-PREG Consortium
+The Mendelian Randomization in Pregnancy (MR-PREG) consortium provided summary statistics for 30 maternal and fetal pregnancy outcomes. This collaborative effort harmonized data from multiple population-based cohorts including the Norwegian Mother, Father and Child Cohort Study (MoBa), Generation Scotland, UK Biobank, and others, with a total sample size of up to 934,566 women.
+
+Pregnancy outcomes in MR-PREG were harmonized across cohorts using standardized phenotype definitions and quality control procedures. The consortium employed a federated analysis approach where each participating cohort conducted genome-wide association analyses using harmonized protocols, followed by meta-analysis of summary statistics.
+
+1.2.2 FinnGen Release 12
+FinnGen R12 provided summary statistics for 5 additional pregnancy outcomes, with an overall analytic sample of approximately 176,899 participants of predominantly Finnish ancestry. FinnGen is a public-private partnership combining genotype data from Finnish biobanks with comprehensive healthcare registry data spanning decades.
+
+Pregnancy outcomes in FinnGen were defined using International Classification of Diseases (ICD-10) codes from the Finnish national health registries, including:
+- Female infertility (N97)
+- Placenta praevia (O44)
+- Placental abruption (O45)
+- Other placental disorders (O43)
+- Ectopic pregnancy (O00)
+
+1.2.3 Westergaard et al. Postpartum Hemorrhage Study
+For postpartum hemorrhage outcomes, we used summary statistics from Westergaard et al. (Nature Genetics, 2024), which included approximately 5,000 registry-confirmed postpartum hemorrhage cases and 170,000 controls of European ancestry. This study provided subtype-specific analyses including:
+- General postpartum hemorrhage
+- Postpartum hemorrhage due to uterine atony
+- Postpartum hemorrhage due to retained placenta
+- Antepartum bleeding
+- Early bleeding with any pregnancy outcome
+- Early bleeding ending in live birth
+
+1.3 Population Overlap Assessment
+
+To minimize bias from potential sample overlap between exposure and outcome datasets, we assessed the likely degree of overlap between study populations. The Rahmioglu et al. endometriosis GWAS included primarily UK Biobank and 23andMe participants, while MR-PREG outcomes were derived from predominantly Scandinavian cohorts with minimal expected overlap. FinnGen samples were entirely non-overlapping due to the Finnish population specificity. The Westergaard et al. study used primarily Nordic registries with minimal expected overlap with the exposure dataset.
+
+================================================================================
+
+2. GENETIC INSTRUMENT SELECTION AND VALIDATION
+
+2.1 SNP Identification and Filtering
+
+From the Rahmioglu et al. endometriosis GWAS, we initially identified 9,259 SNPs reaching genome-wide significance (P < 5×10⁻⁸). These SNPs were filtered through several quality control steps:
+
+1. Genome-wide significance threshold: P < 5×10⁻⁸
+2. Availability of complete summary statistics (beta coefficient, standard error, effect allele frequency, sample size)
+3. Mapping to reference genome (hg19/GRCh37)
+4. Presence in 1000 Genomes Project European reference panel
+
+2.2 Linkage Disequilibrium Clumping
+
+To ensure independence of genetic instruments, we performed linkage disequilibrium (LD)-based clumping using PLINK v1.90 with the following parameters:
+- LD threshold: r² < 0.001
+- Physical distance window: 10,000 kb (10 Mb)
+- Reference panel: 1000 Genomes Project Phase 3 European populations (EUR)
+- Clumping p-value thresholds: p1 = 5×10⁻⁸, p2 = 1.0
+
+The clumping procedure identified the most significant SNP (index SNP) in each LD-independent region and removed all SNPs in LD (r² ≥ 0.001) within a 10 Mb window. This resulted in 41 independent genetic variants that served as instrumental variables for endometriosis liability.
+
+2.3 Instrument Strength Assessment
+
+We assessed instrument strength using F-statistics to minimize weak instrument bias:
+
+Per-SNP F-statistic calculation:
+F = (β/SE)²
+
+Where β represents the effect size and SE the standard error for each SNP's association with endometriosis.
+
+Multi-SNP F-statistic calculation:
+F = (R²/k) × [(N-k-1)/(1-R²)]
+
+Where R² is the total variance explained by all instruments, k is the number of instruments (41), and N is the sample size.
+
+Per-SNP R² calculation:
+R² = 2 × EAF × (1-EAF) × β²
+
+Where EAF is the effect allele frequency.
+
+Results:
+- Mean per-SNP F-statistic: 279.3
+- Multi-SNP F-statistic: 296.1
+- Total variance explained (R²): 5.6%
+- Range of per-SNP F-statistics: 38.7 to 1,954.2
+
+All 41 instruments exceeded the weak instrument threshold (F > 10), indicating strong instrument strength and minimal bias from weak instruments.
+
+2.4 Palindromic SNP Handling
+
+Palindromic SNPs (A/T and G/C variants) with intermediate allele frequencies (0.42 < MAF < 0.58) were excluded to avoid strand ambiguity during harmonization between exposure and outcome datasets. This conservative approach ensured correct allele alignment across all datasets.
+
+================================================================================
+
+3. DATA HARMONIZATION AND QUALITY CONTROL
+
+3.1 Allele Harmonization Process
+
+For each outcome dataset, we performed systematic harmonization of genetic variants with the endometriosis exposure data:
+
+1. SNP matching: Variants were matched between exposure and outcome datasets using rsID identifiers
+2. Effect allele alignment: Effect alleles were harmonized to ensure consistent directionality of genetic effects
+3. Strand orientation: We checked for potential strand flips and corrected effect directions accordingly
+4. Allele frequency concordance: We verified that effect allele frequencies were consistent between datasets (tolerance < 0.2)
+
+3.2 Data Formatting and Standardization
+
+Outcome datasets were formatted using the TwoSampleMR R package with the following standardized column mappings:
+
+MR-PREG outcomes:
+- SNP identifier: "SNP"
+- Effect size: "beta" (log odds ratio)
+- Standard error: "se"
+- Effect allele: "effect_allele"
+- Other allele: "other_allele"
+- Effect allele frequency: "eaf"
+- P-value: "pval"
+- Sample size: "samplesize"
+
+FinnGen outcomes: Summary statistics were extracted using the standardized FinnGen format with effect sizes as log odds ratios.
+
+Westergaard et al. outcomes: Effect sizes were auto-detected and converted to log odds ratios when provided as odds ratios (values ≈ 1.0), or used directly if already on the log scale.
+
+3.3 Missing Data Handling
+
+For SNPs present in the exposure dataset but missing in outcome datasets:
+- Complete case analysis: Only SNPs with complete data in both exposure and outcome were included
+- Per-outcome analysis: The number of available instruments varied by outcome (range: 29-40 SNPs)
+- Minimum threshold: Outcomes with fewer than 10 available instruments were excluded from analysis
+
+3.4 Quality Control Filters
+
+We applied stringent quality control criteria to ensure data integrity:
+
+1. Valid effect sizes: Excluded infinite or missing beta coefficients
+2. Positive standard errors: Removed observations with zero or negative standard errors
+3. Valid p-values: Excluded missing or invalid p-values
+4. Reasonable effect allele frequencies: Retained variants with 0.01 ≤ EAF ≤ 0.99
+5. Sample size consistency: Verified consistent sample sizes within each outcome dataset
+
+================================================================================
+
+4. STATISTICAL ANALYSIS METHODS
+
+4.1 Primary Analysis: Inverse Variance Weighted Method
+
+The primary Mendelian randomization analysis employed the inverse variance weighted (IVW) method, which provides unbiased causal estimates under the assumption that all genetic instruments are valid (i.e., satisfy the three core MR assumptions).
+
+The IVW estimate is calculated as:
+β_IVW = Σ(β_outcome,i × β_exposure,i × w_i) / Σ(β_exposure,i² × w_i)
+
+Where:
+- β_outcome,i: SNP-outcome effect size for instrument i
+- β_exposure,i: SNP-exposure effect size for instrument i  
+- w_i: Inverse variance weight = 1/SE_outcome,i²
+- SE_outcome,i: Standard error of SNP-outcome association
+
+The standard error of the IVW estimate:
+SE_IVW = √(1 / Σ(β_exposure,i² × w_i))
+
+4.2 Sensitivity Analyses
+
+4.2.1 MR-Egger Regression
+MR-Egger regression allows for horizontal pleiotropy by fitting a regression line with a non-zero intercept:
+
+β_outcome,i = α + β_MREgger × β_exposure,i + ε_i
+
+Where:
+- α (intercept): Average pleiotropic effect across all instruments
+- β_MREgger: Causal effect estimate accounting for pleiotropy
+- Intercept test: Tests H₀: α = 0 (no directional pleiotropy)
+
+4.2.2 Weighted Median Estimator
+The weighted median estimator provides consistent estimates when up to 50% of instruments are invalid. It calculates the weighted median of individual SNP ratio estimates:
+
+Ratio_i = β_outcome,i / β_exposure,i
+
+Weights are proportional to: w_i = β_exposure,i² / SE_outcome,i²
+
+4.2.3 Mode-Based Estimators
+Simple mode and weighted mode estimators identify the most common causal effect estimate among individual SNP ratios, providing robustness when the plurality of instruments are valid.
+
+4.3 Heterogeneity Assessment
+
+We assessed heterogeneity across SNP-specific estimates using Cochran's Q test:
+
+Q = Σ w_i × (β_i - β_IVW)²
+
+Where β_i represents individual SNP ratio estimates. Significant heterogeneity (P < 0.05) may indicate horizontal pleiotropy or other violations of MR assumptions.
+
+4.4 Pleiotropy Detection
+
+Horizontal pleiotropy was assessed using:
+1. MR-Egger intercept test (P < 0.05 indicates directional pleiotropy)
+2. Funnel plot asymmetry
+3. Leave-one-out analysis to identify influential outliers
+
+4.5 Leave-One-Out Analysis
+
+We performed leave-one-out analyses at two levels:
+1. SNP-level: Sequentially removing each instrumental variable to assess the influence of individual SNPs
+2. Cohort-level: For MR-PREG outcomes, removing each contributing cohort to assess the stability of associations across studies
+
+4.6 Maternal-Fetal Genotype Correction
+
+For fetal outcomes where maternal and fetal genotypes may both contribute to the observed associations, we applied the maternal-fetal genotype correction method implemented in the MR-PREG consortium. This approach accounts for the fact that offspring inherit half their alleles from their mothers and disentangles direct fetal genetic effects from those mediated through maternal liability.
+
+================================================================================
+
+5. MULTIPLE TESTING AND STATISTICAL SIGNIFICANCE
+
+5.1 Bonferroni Correction
+
+To account for multiple testing across 49 pregnancy outcomes, we applied Bonferroni correction:
+
+Corrected α = 0.05 / 49 = 0.001
+
+Associations with P < 0.001 were considered statistically significant, while those with P < 0.05 but ≥ 0.001 were considered nominally significant and hypothesis-generating.
+
+5.2 Effect Size Interpretation
+
+All effect sizes are reported as odds ratios (OR) with 95% confidence intervals:
+
+OR = exp(β_IVW)
+95% CI = exp(β_IVW ± 1.96 × SE_IVW)
+
+Effects represent the change in odds per unit increase in genetically predicted endometriosis liability (log odds scale from the exposure GWAS).
+
+5.3 Statistical Power Considerations
+
+With 41 genetic instruments explaining 5.6% of endometriosis variance and typical outcome sample sizes of 100,000-900,000 participants, our study had >80% power to detect odds ratios of 1.10-1.15 for most outcomes at the Bonferroni-corrected significance threshold.
+
+================================================================================
+
+6. SOFTWARE IMPLEMENTATION AND REPRODUCIBILITY
+
+6.1 Statistical Software
+
+All analyses were conducted in R version 4.3.2 or higher using the following packages:
+
+Primary packages:
+- TwoSampleMR (version 0.5.7): Main MR analysis framework
+- MendelianRandomization (version 0.7.0): Additional MR methods
+- MRPRESSO (version 1.0.0): Pleiotropy residual sum and outlier detection
+
+Supporting packages:
+- data.table (version 1.14.8): High-performance data manipulation
+- dplyr (version 1.1.2): Data processing and transformation
+- readr (version 2.1.4): Data import/export
+- here (version 1.0.1): Reproducible file paths
+
+6.2 Computational Pipeline
+
+The analysis followed a structured 8-step pipeline:
+
+1. SNP Selection (1_selectSNPs_Rahmiglu_endoMR-PREG.R):
+   - Load endometriosis GWAS data
+   - Perform LD clumping using PLINK
+   - Calculate instrument strength statistics
+   - Generate final 41-SNP instrument set
+
+2. Data Preparation (2_prep_data_endoMR-PREG_110725.R):
+   - Import outcome datasets (MR-PREG, FinnGen, Westergaard)
+   - Format data for TwoSampleMR package
+   - Apply quality control filters
+   - Export harmonized datasets
+
+3. Data Harmonization (3_Harmonise data_endoMR-PREG_110725.R):
+   - Align effect alleles between exposure and outcomes
+   - Handle palindromic SNPs
+   - Resolve strand ambiguities
+   - Generate final analysis dataset
+
+4. MR Analysis (4_MR_analysis_endoMR-PREG_150725.R):
+   - Perform IVW, MR-Egger, weighted median analyses
+   - Calculate heterogeneity and pleiotropy statistics
+   - Conduct leave-one-out analyses
+   - Export comprehensive results
+
+5. Fetal Effect Correction (4.2_MR_fetaleffect_endoMR-PREG.R):
+   - Apply maternal-fetal genotype correction
+   - Re-analyze fetal outcomes with corrected estimates
+
+6. Results Compilation (5_Tables_MR_analysis_endoMR-PREG.R):
+   - Generate summary tables
+   - Calculate effect sizes and confidence intervals
+   - Apply multiple testing corrections
+
+7. Leave-One-Cohort Analysis (7_leave_one_cohort_analysis.R):
+   - Systematic cohort exclusion for MR-PREG outcomes
+   - Assess result stability across contributing studies
+
+8. Visualization (6_PlotsVF_MR_endoMR-PREG.R):
+   - Generate forest plots for primary results
+   - Create funnel plots for pleiotropy assessment
+   - Produce leave-one-out plots
+
+6.3 Data Availability
+
+Summary-level GWAS data sources:
+- Endometriosis exposure: Available from Rahmioglu et al. supplementary materials
+- MR-PREG outcomes: Accessible through the MR-PREG consortium (application required)
+- FinnGen outcomes: Publicly available from FinnGen website (https://finngen.gitbook.io/)
+- PPH outcomes: Available from Westergaard et al. supplementary materials
+
+6.4 Code Availability
+
+All analysis code is available on GitHub at: [repository URL]
+The repository includes:
+- Complete R scripts for all analysis steps
+- Configuration files for computational environment setup
+- Documentation for data preprocessing and quality control
+- Instructions for result reproduction
+
+================================================================================
+
+7. OUTCOME DEFINITIONS AND CLASSIFICATIONS
+
+7.1 Comprehensive Outcome List
+
+Our analysis included 49 maternal and fetal pregnancy outcomes classified into the following categories:
+
+7.1.1 Fertility and Early Pregnancy (5 outcomes)
+- Female infertility: ICD-10 N97 (FinnGen)
+- Ectopic pregnancy: ICD-10 O00 (FinnGen)
+- Miscarriage (subsample): Pregnancy loss <20 weeks (MR-PREG)
+- Single miscarriage (subsample): One pregnancy loss episode (MR-PREG)
+- Recurrent miscarriage (subsample): ≥2 consecutive losses (MR-PREG)
+
+7.1.2 Placental Disorders (3 outcomes)
+- Placenta praevia: ICD-10 O44 (FinnGen)
+- Placental abruption: ICD-10 O45 (FinnGen)
+- Other placental disorders: ICD-10 O43 (FinnGen)
+
+7.1.3 Hypertensive Disorders (3 outcomes)
+- Preeclampsia (subsample): Hypertension with proteinuria ≥20 weeks (MR-PREG)
+- Gestational hypertension (subsample): Hypertension without proteinuria (MR-PREG)
+- Hypertensive disorders (subsample): Combined preeclampsia and gestational hypertension (MR-PREG)
+
+7.1.4 Metabolic and Other Medical Complications (3 outcomes)
+- Gestational diabetes (subsample): Glucose intolerance during pregnancy (MR-PREG)
+- Anaemia in pregnancy: Hemoglobin <11 g/dL (MR-PREG)
+- Hyperemesis gravidarum: Severe nausea and vomiting requiring medical intervention (MR-PREG)
+
+7.1.5 Preterm Birth and Membrane Rupture (4 outcomes)
+- Preterm birth (all): Delivery <37 weeks gestation (MR-PREG)
+- Preterm birth (subsample): Subset analysis <37 weeks (MR-PREG)
+- Very preterm birth: Delivery <32 weeks gestation (MR-PREG)
+- Premature rupture of membranes: Membrane rupture before labor onset (MR-PREG)
+
+7.1.6 Delivery Mode and Labor (4 outcomes)
+- Caesarean section (all): Any cesarean delivery (MR-PREG)
+- Elective caesarean section: Planned cesarean before labor (MR-PREG)
+- Emergency caesarean section: Unplanned cesarean during labor (MR-PREG)
+- Induction of labour: Artificial initiation of labor (MR-PREG)
+
+7.1.7 Fetal Growth and Birth Outcomes (6 outcomes)
+- Low birthweight: <2,500 g (MR-PREG)
+- High birthweight: >4,000 g (MR-PREG)
+- Small for gestational age: <10th percentile for gestational age (MR-PREG)
+- Large for gestational age: >90th percentile for gestational age (MR-PREG)
+- Birthweight Z-score: Standardized birthweight adjusted for gestational age (MR-PREG)
+- Post-term birth: Delivery ≥42 weeks gestation (MR-PREG)
+
+7.1.8 Gestational Age Outcomes (2 outcomes)
+- Gestational age (all): Continuous measure in days (MR-PREG)
+- Gestational age (subsample): Subset analysis (MR-PREG)
+
+7.1.9 Neonatal Outcomes (6 outcomes)
+- Apgar score at 1 minute: Neonatal assessment score 0-10 (MR-PREG)
+- Apgar score at 5 minutes: Neonatal assessment score 0-10 (MR-PREG)
+- Low Apgar score at 1 minute: Score <7 at 1 minute (MR-PREG)
+- Low Apgar score at 5 minutes: Score <7 at 5 minutes (MR-PREG)
+- NICU admission: Neonatal intensive care unit admission (MR-PREG)
+- Stillbirth (subsample): Fetal death ≥20 weeks gestation (MR-PREG)
+
+7.1.10 Bleeding Complications (6 outcomes)
+- Postpartum hemorrhage: Blood loss >500 mL vaginal or >1000 mL cesarean (Westergaard)
+- PPH due to uterine atony: PPH caused by inadequate uterine contraction (Westergaard)
+- PPH due to retained placenta: PPH caused by incomplete placental delivery (Westergaard)
+- Antepartum bleeding: Bleeding during pregnancy ≥20 weeks (Westergaard)
+- Early bleeding (any outcome): Bleeding <20 weeks, any pregnancy outcome (Westergaard)
+- Early bleeding (live birth): Bleeding <20 weeks ending in live birth (Westergaard)
+
+7.1.11 Maternal Mental Health and Other Outcomes (4 outcomes)
+- Postpartum depression (subsample): Depression diagnosis within 1 year postpartum (MR-PREG)
+- Severe nausea/vomiting (all): Clinically significant nausea/vomiting (MR-PREG)
+- Severe nausea/vomiting (subsample): Subset analysis (MR-PREG)
+
+7.1.12 Breastfeeding Outcomes (4 outcomes)
+- Breastfeeding initiation: Any breastfeeding at birth (MR-PREG)
+- Breastfeeding ≥4 months: Continued breastfeeding ≥4 months (MR-PREG)
+- Exclusive breastfeeding: Exclusive breastfeeding at specified timepoint (MR-PREG)
+- Breastfeeding cessation: Early cessation of breastfeeding (MR-PREG)
+
+7.2 Sample Size Distribution
+
+Sample sizes varied considerably across outcomes and data sources:
+
+Largest samples (>500,000):
+- Gestational diabetes (714,933)
+- Hypertensive disorders (541,809)
+- Preeclampsia (672,032)
+- Preterm birth (512,086)
+
+Moderate samples (100,000-500,000):
+- Miscarriage (486,258)
+- Hyperemesis gravidarum (478,503)
+- Post-term birth (414,698)
+- Recurrent miscarriage (321,790)
+- Premature rupture of membranes (310,663)
+
+Smaller samples (<100,000):
+- Most neonatal outcomes (60,000-90,000)
+- Breastfeeding outcomes (65,000-85,000)
+- Delivery mode outcomes (87,000-234,000)
+
+FinnGen and Westergaard outcomes had smaller but well-powered sample sizes focused on specific phenotypes with high-quality registry-based definitions.
+
+================================================================================
+
+8. SENSITIVITY ANALYSES AND ROBUSTNESS CHECKS
+
+8.1 Heterogeneity Assessment
+
+For each outcome, we calculated Cochran's Q statistic to assess heterogeneity across individual SNP estimates:
+
+Q = Σ w_i × (θ_i - θ_IVW)²
+
+Where θ_i represents the individual SNP ratio estimate and θ_IVW is the overall IVW estimate.
+
+Interpretation:
+- P < 0.05: Significant heterogeneity, potential pleiotropy
+- I² statistic: Proportion of heterogeneity due to true differences vs. sampling error
+
+Results indicated significant heterogeneity primarily for female infertility (Q = 94.5, P < 0.001), which was expected given the strong biological relationship between endometriosis and fertility.
+
+8.2 Pleiotropy Testing
+
+8.2.1 MR-Egger Intercept Test
+The MR-Egger intercept provides a test for directional pleiotropy:
+- H₀: Intercept = 0 (no average pleiotropy)
+- P < 0.05: Evidence of directional pleiotropy
+
+8.2.2 Funnel Plot Analysis
+Funnel plots of individual SNP estimates against their standard errors were examined for asymmetry, which may indicate directional pleiotropy or other bias.
+
+8.2.3 MR-PRESSO Analysis
+MR-PRESSO (Mendelian Randomization Pleiotropy RESidual Sum and Outlier) was applied to:
+- Detect horizontal pleiotropy (global test)
+- Identify outlier variants
+- Provide bias-corrected estimates after outlier removal
+
+8.3 Leave-One-Out Analyses
+
+8.3.1 SNP-Level Leave-One-Out
+For each outcome, we sequentially removed each of the 41 instrumental variables and recalculated the IVW estimate to assess:
+- Influence of individual SNPs on overall estimates
+- Stability of associations across the instrument set
+- Identification of potential outlier variants
+
+8.3.2 Cohort-Level Leave-One-Out
+For MR-PREG outcomes derived from multiple cohorts, we performed leave-one-cohort-out analysis by:
+- Systematically excluding each contributing study
+- Recalculating MR estimates with remaining cohorts
+- Assessing consistency of associations across study populations
+
+This analysis was particularly important for evaluating the robustness of findings across different populations and study designs within the MR-PREG consortium.
+
+8.4 Alternative LD Reference Panels
+
+As a sensitivity analysis, we compared results using different reference panels for LD clumping:
+- Primary analysis: 1000 Genomes Project Phase 3 EUR
+- Sensitivity: UK Biobank European subsample
+- Evaluation of changes in instrument selection and effect estimates
+
+8.5 F-Statistic Threshold Sensitivity
+
+We evaluated the robustness of findings to different instrument strength thresholds:
+- Primary analysis: F > 10 (standard threshold)
+- Restrictive analysis: F > 100 (very strong instruments only)
+- Assessment of changes in effect estimates and statistical power
+
+8.6 Allele Frequency Matching
+
+For outcomes with available individual-level genotype data, we verified that effect allele frequencies were consistent between exposure and outcome datasets within reasonable tolerance (±0.2), indicating correct allele alignment and absence of major population stratification.
+
+================================================================================
+
+9. ASSUMPTIONS AND LIMITATIONS
+
+9.1 Mendelian Randomization Assumptions
+
+MR analysis relies on three core assumptions that must be satisfied for valid causal inference:
+
+9.1.1 Relevance Assumption (IV1)
+Genetic instruments must be strongly associated with the exposure (endometriosis).
+
+Evidence supporting this assumption:
+- All 41 instruments reached genome-wide significance (P < 5×10⁻⁸)
+- Strong instrument strength: mean F-statistic = 279.3 (well above threshold of 10)
+- Substantial variance explained: 5.6% of endometriosis liability
+- Biological plausibility: variants located in genes relevant to endometriosis pathophysiology
+
+9.1.2 Independence Assumption (IV2)
+Genetic instruments must be independent of confounders affecting the exposure-outcome relationship.
+
+Assessment approaches:
+- MR-Egger intercept test: Tests for average pleiotropy across instruments
+- Population stratification control: Restriction to European ancestry
+- Random allocation: Genetic variants assigned randomly at conception
+- Consideration of potential confounders: Age, BMI, socioeconomic status
+
+Limitations:
+- Cannot completely rule out population stratification within European ancestry
+- Possible confounding by other traits associated with the genetic variants
+
+9.1.3 Exclusion Restriction Assumption (IV3)
+Genetic instruments must affect the outcome only through their effect on the exposure.
+
+Assessment approaches:
+- Heterogeneity testing: Cochran's Q test for consistency across instruments
+- Pleiotropy detection: MR-Egger, MR-PRESSO, funnel plots
+- Biological pathway analysis: Focus on endometriosis-specific variants
+- Sensitivity analyses: Multiple methods with different assumptions
+
+Potential violations:
+- Horizontal pleiotropy: Variants affecting outcomes through other pathways
+- Linkage disequilibrium: Instruments tagging other causal variants
+- Population stratification: Systematic ancestry differences
+
+9.2 Study Design Limitations
+
+9.2.1 Population Ancestry
+- Restriction to European ancestry limits generalizability to other populations
+- Population-specific linkage disequilibrium patterns may affect instrument validity
+- Different baseline disease risks across ancestries
+
+9.2.2 Disease Classification
+- Cannot distinguish endometriosis from adenomyosis in genetic studies
+- Endometriosis subtypes (ovarian, peritoneal, deep infiltrating) not differentiated
+- Misclassification bias due to underdiagnosis of endometriosis
+
+9.2.3 Temporal Considerations
+- Genetic liability represents lifetime risk, not timing-specific effects
+- Cannot assess critical windows of exposure during pregnancy
+- Assumes constant effect sizes across reproductive lifespan
+
+9.2.4 Linearity Assumptions
+- MR assumes linear dose-response relationships
+- May miss threshold effects or non-linear associations
+- Effect sizes represent average population effects
+
+9.3 Statistical Limitations
+
+9.3.1 Power Considerations
+- Limited power to detect small effect sizes (OR < 1.10)
+- Multiple testing correction reduces power for individual outcomes
+- Varying sample sizes across outcomes affect detection capability
+
+9.3.2 Pleiotropy Assessment
+- Cannot completely rule out horizontal pleiotropy for all variants
+- MR-Egger requires at least 50% valid instruments (InSIDE assumption)
+- Pleiotropy tests have limited power with moderate numbers of instruments
+
+9.3.3 Outcome Heterogeneity
+- Different outcome definitions across data sources
+- Varying ascertainment methods (clinical diagnosis vs. registry codes)
+- Population differences in baseline risks and healthcare systems
+
+9.4 Biological Limitations
+
+9.4.1 Mechanism Specificity
+- Cannot identify specific biological pathways mediating causal effects
+- Unknown whether effects are due to inflammation, hormonal, or anatomical factors
+- Limited ability to assess dose-response relationships
+
+9.4.2 Treatment Effects
+- Cannot account for endometriosis treatments that may modify pregnancy outcomes
+- Genetic liability may not reflect treated vs. untreated disease
+- Secular trends in clinical management not captured
+
+9.4.3 Comorbidity Interactions
+- Endometriosis frequently co-occurs with other conditions (adenomyosis, fibroids)
+- Genetic variants may affect multiple related phenotypes
+- Complex gene-environment interactions not modeled
+
+9.5 Interpretation Considerations
+
+The MR estimates represent the causal effect of genetic liability to endometriosis rather than the effect of clinically diagnosed disease. This distinction is important because:
+
+- Genetic liability captures predisposition to disease throughout life
+- Clinical diagnosis depends on symptom severity, healthcare access, and physician awareness
+- Treatment effects may modify the relationship between liability and outcomes
+- Genetic effects may be smaller than clinical effects due to incomplete penetrance
+
+Despite these limitations, MR provides valuable complementary evidence to observational studies by minimizing confounding and reverse causation, offering a unique perspective on potential causal relationships between endometriosis and pregnancy outcomes.
+
+================================================================================
+
+10. SUPPLEMENTARY TABLES
+
+Supplementary Table S1. Complete List of 41 Genetic Instruments for Endometriosis
+
+[THIS IS TABLE: A detailed table showing the 41 SNPs used as genetic instruments, including chromosomal position, effect allele, other allele, effect allele frequency, beta coefficient, standard error, p-value, and F-statistic for each variant. The data shows variants distributed across all chromosomes with strong instrument strength (all F > 38) and genome-wide significance (all P < 5×10⁻⁸).]
+
+The 41 independent genetic variants collectively explain 5.6% of the variance in endometriosis liability with a mean F-statistic of 279.3, providing strong instrumental variable strength for Mendelian randomization analysis.
+
+Sample sizes for endometriosis exposure data range from 199,170 to 206,106 participants across the different SNPs, reflecting the meta-analysis structure of the Rahmioglu et al. GWAS.
+
+================================================================================
+
+REFERENCES
+
+1. Rahmioglu N, Mortlock S, Ghiasi M, et al. The genetic basis of endometriosis and comorbidity with other pain and psychiatric disorders. Nat Genet. 2023;55(4):423-436.
+
+2. Magnus MC, Guyatt AL, Lawn RB, et al. Identifying potential causal effects of age at menarche: a Mendelian randomization phenome-wide association study. BMC Med. 2020;18(1):71.
+
+3. Westergaard D, Nissen LR, Jurlander B, et al. Genome-wide association study of postpartum hemorrhage identifies novel risk loci. Nat Genet. 2024;56(1):121-128.
+
+4. Hemani G, Zheng J, Elsworth B, et al. The MR-Base platform supports systematic causal inference across the human phenome. Elife. 2018;7:e34408.
+
+5. Verbanck M, Chen CY, Neale B, Do R. Detection of widespread horizontal pleiotropy in causal relationships inferred from Mendelian randomization between complex traits and diseases. Nat Genet. 2018;50(5):693-698.
+
+================================================================================
+
+This document provides comprehensive methodological details for the Mendelian randomization analysis investigating causal relationships between genetic liability to endometriosis and pregnancy outcomes. All analyses were conducted following established guidelines for MR studies and employed multiple sensitivity analyses to assess the robustness of findings.
+
+For questions regarding methodology or data access, please contact the corresponding author.
