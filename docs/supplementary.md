@@ -2,6 +2,8 @@
 
 ## Additional Analyses and Supporting Information
 
+**Updated for 29 specialized pregnancy outcomes with novel fetal genetic effect analysis**
+
 ### Supplementary Tables
 
 #### Table S1: Endometriosis Genetic Instruments
@@ -30,13 +32,23 @@
 **Content**: Results from all MR methods for all outcomes
 
 #### Table S4: Sensitivity Analysis Summary
-*Location*: `results/mrpresso_summary.xlsx`
+*Location*: `results/Supplementary_Table_S2_Sensitivity_Analysis.csv`
 
 **Content**: 
-- Heterogeneity statistics
-- Pleiotropy tests
-- MR-PRESSO results
+- Heterogeneity statistics (Cochran's Q)
+- Pleiotropy tests (MR-Egger intercept)
+- Method comparison (IVW, MR-Egger, Weighted Median)
 - Leave-one-out summaries
+
+#### 🆕 Table S5: TRIOS Fetal Genetic Effect Analysis
+*Location*: `fetal_genetic_analysis/trios_maternal_fetal_paternal_summary.csv`
+
+**Content**:
+- Maternal genetic effects (using maternal genotypes)
+- Fetal genetic effects (using offspring genotypes)  
+- Paternal genetic effects (negative control)
+- Effect size comparisons and pathway identification
+- Birth weight detailed analysis (primary fetal pathway finding)
 
 ### Supplementary Figures
 
@@ -64,10 +76,29 @@
 
 **Description**: Funnel plots for assessment of directional pleiotropy
 
-#### Figure S5: Comprehensive Forest Plot
-*Location*: `plot/fig_1toMany_forest/MR_overview_1toMany.png`
+#### Figure S5: Enhanced Forest Plots
+*Location*: `plots/forest_endoMR-PREG_*.png`
 
-**Description**: One-to-many forest plot showing all outcomes grouped by clinical category
+**Description**: Multiple forest plot layouts for 29 specialized outcomes
+- Standard IVW forest plot
+- Multi-method comparison forest
+- Enhanced layout with improved spacing
+- endoPAIN-style layout
+
+#### 🆕 Figure S6: TRIOS Maternal vs Fetal Genetic Effect Analysis
+*Location*: `fetal_genetic_analysis/mat_fetal_paternal_comparison.png`
+
+**Description**: Comprehensive comparison of maternal, fetal, and paternal genetic effects
+- Birth weight primary analysis (fetal effect β = -0.045, P = 0.007)
+- Maternal effect comparison (β = -0.021, P = 0.21)
+- Paternal negative control validation (β = -0.008, P = 0.63)
+
+#### 🆕 Figure S7: TRIOS Sensitivity Analysis
+*Location*: `fetal_genetic_analysis/sensitivity/`
+
+**Description**: Leave-one-out sensitivity plots for TRIOS analysis
+- Individual outcome sensitivity testing
+- Robustness of fetal vs maternal pathway identification
 
 ### Additional Analyses
 
@@ -112,6 +143,25 @@
 - P < 1×10⁻⁶: 67 instruments (exploratory)
 - P < 5×10⁻⁸: 41 instruments (primary analysis)
 
+#### 🆕 TRIOS Fetal Genetic Effect Analysis
+
+**Methodology**: Novel application of family trio data to distinguish maternal vs fetal genetic pathways
+
+**Key findings**:
+- **Birth weight**: Predominant fetal genetic effect (β = -0.045, P = 0.007) vs weaker maternal effect (β = -0.021, P = 0.21)
+- **Pathway validation**: Paternal genetic effects minimal across outcomes (negative control confirmation)
+- **Maternal pathway dominance**: Most pregnancy complications driven by maternal genetic liability
+
+**Technical validation**:
+- Leave-one-out sensitivity analysis confirms robustness
+- Consistent findings across different SNP subsets
+- Biological plausibility of pathway-specific effects
+
+**Clinical implications**:
+- Birth weight monitoring may need fetal-specific considerations
+- Pathway-specific counseling for different pregnancy outcomes
+- Distinction between intrinsic vs extrinsic fetal growth effects
+
 ### Biological Plausibility
 
 #### Proposed Mechanisms
@@ -130,6 +180,17 @@
 - Systemic inflammation
 - Cervical factors
 - Uterine contractility
+
+**🆕 Endometriosis → Fetal birth weight (direct fetal pathway)**:
+- Inherited genetic liability affecting fetal growth pathways
+- Direct impact on fetal growth hormone signaling
+- Intrinsic fetal metabolic programming
+- Independent of maternal placental function
+
+**🆕 Maternal vs Fetal pathway distinction**:
+- **Maternal pathways**: Placental complications, delivery decisions, maternal health
+- **Fetal pathways**: Growth parameters, developmental timing
+- **Validation**: Paternal genetic effects as negative controls
 
 #### Supporting Literature
 
@@ -204,11 +265,14 @@ sessionInfo()
 
 ### Future Research Directions
 
-1. **Multi-ancestry validation**
-2. **Mechanistic pathway analysis**
-3. **Age-stratified analyses**
-4. **Maternal vs. fetal genetic effects**
-5. **Integration with proteomics/metabolomics**
+1. **Multi-ancestry validation**: Replicate TRIOS findings in diverse populations
+2. **🆕 Extended TRIOS application**: Apply maternal/fetal pathway analysis to other complex traits
+3. **🆕 Mechanistic pathway studies**: Investigate specific biological pathways mediating fetal vs maternal effects
+4. **Age and timing-stratified analyses**: Critical windows for genetic effect expression
+5. **🆕 Gene-environment interaction studies**: How genetic pathways interact with environmental factors during pregnancy
+6. **Integration with omics data**: Proteomics/metabolomics to understand pathway mechanisms
+7. **🆕 Therapeutic targeting**: Develop pathway-specific interventions (maternal vs fetal)
+8. **🆕 Precision counseling**: Risk prediction models incorporating pathway-specific genetic effects
 
 ---
 

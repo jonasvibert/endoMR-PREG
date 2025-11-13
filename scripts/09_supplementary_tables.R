@@ -60,26 +60,94 @@ message("All sensitivity analysis files loaded successfully.")
 # 2. SELECT OUTCOMES OF INTEREST
 ###############################################################################
 
-# Focus on statistically significant and nominally significant associations
-# Based on Bonferroni threshold (p < 0.001) and nominal significance (p < 0.05)
+# Focus on the filtered 29 outcomes for supplementary analysis
+# Include significant and important outcomes from the filtered list
 
 outcomes_of_interest <- c(
-  "finngen_R12_N14_FEMALEINFERT",           # Significant (p = 6.07e-22)
-  "finngen_R12_O15_PLAC_PRAEVIA",           # Significant (p = 1.46e-06) 
-  "rup_memb",                               # Nominal (p = 0.025)
-  "el_cs",                                  # Nominal (p = 0.023)
-  "finngen_R12_O15_PLAC_PREMAT_SEPAR",     # Nominal (p = 0.031)
-  "lowapgar1"                               # Nominal (p = 0.073)
+  # Placental outcomes
+  "finngen_R12_O15_PLAC_PRAEVIA",           # Placenta praevia
+  "finngen_R12_O15_PLAC_DISORD",            # Placental disorders
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR",      # Premature placental separation
+  
+  # Cesarean delivery
+  "el_cs",                                  # Elective caesarean section
+  "em_cs",                                  # Emergency caesarean section
+  "cs",                                     # Caesarean section
+  
+  # Labor complications
+  "rup_memb",                               # Premature rupture of membranes
+  "induction",                              # Labour induction
+  
+  # Apgar and neonatal
+  "lowapgar1",                              # Low Apgar score at 1 min
+  "lowapgar5",                              # Low Apgar score at 5 min
+  "nicu",                                   # NICU admission
+  
+  # Preterm and timing
+  "pretb_all",                              # Preterm birth (any)
+  "vpretb_all",                             # Very preterm birth
+  "posttb_all",                             # Post-term birth
+  
+  # Birth weight
+  "lbw_all",                                # Low birthweight
+  "hbw_all",                                # High birthweight
+  "sga",                                    # Small for gestational age
+  
+  # Pregnancy complications
+  "pe_subsamp",                             # Preeclampsia
+  "gh_subsamp",                             # Gestational hypertension
+  "gdm_subsamp",                            # Gestational diabetes mellitus
+  "hdp_subsamp",                            # Hypertensive disorders
+  
+  # Bleeding
+  "Postpartum_hemorrhage_filtered",         # Postpartum hemorrhage
+  "Postpartum_hemorrhage_due_to_retained_placenta_filtered", # PPH due to retained placenta
+  "Postpartum_hemorrhage_due_to_atony_filtered", # PPH due to atony
+  "Antepartum_bleeding_filtered"            # Antepartum bleeding
 )
 
-# Outcome labels for the table
+# Outcome labels for the table (filtered to 29 outcomes)
 outcome_labels <- c(
-  "finngen_R12_N14_FEMALEINFERT" = "Female infertility",
+  # Placental outcomes
   "finngen_R12_O15_PLAC_PRAEVIA" = "Placenta praevia",
-  "rup_memb" = "Premature rupture of membranes",
+  "finngen_R12_O15_PLAC_DISORD" = "Placental disorders",
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR" = "Premature placental separation",
+  
+  # Cesarean delivery
   "el_cs" = "Elective caesarean section",
-  "finngen_R12_O15_PLAC_PREMAT_SEPAR" = "Placental abruption",
-  "lowapgar1" = "Low Apgar score at 1 minute"
+  "em_cs" = "Emergency caesarean section",
+  "cs" = "Caesarean section",
+  
+  # Labor complications
+  "rup_memb" = "Premature rupture of membranes",
+  "induction" = "Labour induction",
+  
+  # Apgar and neonatal
+  "lowapgar1" = "Low Apgar score at 1 min",
+  "lowapgar5" = "Low Apgar score at 5 min",
+  "nicu" = "NICU admission",
+  
+  # Preterm and timing
+  "pretb_all" = "Preterm birth (any)",
+  "vpretb_all" = "Very preterm birth",
+  "posttb_all" = "Post-term birth",
+  
+  # Birth weight
+  "lbw_all" = "Low birthweight (<2500g)",
+  "hbw_all" = "High birthweight (>4000g)",
+  "sga" = "Small for gestational age",
+  
+  # Pregnancy complications
+  "pe_subsamp" = "Preeclampsia",
+  "gh_subsamp" = "Gestational hypertension",
+  "gdm_subsamp" = "Gestational diabetes mellitus",
+  "hdp_subsamp" = "Hypertensive disorders of pregnancy",
+  
+  # Bleeding
+  "Postpartum_hemorrhage_filtered" = "Postpartum hemorrhage",
+  "Postpartum_hemorrhage_due_to_retained_placenta_filtered" = "PPH due to retained placenta",
+  "Postpartum_hemorrhage_due_to_atony_filtered" = "PPH due to atony",
+  "Antepartum_bleeding_filtered" = "Antepartum bleeding"
 )
 
 ###############################################################################

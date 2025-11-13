@@ -24,11 +24,10 @@ all_results <- read_csv(file.path(results_dir, "all_mr_methods.csv"))
 single_snp_results <- read_csv(file.path(results_dir, "singlesnp_results.csv"))
 leaveoneout_results <- read_csv(file.path(results_dir, "leaveoneout_snp_results.csv"))
 
-# Outcomes with significant IVW p-values (< 0.05)
+# Outcomes with significant IVW p-values (< 0.05) - filtered to match 29 outcomes
 significant_ivw_outcomes <- c(
-  "apgar1",                                  # Apgar score at 1 minute
+  "lowapgar1",                               # Low Apgar score at 1 minute
   "el_cs",                                   # Elective caesarean section
-  "finngen_R12_N14_FEMALEINFERT",            # Female infertility
   "finngen_R12_O15_PLAC_PRAEVIA",            # Placenta praevia
   "finngen_R12_O15_PLAC_PREMAT_SEPAR",       # Placental abruption
   "pretb_all",                               # Preterm birth (all)
@@ -38,11 +37,11 @@ significant_ivw_outcomes <- c(
   "Postpartum_hemorrhage_due_to_retained_placenta_filtered" # PPH due to retained placenta
 )
 
-# Additional outcomes of interest: birthweight-related
+# Additional outcomes of interest: birthweight-related (filtered to 29 outcomes)
 birthweight_outcomes <- c(
   "hbw_all",    # High birthweight (>4000 g)
   "lbw_all",    # Low birthweight (<2500 g)
-  "zbw_all"     # Birthweight z-score
+  "sga"         # Small for gestational age
 )
 
 # Combined list of outcomes to plot

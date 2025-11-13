@@ -43,62 +43,56 @@ if (file.exists(snps_file)) {
 
 log_info("Using", length(snp_whitelist), "SNP instruments")
 
-# ---- Outcome labels for pregnancy traits ----
+# ---- Outcome labels for pregnancy traits (filtered to 29 outcomes) ----
 outcome_labels <- c(
-  # FinnGen
-  "finngen_R12_N14_FEMALEINFERT_filtered"     = "Female infertility",
-  "finngen_R12_O15_PLAC_DISORD_filtered"      = "Placental disorders (overall)",
+  # Placental outcomes
   "finngen_R12_O15_PLAC_PRAEVIA_filtered"     = "Placenta praevia",
-  "finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered"= "Placental abruption",
-  "finngen_R12_O15_PREG_ECTOP_filtered"       = "Ectopic pregnancy",
+  "finngen_R12_O15_PLAC_DISORD_filtered"      = "Placental disorders",
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered"= "Premature placental separation",
   
-  # MR-PREG
-  "anaemia_preg_all"   = "Anaemia in pregnancy",
-  "apgar1"             = "Apgar score at 1 min",
-  "apgar5"             = "Apgar score at 5 min",
-  "bf_dur_4c"          = "Breastfeeding ≥4 months",
-  "bf_est"             = "Exclusive breastfeeding",
-  "bf_ini"             = "Breastfeeding initiation",
-  "bf_sus"             = "Breastfeeding cessation",
-  "cs"                 = "Caesarean section",
+  # Cesarean delivery
   "el_cs"              = "Elective caesarean section",
   "em_cs"              = "Emergency caesarean section",
-  "depr_subsamp"       = "Postpartum depression",
-  "ga_all"             = "Gestational age",
-  "ga_subsamp"         = "Gestational age (subset)",
-  "gdm_subsamp"        = "Gestational diabetes",
-  "gh_subsamp"         = "Gestational hypertension",
-  "hdp_subsamp"        = "Hypertensive disorders",
-  "hbw_all"            = "High birthweight (>4000 g)",
-  "lbw_all"            = "Low birthweight (<2500 g)",
-  "lga"                = "Large for gestational age",
-  "sga"                = "Small for gestational age",
-  "hyp"                = "Hyperemesis gravidarum",
-  "induction"          = "Induction of labour",
+  "cs"                 = "Caesarean section",
+  
+  # Apgar scores
   "lowapgar1"          = "Low Apgar score at 1 min",
   "lowapgar5"          = "Low Apgar score at 5 min",
-  "misc_subsamp"       = "Miscarriage",
-  "nicu"               = "NICU admission",
-  "nvp_sev_all"        = "Severe nausea/vomiting",
-  "nvp_sev_subsamp"    = "Severe nausea/vomiting (subset)",
-  "pe_subsamp"         = "Preeclampsia",
-  "posttb_all"         = "Post-term birth",
-  "pretb_all"          = "Preterm birth (any)",
-  "pretb_subsamp"      = "Preterm birth (spontaneous)",
-  "vpretb_all"         = "Very preterm birth",
-  "r_misc_subsamp"     = "Recurrent miscarriage",
-  "s_misc_subsamp"     = "Single miscarriage",
-  "sb_subsamp"         = "Stillbirth",
-  "rup_memb"           = "Premature rupture of membranes",
-  "zbw_all"            = "Birthweight Z-score",
   
-  # Westergaard PPH
+  # Labor and delivery complications
+  "rup_memb"           = "Premature rupture of membranes",
+  "induction"          = "Labour induction",
+  
+  # Gestational age and timing
+  "ga_all"             = "Gestational age",
+  "pretb_all"          = "Preterm birth (any)",
+  "vpretb_all"         = "Very preterm birth",
+  "posttb_all"         = "Post-term birth",
+  
+  # Birth weight outcomes
+  "hbw_all"            = "High birthweight (>4000g)",
+  "lbw_all"            = "Low birthweight (<2500g)",
+  "sga"                = "Small for gestational age",
+  
+  # Maternal health
+  "depr_subsamp"       = "Postpartum Depression",
+  "anaemia_preg_all"   = "Pregnancy anemia",
+  
+  # Pregnancy complications
+  "gdm_subsamp"        = "Gestational diabetes mellitus",
+  "hdp_subsamp"        = "Hypertensive disorders of pregnancy",
+  "gh_subsamp"         = "Gestational hypertension",
+  "pe_subsamp"         = "Preeclampsia",
+  
+  # Neonatal outcomes
+  "nicu"               = "NICU admission",
+  "sb_subsamp"         = "Stillbirth",
+  
+  # Hemorrhage and bleeding
   "Antepartum_bleeding_filtered"                 = "Antepartum bleeding",
-  "Early_bleeding_ending_in_live_birth_filtered" = "Early bleeding (ending in live birth)",
-  "Early_bleeding_with_any_outcome_filtered"     = "Early bleeding (any outcome)",
-  "Postpartum_hemorrhage_due_to_atony_filtered"  = "PPH (uterine atony)",
-  "Postpartum_hemorrhage_due_to_retained_placenta_filtered" = "PPH (retained placenta)",
-  "Postpartum_hemorrhage_filtered"               = "Postpartum hemorrhage"
+  "Postpartum_hemorrhage_filtered"               = "Postpartum hemorrhage",
+  "Postpartum_hemorrhage_due_to_atony_filtered"  = "PPH due to atony",
+  "Postpartum_hemorrhage_due_to_retained_placenta_filtered" = "PPH due to retained placenta"
 )
 
 # ---- Pregnancy outcomes summary ----

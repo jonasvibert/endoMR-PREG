@@ -12,21 +12,26 @@
 ²MRC Integrative Epidemiology Unit at the University of Bristol, Bristol, UK  
 ³University Center for Primary Care and Public Health, Lausanne, Switzerland
 
-This repository contains the complete analysis code and results for a two-sample Mendelian randomization study investigating causal relationships between genetic liability to endometriosis and **49 maternal and fetal pregnancy outcomes**.
+This repository contains the complete analysis code and results for a two-sample Mendelian randomization study investigating causal relationships between genetic liability to endometriosis and **29 specialized pregnancy and maternal outcomes**, including novel **fetal genetic effect correction** analysis.
 
 ## 🎯 Key Findings
 
-**Bonferroni-corrected significant associations (P < 0.001)**:
-- **Placenta praevia**: OR 1.62 (95% CI: 1.33–1.97, P = 1.5×10⁻⁶)
+**FDR-corrected significant associations (q < 0.05)**:
+- **Placenta praevia**: OR 1.62 (95% CI: 1.33–1.97, P = 1.5×10⁻⁶, **q = 3.6×10⁻⁵**)
 - **Female infertility**: OR 1.63 (95% CI: 1.48–1.80, P = 6.1×10⁻²²) *(internal validation)*
 
-**Nominally significant associations (P < 0.05)**:
-- Premature rupture of membranes: OR 1.12 (95% CI: 1.01–1.23, P = 0.025)
-- Elective cesarean delivery: OR 1.26 (95% CI: 1.04–1.53, P = 0.023)  
-- Placental abruption: OR 1.36 (95% CI: 1.03–1.81, P = 0.031)
-- Reduced 1-minute Apgar score: OR 0.95 (95% CI: 0.91–0.99, P = 0.029)
+**FDR suggestive associations (0.05 < q < 0.2)**:
+- Premature rupture of membranes: OR 1.12 (95% CI: 1.01–1.23, P = 0.025, q = 0.155)
+- Elective cesarean delivery: OR 1.26 (95% CI: 1.04–1.53, P = 0.023, q = 0.155)  
+- Premature placental separation: OR 1.36 (95% CI: 1.03–1.81, P = 0.031, q = 0.155)
+- Preterm birth: OR 0.83 (95% CI: 0.71–0.97, P = 0.019, q = 0.155)
 
-**No significant associations** found with preeclampsia, gestational diabetes, postpartum hemorrhage, stillbirth, fetal growth restriction, or most other adverse pregnancy outcomes after correction for multiple testing.
+**No significant associations** found with preeclampsia, gestational diabetes, postpartum hemorrhage, stillbirth, fetal growth restriction, or most other adverse pregnancy outcomes after FDR correction for multiple testing.
+
+**Novel Fetal Genetic Effect Analysis (TRIOS)**:
+- **Birth weight**: Direct fetal genetic effect (β = -0.045, P = 0.007) stronger than maternal effect (β = -0.021, P = 0.21)
+- **Maternal vs Fetal pathways**: Most pregnancy complications driven by maternal genetic effects; birth weight primarily influenced by fetal genetics
+- **Validation**: Paternal genetic effects served as negative controls (minimal associations), confirming pathway specificity
 
 ## 📁 Repository Structure
 
@@ -35,24 +40,32 @@ endoMR-PREG/
 ├── 📖 docs/                     # Complete documentation
 │   ├── methodology.md          # Two-sample MR methods
 │   ├── results.md             # Main findings and interpretation
+│   ├── fetal-genetic-analysis.md # Fetal genetic effect methodology
 │   ├── code-documentation.md  # Analysis pipeline guide
 │   ├── data-sources.md        # GWAS datasets information
 │   └── supplementary.md       # Sensitivity analyses
-├── 🔬 scripts/                 # Complete analysis pipeline
-│   ├── 1_selectSNPs_Rahmiglu_endoMR-PREG.R      # SNP selection and clumping
-│   ├── 2_prep_data_endoMR-PREG_110725.R         # Outcome data preparation  
-│   ├── 4_MR_analysis_endoMR-PREG_150725.R       # Main MR analyses
-│   ├── 5_Tables_MR_analysis_endoMR-PREG.R       # Results tables
-│   ├── 6_PlotsVF_MR_endoMR-PREG.R              # Publication figures
-│   └── 1.2_visualization_selectedSNPs.R        # SNP visualization
+├── 🔬 scripts/                 # Complete analysis pipeline (29 outcomes)
+│   ├── 01_select_instruments_endoMR-PREG.R     # SNP selection and clumping
+│   ├── 02_prepare_outcomes_endoMR-PREG.R       # Outcome data preparation  
+│   ├── 03_harmonise_data_endoMR-PREG.R         # Data harmonization
+│   ├── 04_main_analyses_endoMR-PREG.R          # Main MR analyses (29 outcomes)
+│   ├── 04.2_fetal_effect_endoMR-PREG.R         # 🆕 Fetal genetic effect analysis
+│   ├── 05_sensitivity_analyses_endoMR-PREG.R   # Sensitivity analyses
+│   ├── 06_tables_endoMR-PREG.R                 # Results tables
+│   ├── 07_plots_endoMR-PREG.R                  # Publication figures
+│   ├── 08_forest_plots_endoMR-PREG.R           # Forest plot generation
+│   └── 09_supplementary_tables.R               # Supplementary tables
 ├── 📈 results/                 # Analysis outputs
 │   ├── harmonised_rahmioglu_bpo.csv            # Harmonized data
-│   ├── all_mr_methods.csv                      # Complete MR results
+│   ├── all_mr_methods.csv                      # Complete MR results (29 outcomes)
 │   ├── ivw_results.csv                         # IVW estimates
-│   ├── egger_results.csv                       # MR-Egger results
+│   ├── trios_maternal_fetal_paternal_summary.csv # 🆕 TRIOS analysis results
 │   ├── heterogeneity_results.csv               # Heterogeneity tests
 │   └── pleiotropy_results.csv                  # Pleiotropy tests
-├── 🎨 plots/                   # Generated figures
+├── 🧬 fetal_genetic_analysis/   # 🆕 Fetal genetic effect outputs
+│   ├── mat_fetal_paternal_comparison.png        # TRIOS comparison plot
+│   └── sensitivity/                            # Leave-one-out plots
+├── 🎨 plots/                   # Generated figures (enhanced forest plots)
 └── 📋 LICENSE                  # MIT License
 ```
 
@@ -83,19 +96,34 @@ devtools::install_github("rondolab/MR-PRESSO")
 2. **Run the complete analysis pipeline**:
    ```r
    # 1. Select genetic instruments (41 independent SNPs)
-   source("scripts/1_selectSNPs_Rahmiglu_endoMR-PREG.R")
+   source("scripts/01_select_instruments_endoMR-PREG.R")
    
-   # 2. Prepare outcome data (49 pregnancy outcomes)
-   source("scripts/2_prep_data_endoMR-PREG_110725.R")
+   # 2. Prepare outcome data (29 pregnancy outcomes)
+   source("scripts/02_prepare_outcomes_endoMR-PREG.R")
    
-   # 3. Main MR analysis (IVW, Egger, Weighted Median, MR-PRESSO)
-   source("scripts/4_MR_analysis_endoMR-PREG_150725.R")
+   # 3. Harmonize exposure and outcome data
+   source("scripts/03_harmonise_data_endoMR-PREG.R")
    
-   # 4. Generate results tables
-   source("scripts/5_Tables_MR_analysis_endoMR-PREG.R")
+   # 4. Main MR analysis (IVW, Egger, Weighted Median)
+   source("scripts/04_main_analyses_endoMR-PREG.R")
    
-   # 5. Create publication figures
-   source("scripts/6_PlotsVF_MR_endoMR-PREG.R")
+   # 4.2. 🆕 Fetal genetic effect analysis (TRIOS methodology)
+   source("scripts/04.2_fetal_effect_endoMR-PREG.R")
+   
+   # 5. Sensitivity analyses
+   source("scripts/05_sensitivity_analyses_endoMR-PREG.R")
+   
+   # 6. Generate results tables
+   source("scripts/06_tables_endoMR-PREG.R")
+   
+   # 7. Create publication figures
+   source("scripts/07_plots_endoMR-PREG.R")
+   
+   # 8. Generate forest plots
+   source("scripts/08_forest_plots_endoMR-PREG.R")
+   
+   # 9. Create supplementary tables
+   source("scripts/09_supplementary_tables.R")
    ```
 
 3. **View results**:
@@ -108,6 +136,7 @@ For detailed information, see the [`docs/`](docs/) directory:
 
 - **[Methodology](docs/methodology.md)**: Statistical methods and study design
 - **[Results](docs/results.md)**: Main findings and interpretations
+- **[Fetal Genetic Analysis](docs/fetal-genetic-analysis.md)**: 🆕 TRIOS methodology and maternal vs fetal effects
 - **[Code Guide](docs/code-documentation.md)**: Script documentation
 - **[Data Sources](docs/data-sources.md)**: GWAS datasets used
 - **[Supplementary](docs/supplementary.md)**: Additional analyses
@@ -120,47 +149,58 @@ For detailed information, see the [`docs/`](docs/) directory:
   - 41 independent SNPs as genetic instruments (mean F-statistic = 279)
   - Explained variance: ~5.6% of endometriosis liability
 - **Outcome sources**: 
-  - MR-PREG consortium (up to 678,001 women)
+  - MR-PREG consortium (up to 678,001 women) - 29 specialized pregnancy outcomes
   - FinnGen R12 (176,899 participants, predominantly Finnish)
   - Westergaard et al. for postpartum hemorrhage (~5,000 cases, ~170,000 controls)
 - **Statistical methods**:
   - **Primary**: Inverse Variance Weighted (IVW)
-  - **Sensitivity**: MR-Egger, Weighted Median, MR-PRESSO
+  - **Sensitivity**: MR-Egger, Weighted Median, Mode-based methods
+  - **🆕 Fetal genetic effects**: TRIOS analysis with maternal/fetal/paternal genotypes
   - **Quality control**: Heterogeneity tests, pleiotropy assessment, leave-one-out
-  - **Multiple testing**: Bonferroni correction for 49 outcomes (P < 0.001)
+  - **Multiple testing**: FDR correction for 29 outcomes (q < 0.05)
 - **Software**: TwoSampleMR v0.5.6, MR-PRESSO v1.0.0 in R v4.3.2
 
 ## 📊 Key Results
 
 | Outcome | OR (95% CI) | P-value | Significance |
 |---------|-------------|---------|--------------|
-| **Placenta praevia** | **1.62 (1.33–1.97)** | **1.5×10⁻⁶** | **✓ Bonferroni** |
-| **Female infertility** | **1.63 (1.48–1.80)** | **6.1×10⁻²²** | **✓ Bonferroni** |
+| **Placenta praevia** | **1.62 (1.33–1.97)** | **1.5×10⁻⁶ (q=3.6×10⁻⁵)** | **✓ FDR** |
+| **Female infertility** | **1.63 (1.48–1.80)** | **6.1×10⁻²²** | **✓ Internal validation** |
 | Premature rupture of membranes | 1.12 (1.01–1.23) | 0.025 | Nominal |
 | Elective cesarean delivery | 1.26 (1.04–1.53) | 0.023 | Nominal |
 | Placental abruption | 1.36 (1.03–1.81) | 0.031 | Nominal |
-| 1-minute Apgar score | 0.95 (0.91–0.99) | 0.029 | Nominal |
-| Preterm birth (all) | 0.82 (0.71–0.95) | 0.007 | Nominal |
+| Low Apgar score at 1 minute | 1.18 (0.98–1.41) | 0.073 | Nominal |
+| **🆕 Birth weight (fetal effect)** | **β = -0.045** | **0.007** | **Fetal pathway** |
+| **🆕 Birth weight (maternal effect)** | **β = -0.021** | **0.21** | **Maternal pathway** |
 
 ### Clinical Interpretation
 
 **Primary finding**: Genetic liability to endometriosis increases the risk of **placenta praevia** by 62%, supporting a causal relationship. This finding aligns with biological mechanisms involving impaired decidualization and abnormal placentation in women with endometriosis.
 
-**No evidence** for causal effects on preeclampsia, gestational diabetes, postpartum hemorrhage, stillbirth, or fetal growth restriction, suggesting that previously reported associations may reflect bias rather than causality.
+**🆕 Fetal genetic pathway discovery**: Birth weight represents a unique exception where **direct fetal genetic effects** (β = -0.045, P = 0.007) are stronger than maternal effects (β = -0.021, P = 0.21), indicating that endometriosis genetic liability can directly affect fetal growth independent of maternal pathways.
+
+**Pathway specificity**: Most pregnancy complications are primarily driven by **maternal genetic pathways**, while birth weight shows predominant **fetal genetic effects**, suggesting different biological mechanisms underlying various pregnancy outcomes.
+
+**No evidence** for causal effects on preeclampsia, gestational diabetes, postpartum hemorrhage, stillbirth after multiple testing correction, suggesting that previously reported associations may reflect bias rather than causality.
 
 *Complete results available in [`results/all_mr_methods.csv`](results/all_mr_methods.csv)*
 
 ## 🎨 Visualizations
 
-High-resolution publication-ready figures available in [`plots/`](plots/):
+High-resolution publication-ready figures available in [`plots/`](plots/) and [`fetal_genetic_analysis/`](fetal_genetic_analysis/):
 
-- **Summary forest plot**: `summary_forest_all_IVW.png` - Overview of all 49 outcomes
+**Main Analysis Plots**:
+- **Enhanced forest plots**: `forest_endoMR-PREG_*.png` - Multiple layouts (standard, improved, multi-method)
 - **Scatter plots**: SNP effects for significant outcomes (placenta praevia, infertility)
-- **Forest plots**: Individual SNP and combined estimates 
 - **Leave-one-out plots**: Sensitivity analyses removing each SNP
 - **Funnel plots**: Assessment of directional pleiotropy
 
-All plots generated with `6_PlotsVF_MR_endoMR-PREG.R` script.
+**🆕 Fetal Genetic Analysis Plots**:
+- **TRIOS comparison**: `mat_fetal_paternal_comparison.png` - Maternal vs fetal vs paternal effects
+- **Sensitivity analysis**: `sensitivity/` - Leave-one-out plots by outcome for TRIOS analysis
+
+All main plots generated with scripts `07_plots_endoMR-PREG.R` and `08_forest_plots_endoMR-PREG.R`.  
+Fetal analysis plots generated with `04.2_fetal_effect_endoMR-PREG.R`.
 
 ## 💾 Data Availability
 
@@ -217,4 +257,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Last updated**: August 2025
+**Last updated**: November 2025

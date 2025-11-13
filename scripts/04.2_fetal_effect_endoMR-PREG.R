@@ -17,7 +17,7 @@
   + ################################################################################
 + 
   + # Load required libraries
-  + library(TwoSampleMR)
+library(TwoSampleMR)
 + library(dplyr)
 + library(purrr)
 + library(ggplot2)
@@ -31,54 +31,45 @@
   + message("=== FETAL GENETIC EFFECT ANALYSIS ===")
 + 
   + # Define fetal-relevant outcomes (birth outcomes influenced by fetal genetics)
+  + # Using standardized outcome codes from the main analysis (filtered to 29 outcomes)
   + fetal_outcomes <- c(
     +   # Birth size outcomes (strong fetal genetic component)
-      +   "zKkCNG",  # Low birthweight (<2500g)
-    +   "ycgY62",  # Large for gestational age
-    +   "yoKaH0",  # Small for gestational age
-    +   "iS2FMp",  # Birthweight Z-score
-    +   "dhBaTu",  # High birthweight (>4000g)
+      +   "lbw_all",    # Low birthweight (<2500g)
+    +   "hbw_all",    # High birthweight (>4000g)
+    +   "sga",        # Small for gestational age
     +   
       +   # Gestational timing (potential fetal contribution)
-      +   "O2sj1s",  # Preterm birth (all)
-    +   "9QjNDJ",  # Preterm birth (subsample)
-    +   "i3cwH7",  # Very preterm birth
-    +   "5sBPKR",  # Premature rupture of membranes
+      +   "pretb_all",  # Preterm birth (all)
+    +   "vpretb_all", # Very preterm birth
+    +   "ga_all",     # Gestational age
+    +   "rup_memb",   # Premature rupture of membranes
     +   
       +   # Neonatal outcomes (fetal development-related)
-      +   "z2noFK",  # Low Apgar at 1 minute
-    +   "dBcqKG",  # Low Apgar at 5 minutes
-    +   "wvATQb",  # Apgar score at 1 minute
-    +   "RJauGo",  # Apgar score at 5 minutes
-    +   "6g03jM"   # NICU admission
+      +   "lowapgar1",  # Low Apgar at 1 minute
+    +   "lowapgar5",  # Low Apgar at 5 minutes
+    +   "nicu"        # NICU admission
     + )
   + 
-    + # Fetal outcome labels
+    + # Fetal outcome labels (updated to match filtered 29 outcomes)
     + fetal_labels <- c(
-      +   "zKkCNG" = "Low birthweight (<2500g)",
-      +   "ycgY62" = "Large for gestational age",
-      +   "yoKaH0" = "Small for gestational age",
-      +   "iS2FMp" = "Birthweight Z-score",
-      +   "dhBaTu" = "High birthweight (>4000g)",
-      +   "O2sj1s" = "Preterm birth (all)",
-      +   "9QjNDJ" = "Preterm birth (subsample)",
-      +   "i3cwH7" = "Very preterm birth",
-      +   "5sBPKR"  = "Premature rupture of membranes",
-      +   "z2noFK" = "Low Apgar at 1 minute",
-      +   "dBcqKG" = "Low Apgar at 5 minutes",
-      +   "wvATQb" = "Apgar score at 1 minute",
-      +   "RJauGo" = "Apgar score at 5 minutes",
-      +   "6g03jM" = "NICU admission"
+      +   "lbw_all" = "Low birthweight (<2500g)",
+      +   "hbw_all" = "High birthweight (>4000g)",
+      +   "sga" = "Small for gestational age",
+      +   "pretb_all" = "Preterm birth (all)",
+      +   "vpretb_all" = "Very preterm birth",
+      +   "ga_all" = "Gestational age",
+      +   "rup_memb" = "Premature rupture of membranes",
+      +   "lowapgar1" = "Low Apgar at 1 minute",
+      +   "lowapgar5" = "Low Apgar at 5 minutes",
+      +   "nicu" = "NICU admission"
       + )
     + 
-      + # Clinical groupings for fetal effects
+      + # Clinical groupings for fetal effects (updated to match filtered 29 outcomes)
       + fetal_groups <- c(
-        +   "zKkCNG" = "Birth size", "ycgY62" = "Birth size", "yoKaH0" = "Birth size",
-        +   "iS2FMp" = "Birth size", "dhBaTu" = "Birth size",
-        +   "O2sj1s" = "Gestational timing", "9QjNDJ" = "Gestational timing", 
-        +   "i3cwH7" = "Gestational timing", "5sBPKR" = "Gestational timing",
-        +   "z2noFK" = "Neonatal health", "dBcqKG" = "Neonatal health", 
-        +   "wvATQb" = "Neonatal health", "RJauGo" = "Neonatal health", "6g03jM" = "Neonatal health"
+        +   "lbw_all" = "Birth size", "hbw_all" = "Birth size", "sga" = "Birth size",
+        +   "pretb_all" = "Gestational timing", "vpretb_all" = "Gestational timing", 
+        +   "ga_all" = "Gestational timing", "rup_memb" = "Gestational timing",
+        +   "lowapgar1" = "Neonatal health", "lowapgar5" = "Neonatal health", "nicu" = "Neonatal health"
         + )
       + 
         + ################################################################################

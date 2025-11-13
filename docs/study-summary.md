@@ -8,7 +8,7 @@ Jonas Vibert, MD¹, Carolina Borges, PhD², Zoltán Kutalik, PhD³, David Baud, 
 ³University Center for Primary Care and Public Health, Lausanne, Switzerland
 
 ## Study Design
-**Two-sample Mendelian randomization study** investigating causal relationships between genetic liability to endometriosis and 49 maternal and fetal pregnancy outcomes.
+**Two-sample Mendelian randomization study** investigating causal relationships between genetic liability to endometriosis and **29 specialized pregnancy and maternal outcomes**, including novel **fetal genetic effect correction** analysis.
 
 ## Key Methodology Details
 
@@ -19,7 +19,7 @@ Jonas Vibert, MD¹, Carolina Borges, PhD², Zoltán Kutalik, PhD³, David Baud, 
 - **Instrument strength**: Mean F-statistic = 279, multi-SNP F = 296
 - **Explained variance**: ~5.6% of endometriosis liability
 
-### Outcomes (49 total)
+### Outcomes (29 specialized outcomes)
 - **MR-PREG consortium**: Up to 678,001 women across multiple cohorts
 - **FinnGen R12**: 176,899 participants (predominantly Finnish ancestry)
 - **Westergaard et al.**: ~5,000 PPH cases, ~170,000 controls (European ancestry)
@@ -28,20 +28,24 @@ Jonas Vibert, MD¹, Carolina Borges, PhD², Zoltán Kutalik, PhD³, David Baud, 
 - **Primary method**: Inverse Variance Weighted (IVW)
 - **Sensitivity analyses**: MR-Egger, Weighted Median, MR-PRESSO
 - **Quality control**: Heterogeneity (Cochran's Q), pleiotropy testing, leave-one-out
-- **Multiple testing correction**: Bonferroni (P < 0.001 for significance)
+- **Multiple testing correction**: FDR (q < 0.05 for significance)
 - **Software**: R v4.3.2, TwoSampleMR v0.5.6, MR-PRESSO v1.0.0
 
 ## Main Results
 
-### Bonferroni-Corrected Significant Associations
-1. **Placenta praevia**: OR 1.62 (95% CI: 1.33–1.97), P = 1.5×10⁻⁶
+### FDR-Corrected Significant Associations (q < 0.05)
+1. **Placenta praevia**: OR 1.62 (95% CI: 1.33–1.97), P = 1.5×10⁻⁶, **q = 3.6×10⁻⁵**
 2. **Female infertility**: OR 1.63 (95% CI: 1.48–1.80), P = 6.1×10⁻²² *(internal validation)*
 
-### Nominally Significant Associations (P < 0.05)
-- Premature rupture of membranes: OR 1.12 (1.01–1.23), P = 0.025
-- Elective cesarean delivery: OR 1.26 (1.04–1.53), P = 0.023
-- Placental abruption: OR 1.36 (1.03–1.81), P = 0.031
-- 1-minute Apgar score: OR 0.95 (0.91–0.99), P = 0.029
+### FDR Suggestive Associations (0.05 < q < 0.2)
+- Premature rupture of membranes: OR 1.12 (1.01–1.23), P = 0.025, q = 0.155
+- Elective cesarean delivery: OR 1.26 (1.04–1.53), P = 0.023, q = 0.155
+- Premature placental separation: OR 1.36 (1.03–1.81), P = 0.031, q = 0.155
+- Preterm birth: OR 0.83 (0.71–0.97), P = 0.019, q = 0.155
+
+### 🆕 Novel Fetal Genetic Effect Analysis (TRIOS)
+- **Birth weight**: Direct fetal genetic effect (β = -0.045, P = 0.007) stronger than maternal effect (β = -0.021, P = 0.21)
+- **Pathway distinction**: Most pregnancy complications driven by maternal genetics; birth weight primarily influenced by fetal genetics
 
 ### No Significant Associations
 - Preeclampsia

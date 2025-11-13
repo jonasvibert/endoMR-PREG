@@ -107,42 +107,91 @@ message("Available cohorts: ", paste(cohort_summary$study, collapse = ", "))
 if (nrow(cohort_summary) < 2) stop("Need ≥2 cohorts for leave-one-out analysis")
 
 outcome_labels <- c(
-  pretb_all = "Preterm birth (any)",
-  el_cs = "Elective caesarean section",
-  rup_memb = "Premature rupture of membranes",
-  pretb_subsamp = "Preterm birth (spontaneous)",
-  apgar1 = "Apgar score at 1 min",
-  vpretb_all = "Very preterm birth (any)",
-  em_cs = "Emergency caesarean section",
-  lowapgar1 = "Low Apgar score at 1 min",
-  pe_subsamp = "Preeclampsia",
-  lbw_all = "Low birthweight (<2500 g)",
-  ga_all = "Gestational age",
-  gh_subsamp = "Gestational hypertension",
-  ga_subsamp = "Gestational age (subset)",
-  lga = "Large for gestational age",
-  zbw_all = "Z-score birthweight",
-  nvp_sev_subsamp = "Severe nausea/vomiting (subset)",
-  nvp_sev_all = "Severe nausea/vomiting",
-  hbw_all = "High birthweight (>4000 g)",
-  anaemia_preg_all = "Pregnancy anaemia",
-  finngen_R12_N14_FEMALEINFERT = "Female infertility",
-  finngen_R12_O15_PLAC_DISORD = "Placental disorders",
+  # Placental outcomes
   finngen_R12_O15_PLAC_PRAEVIA = "Placenta praevia",
+  finngen_R12_O15_PLAC_DISORD = "Placental disorders",
   finngen_R12_O15_PLAC_PREMAT_SEPAR = "Premature placental separation",
-  finngen_R12_O15_PREG_ECTOP = "Ectopic pregnancy"
+  
+  # Cesarean delivery
+  el_cs          = "Elective caesarean section",
+  em_cs          = "Emergency caesarean section",
+  cs             = "Caesarean section",
+  
+  # Apgar scores
+  lowapgar1      = "Low Apgar score at 1 min",
+  lowapgar5      = "Low Apgar score at 5 min",
+  
+  # Labor and delivery complications
+  rup_memb       = "Premature rupture of membranes",
+  induction      = "Labour induction",
+  
+  # Gestational age and timing
+  ga_all         = "Gestational age",
+  pretb_all      = "Preterm birth (any)",
+  vpretb_all     = "Very preterm birth",
+  posttb_all     = "Post-term birth",
+  
+  # Birth weight outcomes
+  hbw_all        = "High birthweight (>4000g)",
+  lbw_all        = "Low birthweight (<2500g)",
+  sga            = "Small for gestational age",
+  
+  # Maternal health
+  depr_subsamp   = "Postpartum Depression",
+  anaemia_preg_all = "Pregnancy anemia",
+  
+  # Pregnancy complications
+  gdm_subsamp    = "Gestational diabetes mellitus",
+  hdp_subsamp    = "Hypertensive disorders of pregnancy",
+  gh_subsamp     = "Gestational hypertension",
+  pe_subsamp     = "Preeclampsia",
+  
+  # Neonatal outcomes
+  nicu           = "NICU admission",
+  sb_subsamp     = "Stillbirth",
+  
+  # Hemorrhage and bleeding
+  Antepartum_bleeding_filtered = "Antepartum bleeding",
+  Postpartum_hemorrhage_filtered = "Postpartum hemorrhage",
+  Postpartum_hemorrhage_due_to_atony_filtered = "PPH due to atony",
+  Postpartum_hemorrhage_due_to_retained_placenta_filtered = "PPH due to retained placenta"
 )
 
 outcome_types <- c(
-  pretb_all = "binary", el_cs = "binary", rup_memb = "binary",
-  pretb_subsamp = "binary", apgar1 = "continuous", vpretb_all = "binary",
-  em_cs = "binary", lowapgar1 = "binary", pe_subsamp = "binary",
-  lbw_all = "binary", ga_all = "continuous", gh_subsamp = "binary",
-  ga_subsamp = "continuous", lga = "binary", zbw_all = "continuous",
-  nvp_sev_subsamp = "binary", nvp_sev_all = "binary", hbw_all = "binary",
-  anaemia_preg_all = "binary", finngen_R12_N14_FEMALEINFERT = "binary",
-  finngen_R12_O15_PLAC_DISORD = "binary", finngen_R12_O15_PLAC_PRAEVIA = "binary",
-  finngen_R12_O15_PLAC_PREMAT_SEPAR = "binary", finngen_R12_O15_PREG_ECTOP = "binary"
+  # Placental outcomes
+  finngen_R12_O15_PLAC_PRAEVIA = "binary",
+  finngen_R12_O15_PLAC_DISORD = "binary",
+  finngen_R12_O15_PLAC_PREMAT_SEPAR = "binary",
+  
+  # Cesarean delivery
+  el_cs = "binary", em_cs = "binary", cs = "binary",
+  
+  # Apgar scores
+  lowapgar1 = "binary", lowapgar5 = "binary",
+  
+  # Labor and delivery complications
+  rup_memb = "binary", induction = "binary",
+  
+  # Gestational age and timing
+  ga_all = "continuous", pretb_all = "binary", vpretb_all = "binary", posttb_all = "binary",
+  
+  # Birth weight outcomes
+  hbw_all = "binary", lbw_all = "binary", sga = "binary",
+  
+  # Maternal health
+  depr_subsamp = "binary", anaemia_preg_all = "binary",
+  
+  # Pregnancy complications
+  gdm_subsamp = "binary", hdp_subsamp = "binary", gh_subsamp = "binary", pe_subsamp = "binary",
+  
+  # Neonatal outcomes
+  nicu = "binary", sb_subsamp = "binary",
+  
+  # Hemorrhage and bleeding
+  Antepartum_bleeding_filtered = "binary",
+  Postpartum_hemorrhage_filtered = "binary",
+  Postpartum_hemorrhage_due_to_atony_filtered = "binary",
+  Postpartum_hemorrhage_due_to_retained_placenta_filtered = "binary"
 )
 
 mr_data <- mr_data |>

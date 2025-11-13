@@ -4,63 +4,63 @@
 
 ### Exposure Data: Endometriosis
 
-**Primary Source**: Rahmioglu et al. (2018)
-- **Publication**: "Large-scale genome-wide association meta-analysis of endometriosis reveals 13 novel loci and a causal association with depression"
-- **Journal**: Human Molecular Genetics
-- **DOI**: [Add DOI]
-- **Sample size**: [Add sample size]
+**Primary Source**: Rahmioglu et al. (2023)
+- **Publication**: "The genetic basis of endometriosis and comorbidity with other pain and inflammatory conditions"
+- **Journal**: Nature Genetics
+- **DOI**: 10.1038/s41588-023-01323-z
+- **Sample size**: ~791,000 individuals (~58,000 cases, ~733,000 controls)
 - **Population**: European ancestry
-- **Cases/Controls**: [Add numbers]
+- **Genetic instruments**: 41 independent genome-wide significant SNPs
+- **Explained variance**: ~5.6% of endometriosis liability
+- **Mean F-statistic**: 279 (strong instruments)
 
 **Supplementary Sources**:
 - Additional endometriosis GWAS for validation
 - Meta-analysis datasets when available
 
-### Outcome Data: Pregnancy Outcomes
+### Outcome Data: 29 Specialized Pregnancy and Maternal Outcomes
+
+#### MR-PREG Consortium
+
+**Primary Source**: McBride et al. (2025)
+**Population**: Up to 678,001 women (European ancestry)
+**Focus**: Comprehensive pregnancy outcome GWAS meta-analysis
+**🆕 TRIOS data**: Family trio data (mother-father-offspring) for fetal genetic effect analysis
+
+**Outcomes included**:
+- Preterm birth (any), very preterm birth
+- Birth weight (high >4000g, low <2500g), small for gestational age
+- Gestational age, post-term birth
+- Caesarean section (elective, emergency, any)
+- Labor induction, premature rupture of membranes
+- Low Apgar scores (1 min, 5 min), NICU admission
+- Gestational diabetes mellitus, pregnancy anemia
+- Hypertensive disorders of pregnancy, gestational hypertension, preeclampsia
+- Postpartum depression, stillbirth
 
 #### FinnGen Release 12
 
 **Access**: https://www.finngen.fi/
-**Population**: Finnish
-**Sample sizes**: Variable by outcome
+**Population**: ~176,899 participants (Finnish ancestry)
+**Sample sizes**: Variable by outcome (typically 1,000-10,000 cases)
 
-**Specific outcomes**:
-- `finngen_R12_N14_FEMALEINFERT` - Female infertility
-- `finngen_R12_O15_PLAC_PRAEVIA` - Placenta praevia  
-- `finngen_R12_O15_PLAC_PREMAT_SEPAR` - Placental abruption
-- `finngen_R12_O15_PLAC_DISORD` - Placental disorders (general)
-- `finngen_R12_O15_PREG_ECTOP` - Ectopic pregnancy
+**Specialized placental outcomes**:
+- `finngen_R12_O15_PLAC_PRAEVIA` - Placenta praevia
+- `finngen_R12_O15_PLAC_PREMAT_SEPAR` - Premature placental separation
+- `finngen_R12_O15_PLAC_DISORD` - Placental disorders (other)
 
-#### UK Biobank
+#### Westergaard et al. Postpartum Hemorrhage GWAS
 
-**Access**: https://www.ukbiobank.ac.uk/
-**Population**: UK (primarily European ancestry)
+**Source**: Westergaard et al. (2024)
+**Publication**: "Genome-wide association meta-analysis identifies five loci associated with postpartum hemorrhage"
+**Journal**: Nature Genetics
+**Sample**: ~5,000 PPH cases, ~170,000 controls
 
-**Pregnancy outcomes**:
-- Postpartum hemorrhage variants
-- Preterm birth outcomes
-- Caesarean section records
-
-#### Early Growth Genetics (EGG) Consortium
-
-**Website**: https://egg-consortium.org/
-**Focus**: Birth outcomes and early growth
-
-**Key outcomes**:
-- Birthweight
-- Gestational duration
-- Birth length
-- Small/large for gestational age
-
-#### Other Consortiums
-
-**GWAS Catalog**: https://www.ebi.ac.uk/gwas/
-- Additional pregnancy outcome GWAS
-- Validation datasets
-
-**dbGaP**: https://www.ncbi.nlm.nih.gov/gap/
-- US-based pregnancy cohorts
-- Maternal and fetal genetic data
+**Bleeding outcomes**:
+- Postpartum hemorrhage (overall)
+- PPH due to uterine atony
+- PPH due to retained placenta
+- Antepartum bleeding
 
 ### Reference Data
 
@@ -98,6 +98,20 @@
 3. **Palindromic SNPs**: Excluded if MAF > 0.42
 4. **Effect size orientation**: Standardized to same allele
 
+#### 🆕 TRIOS Data Processing
+
+**Family trio structure**: Mother-father-offspring genotypes for same SNP set
+**Quality control**:
+- Mendelian inheritance checks
+- Family structure validation
+- Population stratification control
+
+**Analysis approach**:
+- **Maternal genetic effects**: Using maternal genotypes as instruments
+- **Fetal genetic effects**: Using offspring genotypes as instruments
+- **Paternal genetic effects**: Using paternal genotypes as negative controls
+- **Pathway validation**: Minimal paternal effects confirm approach validity
+
 ### Ethical Considerations
 
 #### Data Usage Agreements
@@ -133,7 +147,7 @@ We thank the following groups for making data publicly available:
 - 1000 Genomes: Phase 3
 - UK Biobank: [Add data freeze date]
 
-**Analysis date**: August 2025
+**Analysis date**: November 2025
 **Last data update**: [Add date]
 
 ### Citation Requirements
@@ -146,13 +160,19 @@ When using this analysis, please cite:
 
 ### References
 
-1. Rahmioglu, N., et al. (2018). Large-scale genome-wide association meta-analysis of endometriosis reveals 13 novel loci and a causal association with depression. Human Molecular Genetics.
+1. Rahmioglu, N., et al. (2023). The genetic basis of endometriosis and comorbidity with other pain and inflammatory conditions. Nature Genetics, 55(3):423-36. DOI: 10.1038/s41588-023-01323-z
 
-2. Hemani, G., et al. (2018). The MR-Base platform supports systematic causal inference across the human phenome. eLife.
+2. McBride, N., et al. (2025). Cohort Profile: The Mendelian Randomization in Pregnancy (MR-PREG) collaboration. [In preparation]
 
-3. FinnGen consortium. (2023). FinnGen Documentation of R12 release. https://www.finngen.fi/
+3. Westergaard, D., et al. (2024). Genome-wide association meta-analysis identifies five loci associated with postpartum hemorrhage. Nature Genetics, 56(8):1597-603.
 
-4. Kurki, M.I., et al. (2023). FinnGen provides genetic insights from a well-phenotyped isolated population. Nature.
+4. Kurki, M.I., et al. (2023). FinnGen provides genetic insights from a well-phenotyped isolated population. Nature, 613(7944):508-18.
+
+5. Hemani, G., et al. (2018). The MR-Base platform supports systematic causal inference across the human phenome. eLife, 7:e34408.
+
+6. Warrington, N.M., et al. (2019). Maternal and fetal genetic effects on birth weight and their relevance to cardio-metabolic risk factors. Nature Genetics, 51:804-814. [TRIOS methodology]
+
+7. FinnGen consortium. (2023). FinnGen Documentation of R12 release. https://www.finngen.fi/
 
 ---
 

@@ -52,74 +52,56 @@ message("Loaded IVW results: ", nrow(ivw_results), " outcomes")
 message("Loaded all methods: ", nrow(all_results), " results")
 
 # ---------- Outcome Categories and Labels ----------
-# Define pregnancy/maternal health outcome categories and clean labels
+# Define pregnancy/maternal health outcome categories and clean labels (filtered to 29 outcomes)
 outcome_labels <- c(
-  # Birth outcomes
-  "pretb_all"              = "Preterm birth (any)",
-  "pretb_subsamp"          = "Preterm birth (spontaneous)",
-  "vpretb_all"             = "Very preterm birth",
-  "posttb_all"             = "Post-term birth",
-  "lbw_all"                = "Low birthweight (<2500g)",
-  "hbw_all"                = "High birthweight (>4000g)",
-  "zbw_all"                = "Z-score birthweight",
-  "sga"                    = "Small for gestational age",
-  "lga"                    = "Large for gestational age",
+  # Placental outcomes
+  "finngen_R12_O15_PLAC_PRAEVIA"    = "Placenta praevia",
+  "finngen_R12_O15_PLAC_DISORD"     = "Placental disorders",
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR" = "Premature placental separation",
+  
+  # Cesarean delivery
+  "el_cs"                  = "Elective caesarean section",
+  "em_cs"                  = "Emergency caesarean section",
+  "cs"                     = "Caesarean section",
+  
+  # Apgar scores
+  "lowapgar1"              = "Low Apgar score at 1 min",
+  "lowapgar5"              = "Low Apgar score at 5 min",
+  
+  # Labor and delivery complications
+  "rup_memb"               = "Premature rupture of membranes",
+  "induction"              = "Labour induction",
   
   # Gestational age and timing
   "ga_all"                 = "Gestational age",
-  "ga_subsamp"             = "Gestational age (subset)",
+  "pretb_all"              = "Preterm birth (any)",
+  "vpretb_all"             = "Very preterm birth",
+  "posttb_all"             = "Post-term birth",
   
-  # Delivery and cesarean
-  "cs"                     = "Caesarean section",
-  "el_cs"                  = "Elective caesarean section",
-  "em_cs"                  = "Emergency caesarean section",
-  "induction"              = "Labour induction",
-  
-  # Pregnancy complications
-  "pe_subsamp"             = "Preeclampsia",
-  "gh_subsamp"             = "Gestational hypertension",
-  "gdm_subsamp"            = "Gestational diabetes mellitus",
-  "hdp_subsamp"            = "Hypertensive disorders of pregnancy",
-  "hyp"                    = "Hypertension",
-  
-  # Bleeding and placental
-  "Antepartum_bleeding"                     = "Antepartum bleeding",
-  "Early_bleeding_ending_in_live_birth"    = "Early bleeding ending in live birth",
-  "Early_bleeding_with_any_outcome"        = "Early bleeding with any outcome",
-  "Postpartum_hemorrhage"                  = "Postpartum hemorrhage",
-  "Postpartum_hemorrhage_due_to_atony"     = "PPH due to atony",
-  "Postpartum_hemorrhage_due_to_retained_placenta" = "PPH due to retained placenta",
-  "rup_memb"               = "Premature rupture of membranes",
-  
-  # FinnGen placental disorders
-  "finngen_R12_O15_PLAC_DISORD"     = "Placental disorders",
-  "finngen_R12_O15_PLAC_PRAEVIA"    = "Placenta praevia", 
-  "finngen_R12_O15_PLAC_PREMAT_SEPAR" = "Premature placental separation",
-  "finngen_R12_O15_PREG_ECTOP"      = "Ectopic pregnancy",
-  "finngen_R12_N14_FEMALEINFERT"    = "Female infertility",
-  
-  # Apgar and neonatal
-  "apgar1"                 = "Apgar score at 1 min",
-  "apgar5"                 = "Apgar score at 5 min", 
-  "lowapgar1"              = "Low Apgar score at 1 min",
-  "lowapgar5"              = "Low Apgar score at 5 min",
-  "nicu"                   = "NICU admission",
-  
-  # Miscarriage and stillbirth
-  "misc_subsamp"           = "Miscarriage",
-  "r_misc_subsamp"         = "Recurrent miscarriage",
-  "s_misc_subsamp"         = "Spontaneous miscarriage",
-  "sb_subsamp"             = "Stillbirth",
-  
-  # Breastfeeding
-  "bf_ini"                 = "Breastfeeding initiation",
-  "bf_dur_4c"              = "Breastfeeding ≥4 months",
-  "bf_est"                 = "Exclusive breastfeeding",
-  "bf_sus"                 = "Breastfeeding cessation",
+  # Birth weight outcomes
+  "hbw_all"                = "High birthweight (>4000g)",
+  "lbw_all"                = "Low birthweight (<2500g)",
+  "sga"                    = "Small for gestational age",
   
   # Maternal health
+  "depr_subsamp"           = "Postpartum Depression",
   "anaemia_preg_all"       = "Pregnancy anemia",
-  "depr_subsamp"           = "Postpartum Depression"
+  
+  # Pregnancy complications
+  "gdm_subsamp"            = "Gestational diabetes mellitus",
+  "hdp_subsamp"            = "Hypertensive disorders of pregnancy",
+  "gh_subsamp"             = "Gestational hypertension",
+  "pe_subsamp"             = "Preeclampsia",
+  
+  # Neonatal outcomes
+  "nicu"                   = "NICU admission",
+  "sb_subsamp"             = "Stillbirth",
+  
+  # Hemorrhage and bleeding
+  "Antepartum_bleeding_filtered"     = "Antepartum bleeding",
+  "Postpartum_hemorrhage_filtered"   = "Postpartum hemorrhage",
+  "Postpartum_hemorrhage_due_to_atony_filtered" = "PPH due to atony",
+  "Postpartum_hemorrhage_due_to_retained_placenta_filtered" = "PPH due to retained placenta"
 )
 
 # ---------- Filter for pregnancy-relevant outcomes ----------
@@ -142,7 +124,7 @@ message("Filtered to ", nrow(all_filtered), " results for multi-method analysis"
 
 message("Creating IVW forest plot...")
 
-# Define specific outcomes from the image + SGA and very preterm birth
+# Define specific outcomes (filtered to 29 outcomes)
 target_outcomes <- c(
   "finngen_R12_O15_PLAC_PRAEVIA",    # Placenta praevia
   "finngen_R12_O15_PLAC_DISORD",     # Placental disorders  
@@ -153,7 +135,7 @@ target_outcomes <- c(
   "lowapgar5",                       # Low Apgar score at 5 min
   "rup_memb",                        # Premature rupture of membranes
   "ga_all",                          # Gestational age
-  "Antepartum_bleeding",             # Antepartum bleeding
+  "Antepartum_bleeding_filtered",    # Antepartum bleeding
   "hbw_all",                         # High birthweight (>4000g)
   "posttb_all",                      # Post-term birth
   "depr_subsamp",                    # Depression
@@ -162,14 +144,14 @@ target_outcomes <- c(
   "anaemia_preg_all",                # Pregnancy anemia
   "hdp_subsamp",                     # Hypertensive disorders of pregnancy
   "gdm_subsamp",                     # Gestational diabetes mellitus
-  "Postpartum_hemorrhage_due_to_atony", # PPH due to atony
+  "Postpartum_hemorrhage_due_to_atony_filtered", # PPH due to atony
   "nicu",                            # NICU admission
   "gh_subsamp",                      # Gestational hypertension
-  "Postpartum_hemorrhage",           # Postpartum hemorrhage
+  "Postpartum_hemorrhage_filtered",  # Postpartum hemorrhage
   "pe_subsamp",                      # Preeclampsia
   "sb_subsamp",                      # Stillbirth
   "lbw_all",                         # Low birthweight (<2500g)
-  "Postpartum_hemorrhage_due_to_retained_placenta", # PPH due to retained placenta
+  "Postpartum_hemorrhage_due_to_retained_placenta_filtered", # PPH due to retained placenta
   "pretb_all",                       # Preterm birth (any)
   "sga",                             # Small for gestational age 
   "vpretb_all"                       # Very preterm birth

@@ -18,25 +18,23 @@ This study employs a two-sample Mendelian randomization (MR) approach to investi
 
 ### Outcome Data
 
-**49 maternal and fetal outcomes analyzed**:
+**29 specialized pregnancy and maternal outcomes analyzed** (focused on pregnancy/delivery complications, maternal health, and fetal development):
 
 **Data sources**:
 - **MR-PREG consortium**: Up to 934,566 women
 - **FinnGen R12**: ~176,899 participants (Finnish ancestry)
 - **Westergaard et al.**: ~5,000 PPH cases, ~170,000 controls
 
-**Outcome categories**:
-1. **Fertility**: Female infertility, ectopic pregnancy
-2. **Placental disorders**: Placenta praevia, abruption, general disorders
-3. **Hypertensive disorders**: Preeclampsia, gestational hypertension
-4. **Metabolic**: Gestational diabetes, maternal anemia
-5. **Preterm birth**: All preterm, very preterm, PROM
-6. **Delivery**: Caesarean section (elective/emergency), labor induction
-7. **Pregnancy loss**: Miscarriage, stillbirth, recurrent miscarriage
-8. **Birth outcomes**: Birthweight, SGA, LGA, gestational age
-9. **Neonatal**: Apgar scores, NICU admission
-10. **Bleeding**: Postpartum hemorrhage (overall and specific causes)
-11. **Other**: Breastfeeding, postpartum depression, nausea/vomiting
+**Outcome categories** (29 specialized outcomes):
+1. **Placental disorders**: Placenta praevia, premature placental separation, placental disorders
+2. **Delivery complications**: Caesarean section (elective/emergency/any), labor induction
+3. **Hypertensive disorders**: Preeclampsia, gestational hypertension, hypertensive disorders of pregnancy
+4. **Metabolic**: Gestational diabetes mellitus, pregnancy anemia
+5. **Preterm birth**: Any preterm birth, very preterm birth, premature rupture of membranes
+6. **Birth outcomes**: High/low birthweight, small for gestational age, gestational age, post-term birth
+7. **Neonatal**: Low Apgar scores (1 min/5 min), NICU admission, stillbirth
+8. **Bleeding**: Postpartum hemorrhage (overall), PPH due to atony, PPH due to retained placenta, antepartum bleeding
+9. **Maternal health**: Postpartum depression
 
 ### Statistical Methods
 
@@ -45,6 +43,14 @@ This study employs a two-sample Mendelian randomization (MR) approach to investi
 - **MR-Egger regression**: Allows for horizontal pleiotropy with intercept test
 - **Weighted median**: Robust to up to 50% invalid instruments
 - **Mode-based methods**: Simple and weighted mode for robustness
+
+#### 🆕 Fetal Genetic Effect Analysis (TRIOS)
+- **TRIOS methodology**: Uses family trio data (mother-father-offspring) to distinguish maternal vs fetal genetic effects
+- **Maternal genetic effects**: Using maternal genotypes as instruments
+- **Fetal genetic effects**: Using offspring genotypes as instruments  
+- **Paternal genetic effects**: Using paternal genotypes as negative controls
+- **Pathway identification**: Determines whether pregnancy outcomes are driven by maternal or fetal genetic pathways
+- **Validation**: Paternal effects serve as negative controls to confirm pathway specificity
 
 #### Sensitivity Analyses
 1. **Heterogeneity assessment**: Cochran's Q test
@@ -58,7 +64,8 @@ This study employs a two-sample Mendelian randomization (MR) approach to investi
 - **Palindromic SNPs**: Excluded if MAF > 0.42 to avoid strand ambiguity
 - **Harmonization**: Effect alleles aligned between exposure and outcome
 - **Minimum variants**: ≥3 SNPs required for MR-Egger analysis
-- **Maternal-fetal correction**: Applied for fetal outcomes where appropriate
+- **🆕 Maternal-fetal distinction**: TRIOS analysis applied to identify maternal vs fetal genetic pathways
+- **TRIOS quality control**: Paternal genetic effects as negative controls, leave-one-out sensitivity
 
 ### Software
 
@@ -68,8 +75,8 @@ This study employs a two-sample Mendelian randomization (MR) approach to investi
 
 ### Statistical Significance
 
-- **Bonferroni threshold**: P < 0.001 (correcting for ~49 independent outcomes)
-- **Nominally significant**: P < 0.05 but > 0.001 (hypothesis-generating)
+- **FDR threshold**: q < 0.05 (False Discovery Rate correction for 29 specialized pregnancy outcomes)
+- **Suggestive evidence**: 0.05 < q < 0.2 (hypothesis-generating, requires replication)
 - **Effect sizes**: Odds ratios (OR) with 95% confidence intervals per unit increase in genetic liability
 - **Two-sided testing**: All P-values are two-sided
 
@@ -94,6 +101,8 @@ MR analysis relies on three core assumptions:
 - **Timing**: Reflects lifetime genetic liability, not timing-specific effects
 - **Power**: Some true small effects may be missed
 - **Pleiotropy**: Possible horizontal pleiotropy for some variants
+- **🆕 TRIOS limitations**: Requires family trio data availability, assumption of linear fetal genetic effects
+- **Pathway interpretation**: Binary maternal vs fetal classification may oversimplify complex gene-environment interactions
 
 ---
 
