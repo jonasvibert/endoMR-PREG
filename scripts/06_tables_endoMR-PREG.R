@@ -1,14 +1,19 @@
 #!/usr/bin/env Rscript
-# 5_Tables_MR_analysis_endoMR-PREG.R
+
 ###############################################################################
-# Generate summary tables for endometriosis → pregnancy outcomes MR analysis
+# 06_tables_endoMR-PREG.R
+#
+# Generate main and supplementary tables for:
+#   Genetic liability to endometriosis → pregnancy outcomes (endoMR-PREG)
 ###############################################################################
 
-# =========================
-# Table 1: Sample sizes and SNP counts for pregnancy outcomes
-# =========================
 suppressPackageStartupMessages({
-  library(dplyr); library(stringr); library(readr); library(here)
+  library(dplyr)
+  library(stringr)
+  library(readr)
+  library(here)
+  library(data.table)
+  library(tidyr)
 })
 
 source(here::here("config", "config.R"))
@@ -17,597 +22,772 @@ source(here::here("config", "utils.R"))
 setup_logging("5_tables_MR_analysis")
 log_info("=== Starting table generation for endoMR-PREG study ===")
 
-# Load required packages
-load_packages(c("dplyr", "stringr", "readr", "openxlsx", "knitr", "data.table", "purrr"))
+load_packages(c("openxlsx", "knitr", "tibble", "purrr", "gt", "TwoSampleMR"))
 
-# ---- Load harmonised data ----
-harm_file <- file.path(PATHS$results, "harmonised_rahmioglu_bpo.csv")
+results_dir <- PATHS$results
+tables_dir  <- file.path(results_dir, "tables")
+dir.create(tables_dir, showWarnings = FALSE, recursive = TRUE)
+
+harm_file <- file.path(results_dir, "harmonised_rahmioglu_bpo.csv")
 if (!file.exists(harm_file)) {
-  log_error("Harmonised data not found. Please run harmonisation script first.")
+  log_error("Harmonised data not found: ", harm_file)
   stop("Harmonised data not found.")
 }
 
+###############################################################################
+# 1) LOAD HARMONISED DATA & DEFINE 29 PRIMARY OUTCOMES
+###############################################################################
+
 dat <- data.table::fread(harm_file)
-log_info("Loaded harmonised data with", nrow(dat), "rows")
+log_info("Loaded harmonised data with ", nrow(dat), " rows")
 
-# ---- Whitelist 41 SNPs ----
-# Load from clumped data
-snps_file <- file.path(PATHS$results, "endometriosis_clumped_snps.tsv")
-if (file.exists(snps_file)) {
-  clumped_snps <- data.table::fread(snps_file)
-  snp_whitelist <- unique(clumped_snps$SNP)
-} else {
-  # Use unique SNPs from harmonised data
-  snp_whitelist <- unique(dat$SNP)
-}
+stopifnot(all(c("id.exposure", "beta.exposure", "beta.outcome") %in% colnames(dat)))
+stopifnot("outcome" %in% colnames(dat))
 
-log_info("Using", length(snp_whitelist), "SNP instruments")
-
-# ---- Outcome labels for pregnancy traits (filtered to 29 outcomes) ----
-outcome_labels <- c(
-  # Placental outcomes
-  "finngen_R12_O15_PLAC_PRAEVIA_filtered"     = "Placenta praevia",
-  "finngen_R12_O15_PLAC_DISORD_filtered"      = "Placental disorders",
-  "finngen_R12_O15_PLAC_PREMAT_SEPAR_filtered"= "Premature placental separation",
+vars_keep <- c(
+  # Placenta & bleeding (7)
+  "Antepartum_bleeding",
+  "Postpartum_hemorrhage",
+  "Postpartum_hemorrhage_due_to_atony",
+  "Postpartum_hemorrhage_due_to_retained_placenta",
+  "finngen_R12_O15_PLAC_PRAEVIA",
+  "finngen_R12_O15_PLAC_DISORD",
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR",
   
-  # Cesarean delivery
-  "el_cs"              = "Elective caesarean section",
-  "em_cs"              = "Emergency caesarean section",
-  "cs"                 = "Caesarean section",
+  # Membranes (1)
+  "rup_memb",
   
-  # Apgar scores
-  "lowapgar1"          = "Low Apgar score at 1 min",
-  "lowapgar5"          = "Low Apgar score at 5 min",
+  # Preterm birth (2)
+  "pretb_all",
+  "vpretb_all",
   
-  # Labor and delivery complications
-  "rup_memb"           = "Premature rupture of membranes",
-  "induction"          = "Labour induction",
+  # Growth / GA / weight (7)
+  "ga_all",
+  "ga_subsamp",
+  "sga",
+  "lbw_all",
+  "hbw_all",
+  "lga",
+  "zbw_all",
   
-  # Gestational age and timing
-  "ga_all"             = "Gestational age",
-  "pretb_all"          = "Preterm birth (any)",
-  "vpretb_all"         = "Very preterm birth",
-  "posttb_all"         = "Post-term birth",
+  # Neonatal / Apgar (3)
+  "lowapgar1",
+  "lowapgar5",
+  "nicu",
   
-  # Birth weight outcomes
-  "hbw_all"            = "High birthweight (>4000g)",
-  "lbw_all"            = "Low birthweight (<2500g)",
-  "sga"                = "Small for gestational age",
+  # Maternal complications (5)
+  "anaemia_preg_all",
+  "gdm_subsamp",
+  "gh_subsamp",
+  "hdp_subsamp",
+  "pe_subsamp",
   
-  # Maternal health
-  "depr_subsamp"       = "Postpartum Depression",
-  "anaemia_preg_all"   = "Pregnancy anemia",
-  
-  # Pregnancy complications
-  "gdm_subsamp"        = "Gestational diabetes mellitus",
-  "hdp_subsamp"        = "Hypertensive disorders of pregnancy",
-  "gh_subsamp"         = "Gestational hypertension",
-  "pe_subsamp"         = "Preeclampsia",
-  
-  # Neonatal outcomes
-  "nicu"               = "NICU admission",
-  "sb_subsamp"         = "Stillbirth",
-  
-  # Hemorrhage and bleeding
-  "Antepartum_bleeding_filtered"                 = "Antepartum bleeding",
-  "Postpartum_hemorrhage_filtered"               = "Postpartum hemorrhage",
-  "Postpartum_hemorrhage_due_to_atony_filtered"  = "PPH due to atony",
-  "Postpartum_hemorrhage_due_to_retained_placenta_filtered" = "PPH due to retained placenta"
+  # Other obstetric ≥20 SA (2)
+  "induction",
+  "posttb_all"
 )
 
-# ---- Pregnancy outcomes summary ----
-log_info("Creating sample size summary for pregnancy outcomes...")
+outcome_labels <- c(
+  Antepartum_bleeding                       = "Antepartum bleeding",
+  Postpartum_hemorrhage                     = "Postpartum hemorrhage",
+  Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
+  Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
+  finngen_R12_O15_PLAC_PRAEVIA              = "Placenta praevia",
+  finngen_R12_O15_PLAC_DISORD               = "Placental disorders",
+  finngen_R12_O15_PLAC_PREMAT_SEPAR         = "Premature placental separation",
+  rup_memb                                  = "Premature rupture of membranes",
+  pretb_all                                 = "Preterm birth (all)",
+  vpretb_all                                = "Very preterm birth",
+  ga_all                                    = "Gestational age (all)",
+  ga_subsamp                                = "Gestational age (subsample)",
+  sga                                       = "Small for gestational age",
+  lbw_all                                   = "Low birthweight",
+  hbw_all                                   = "High birthweight",
+  lga                                       = "Large for gestational age",
+  zbw_all                                   = "Z-score birthweight",
+  lowapgar1                                 = "Low Apgar score at 1 min",
+  lowapgar5                                 = "Low Apgar score at 5 min",
+  nicu                                      = "NICU admission",
+  anaemia_preg_all                          = "Pregnancy anemia",
+  gdm_subsamp                               = "Gestational diabetes",
+  gh_subsamp                                = "Gestational hypertension",
+  hdp_subsamp                               = "Hypertensive disorders of pregnancy",
+  pe_subsamp                                = "Preeclampsia",
+  induction                                 = "Labour induction",
+  posttb_all                                = "Post-term birth"
+)
 
-# Load outcome data and create summary by data source
-preg_summary <- dat %>%
-  filter(SNP %in% snp_whitelist) %>%
-  group_by(outcome) %>%
-  summarise(
-    `No. SNPs` = n_distinct(SNP),
-    `N total`  = first(samplesize.outcome),
-    Cases      = NA_integer_,
-    Controls   = NA_integer_,
-    .groups = "drop"
+dat <- dat[dat$outcome %in% vars_keep, , drop = FALSE]
+
+labels_df <- data.frame(
+  outcome      = names(outcome_labels),
+  outcome_full = unname(outcome_labels),
+  stringsAsFactors = FALSE
+)
+
+dat <- merge(dat, labels_df, by = "outcome", all.x = TRUE, sort = FALSE)
+dat$id.outcome <- dat$outcome
+
+dat <- dat %>%
+  dplyr::filter(
+    !is.na(beta.outcome),
+    !is.na(se.outcome),
+    se.outcome > 0,
+    !is.na(pval.outcome)
+  )
+
+log_info("Outcomes included in tables (n = ", length(unique(dat$outcome)), "):")
+print(sort(unique(dat$outcome_full)))
+
+continuous_outcomes <- c("zbw_all")
+
+###############################################################################
+# 2) HELPERS
+###############################################################################
+
+label_source <- function(x) {
+  dplyr::case_when(
+    grepl("^finngen_R12_", x) ~ "FinnGen R12",
+    grepl("^Postpartum_hemorrhage", x) ~ "Westergaard (PPH)",
+    grepl("^Antepartum_bleeding|^Early_bleeding", x) ~ "Westergaard (PPH)",
+    TRUE ~ "MR-PREG"
+  )
+}
+
+classify_outcome_type <- function(df) {
+  df %>%
+    dplyr::group_by(outcome) %>%
+    dplyr::summarise(
+      has_cases = any(!is.na(ncase.outcome)),
+      .groups   = "drop"
+    ) %>%
+    dplyr::mutate(
+      Type = if_else(has_cases, "Binary", "Continuous")
+    ) %>%
+    dplyr::select(outcome, Type)
+}
+
+load_mr_results <- function(stem) {
+  path <- file.path(results_dir, paste0(stem, ".csv"))
+  if (!file.exists(path)) {
+    stop("MR results file not found: ", path)
+  }
+  df <- readr::read_csv(path, show_col_types = FALSE)
+  df <- readr::type_convert(df)
+  df
+}
+
+fmt_p <- function(p) {
+  dplyr::case_when(
+    p < 0.001 ~ formatC(p, format = "e", digits = 2),
+    p < 0.01  ~ sprintf("%.3f", p),
+    TRUE      ~ sprintf("%.2f", p)
+  )
+}
+
+snps_file <- file.path(results_dir, "endometriosis_clumped_snps.tsv")
+if (file.exists(snps_file)) {
+  clumped_snps  <- data.table::fread(snps_file)
+  snp_whitelist <- unique(clumped_snps$SNP)
+} else {
+  snp_whitelist <- unique(dat$SNP)
+  log_warn("Clumped SNP file not found. Using SNPs from harmonised data (n = ",
+           length(snp_whitelist), ").")
+}
+log_info("Using ", length(snp_whitelist), " SNP instruments")
+
+type_df <- tibble::tibble(
+  outcome = vars_keep,
+  Type    = dplyr::if_else(outcome %in% continuous_outcomes, "Continuous", "Binary")
+)
+
+###############################################################################
+# 3) MAIN TABLE 1 — DESCRIPTION OF GWAS DATASETS
+###############################################################################
+
+log_info("Creating Table 1: description of GWAS datasets...")
+
+table1_gwas <- tibble::tribble(
+  ~Study,                      ~Year, ~Dataset_or_consortium,                                            ~Phenotype_group,                                                      ~Ancestry,                                             ~Sample_size,                                             ~Sex,           ~Main_adjustments,                                                   ~Notes_or_accession,
+  "Rahmioglu et al.",          2023,  "International Endometriosis Genetics Consortium + UK Biobank",    "Endometriosis (overall and subtypes)",                              "Predominantly European (~98%) + Japanese (~2%)",     "60,674 cases; 701,926 controls",                       "Female/mixed", "Age, batch, principal components, study-specific covariates", "Primary exposure GWAS; clumped instruments used in endoMR-PREG",
+  "FinnGen R12",               2024,  "FinnGen (release 12)",                                            "Pregnancy and fertility ICD-10 phenotypes",                          "Finnish (European)",                                 "Varies by phenotype",                                   "Female",       "Age, batch, principal components",                       "Used for placental phenotypes (O43–O45) and related outcomes",
+  "McBride et al. (MR-PREG)",  2025,  "MR-PREG collaboration (ALSPAC, BiB, MoBa, UKB, FinnGen + GWAS)",  "Adverse pregnancy and perinatal outcomes (binary and continuous)",   "Predominantly European",                              "Up to 678,001 women (outcome-specific)",               "Female",       "Age, study/centre, principal components",              "Core source for hypertensive disorders, GDM, PTB, SGA/LGA, CS, PROM, stillbirth, Apgar, NICU",
+  "Westergaard et al.",        2024,  "Nordic registry-based GWAS (6 cohorts)",                           "Bleeding in pregnancy and postpartum haemorrhage (overall, subtypes)", "Northern European (registry-based)",               "Up to 331,792 women; outcome-specific case counts",     "Female",       "Age, parity, calendar year, cohort",                   "Provides GWAS for antepartum bleeding and PPH subtypes used in endoMR-PREG"
+)
+
+table1_file <- file.path(tables_dir, "Table1_GWAS_sources.csv")
+write.csv(table1_gwas, table1_file, row.names = FALSE)
+log_info("Table 1 (GWAS sources) saved: ", table1_file)
+
+table1_gwas_gt <- table1_gwas %>%
+  gt::gt() %>%
+  gt::tab_header(
+    title = gt::md("**Table 1. Description of exposure and outcome GWAS datasets used in endoMR-PREG**")
   ) %>%
-  mutate(
-    Source = case_when(
-      grepl("^finngen_R12_", outcome) ~ "FinnGen R12",
-      grepl("Postpartum|Antepartum|Early_bleeding", outcome) ~ "Westergaard (PPH)",
-      TRUE ~ "MR-PREG"
+  gt::cols_label(
+    Study                = "Study",
+    Year                 = "Year",
+    Dataset_or_consortium = "Dataset / Consortium",
+    Phenotype_group      = "Phenotype group",
+    Ancestry             = "Ancestry",
+    Sample_size          = "Sample size",
+    Sex                  = "Sex",
+    Main_adjustments     = "Main covariate adjustments",
+    Notes_or_accession   = "Notes / accession"
+  ) %>%
+  gt::tab_options(
+    table.font.size = 11,
+    heading.align   = "left"
+  )
+
+table1_gwas_gt
+
+###############################################################################
+# 4) MAIN TABLE 2 — SUMMARY OF 29 OUTCOMES & SAMPLE SIZES
+###############################################################################
+
+log_info("Creating Table 2: pregnancy outcome sample sizes and SNP counts...")
+
+preg_summary <- dat %>%
+  dplyr::filter(SNP %in% snp_whitelist) %>%
+  dplyr::group_by(outcome) %>%
+  dplyr::summarise(
+    `No. SNPs` = dplyr::n_distinct(SNP),
+    `N total`  = suppressWarnings(max(samplesize.outcome, na.rm = TRUE)),
+    Cases      = suppressWarnings(max(ncase.outcome, na.rm = TRUE)),
+    Controls   = suppressWarnings(max(ncontrol.outcome, na.rm = TRUE)),
+    .groups    = "drop"
+  ) %>%
+  dplyr::mutate(
+    `N total` = ifelse(is.infinite(`N total`), NA, `N total`),
+    Cases     = ifelse(is.infinite(Cases), NA, Cases),
+    Controls  = ifelse(is.infinite(Controls), NA, Controls),
+    Source    = label_source(outcome)
+  ) %>%
+  dplyr::mutate(
+    `N total` = ifelse(
+      is.na(`N total`) & !is.na(Cases) & !is.na(Controls),
+      Cases + Controls,
+      `N total`
     )
   )
 
-# ---- Fill FinnGen cases/controls from R12 manifest (robust) ----
-R12_MANIFEST_URL <- "https://zenodo.org/records/15815805/files/finngen_R12_manifest.csv"
-
-fg_endpoints <- unique(preg_summary$outcome[grepl("^finngen_R12_", preg_summary$outcome)])
-# Remove _filtered suffix for manifest lookup
-fg_endpoints_clean <- gsub("_filtered$", "", fg_endpoints)
-
-# Read manifest
-if (length(fg_endpoints) > 0) {
-  log_info("Fetching FinnGen R12 sample sizes...")
-  mani <- tryCatch(
-    data.table::fread(R12_MANIFEST_URL, showProgress = FALSE),
-    error = function(e) {
-      log_warn("Could not fetch FinnGen R12 manifest:", e$message)
-      NULL
-    }
-  )
-  
-  if (!is.null(mani)) {
-    # Find phenocode column and URL column (robust)
-    phenocode_col <- c("phenocode","phenotype","code")
-    phenocode_col <- phenocode_col[phenocode_col %in% names(mani)][1]
-    
-    if (!is.na(phenocode_col)) {
-      url_like_cols <- names(mani)[grepl("url|path|file", names(mani), ignore.case = TRUE)]
-      url_col <- if (length(url_like_cols)) url_like_cols[1] else NA_character_
-      
-      # Standardize phenocode with finngen_R12_ prefix
-      mani <- mani %>%
-        mutate(phenocode_std = if_else(
-          str_starts(.data[[phenocode_col]], "finngen_R12_"),
-          .data[[phenocode_col]],
-          paste0("finngen_R12_", .data[[phenocode_col]])
-        ))
-      
-      # Build targets with URL from manifest
-      if (!is.na(url_col)) {
-        targets <- mani %>%
-          filter(phenocode_std %in% fg_endpoints_clean) %>%
-          transmute(
-            phenocode = phenocode_std,
-            url = .data[[url_col]]
-          ) %>%
-          distinct()
-      } else {
-        # fallback: construct standard R12 path
-        targets <- mani %>%
-          filter(phenocode_std %in% fg_endpoints_clean) %>%
-          transmute(
-            phenocode = phenocode_std,
-            url = paste0(
-              "https://storage.googleapis.com/finngen-public-data-r12/summary_stats/",
-              phenocode_std, ".gz"
-            )
-          ) %>%
-          distinct()
-      }
-      
-      # Read each summary stats and extract n_cases / n_controls
-      read_remote_gz <- function(url) {
-        tryCatch(
-          data.table::fread(url, nThread = max(1, parallel::detectCores()-1), showProgress = FALSE),
-          error = function(e) {
-            log_warn("Failed to read", basename(url))
-            NULL
-          }
-        )
-      }
-      
-      get_sizes <- function(ep, url) {
-        dt <- read_remote_gz(url)
-        if (is.null(dt) || !nrow(dt)) return(tibble(outcome = ep, Cases = NA_integer_, Controls = NA_integer_))
-        
-        # be tolerant to naming variants
-        ncase_col <- c("n_cases","ncase","N_cases"); ncase_col <- ncase_col[ncase_col %in% names(dt)][1]
-        nctrl_col <- c("n_controls","ncontrol","N_controls"); nctrl_col <- nctrl_col[nctrl_col %in% names(dt)][1]
-        
-        nc <- if (!is.na(ncase_col)) suppressWarnings(max(dt[[ncase_col]], na.rm = TRUE)) else NA
-        nt <- if (!is.na(nctrl_col)) suppressWarnings(max(dt[[nctrl_col]], na.rm = TRUE)) else NA
-        
-        if (!is.finite(nc)) nc <- NA_integer_
-        if (!is.finite(nt)) nt <- NA_integer_
-        
-        tibble(outcome = ep, Cases = as.integer(nc), Controls = as.integer(nt))
-      }
-      
-      # Try to get FinnGen sample sizes (with error handling)
-      if (nrow(targets) > 0) {
-        fg_sizes <- tryCatch({
-          purrr::map2_dfr(targets$phenocode, targets$url, get_sizes)
-        }, error = function(e) {
-          log_warn("Error downloading FinnGen data, using NA values")
-          data.frame(outcome = character(0), Cases = integer(0), Controls = integer(0))
-        })
-        
-        # Join back to preg_summary (add _filtered suffix back)
-        if (nrow(fg_sizes) > 0) {
-          fg_sizes_filtered <- fg_sizes %>%
-            mutate(outcome_filtered = paste0(outcome, "_filtered"))
-          
-          preg_summary <- preg_summary %>%
-            left_join(fg_sizes_filtered, by = c("outcome" = "outcome_filtered")) %>%
-            mutate(
-              Cases    = dplyr::coalesce(Cases.y, Cases.x),
-              Controls = dplyr::coalesce(Controls.y, Controls.x),
-              `N total` = ifelse(!is.na(Cases) & !is.na(Controls), Cases + Controls, `N total`)
-            ) %>%
-            select(-Cases.x, -Controls.x, -Cases.y, -Controls.y)
-        }
-      }
-    }
-  }
-}
-
-# ---- Add known sample sizes for MR-PREG outcomes ----
-# Extract case/control info where available from the harmonised data
-case_control_info <- dat %>%
-  filter(!is.na(ncase.outcome) | !is.na(ncontrol.outcome)) %>%
-  group_by(outcome) %>%
-  summarise(
-    Cases_extracted = first(ncase.outcome),
-    Controls_extracted = first(ncontrol.outcome),
-    .groups = "drop"
-  )
-
-preg_summary <- preg_summary %>%
-  left_join(case_control_info, by = "outcome") %>%
-  mutate(
-    Cases = dplyr::coalesce(Cases, Cases_extracted),
-    Controls = dplyr::coalesce(Controls, Controls_extracted),
-    `N total` = ifelse(!is.na(Cases) & !is.na(Controls) & is.na(`N total`), 
-                       Cases + Controls, `N total`)
-  ) %>%
-  select(-Cases_extracted, -Controls_extracted)
-
-# ---- Combine & tidy ----
 table1_preg <- preg_summary %>%
-  select(outcome, Source, `No. SNPs`, `N total`, Cases, Controls) %>%
-  rename(Outcome = outcome) %>%
-  mutate(Outcome = dplyr::recode(Outcome, !!!outcome_labels)) %>%
-  arrange(Source, Outcome)
+  dplyr::mutate(
+    Outcome_label = dplyr::recode(outcome, !!!outcome_labels, .default = outcome)
+  ) %>%
+  dplyr::select(
+    Source,
+    Outcome = Outcome_label,
+    `No. SNPs`,
+    `N total`,
+    Cases,
+    Controls
+  ) %>%
+  dplyr::arrange(Source, Outcome)
 
-# ---- Save & preview ----
-table1_file <- file.path(PATHS$results, "Table1_pregnancy_sample_sizes.csv")
-write.csv(table1_preg, table1_file, row.names = FALSE)
-log_info("Table 1 saved:", table1_file)
+manual_sizes <- tibble::tribble(
+  ~Source,             ~Outcome,                             ~`N total`, ~Cases,  ~Controls,
+  "Westergaard (PPH)", "Antepartum bleeding",                  331792L,     3236L,   328556L,
+  "Westergaard (PPH)", "Early bleeding (live birth)",          331792L,     6356L,   325436L,
+  "Westergaard (PPH)", "Early bleeding (any outcome)",         331792L,    28898L,   302894L,
+  "Westergaard (PPH)", "PPH due to atony",                     274857L,    13048L,   261809L,
+  "Westergaard (PPH)", "PPH due to retained placenta",         272683L,     6256L,   266427L,
+  "Westergaard (PPH)", "Postpartum hemorrhage",                331792L,    21521L,   310271L
+)
+
+table1_preg <- table1_preg %>%
+  dplyr::left_join(
+    manual_sizes,
+    by = c("Source", "Outcome"),
+    suffix = c("", ".manual")
+  ) %>%
+  dplyr::mutate(
+    `N total` = dplyr::coalesce(`N total`, `N total.manual`),
+    Cases     = dplyr::coalesce(Cases,     Cases.manual),
+    Controls  = dplyr::coalesce(Controls,  Controls.manual)
+  ) %>%
+  dplyr::select(Source, Outcome, `No. SNPs`, `N total`, Cases, Controls) %>%
+  dplyr::arrange(Source, Outcome)
+
+table1_preg_file <- file.path(tables_dir, "Table2_pregnancy_sample_sizes.csv")
+write.csv(table1_preg, table1_preg_file, row.names = FALSE)
+log_info("Table 2 saved: ", table1_preg_file)
 
 if (requireNamespace("knitr", quietly = TRUE)) {
-  cat("\n=== TABLE 1: SAMPLE SIZES ===\n")
-  print(knitr::kable(table1_preg, align = "lrrrr", caption = "Table 1. Sample sizes and SNP counts for pregnancy outcomes"))
-} else {
-  print(table1_preg, n = nrow(table1_preg))
+  cat("\n=== TABLE 2: SAMPLE SIZES ===\n")
+  print(knitr::kable(
+    table1_preg,
+    align   = "llrrrr",
+    caption = "Table 2. Sample sizes and SNP counts for pregnancy outcomes."
+  ))
 }
 
-###############################################
-# Table 2. Primary Mendelian Randomization (IVW) Estimates
-# for the Association of Genetically Predicted Endometriosis
-# With Pregnancy Outcomes
-###############################################
+###############################################################################
+# 5) MAIN TABLE 3 — PRIMARY IVW MR ESTIMATES (FDR-CORRECTED)
+###############################################################################
 
-# Load IVW results
-ivw_file <- file.path(PATHS$results, "ivw_results.csv")
-if (!file.exists(ivw_file)) {
-  log_warn("IVW results not found. Please run MR analysis first.")
-} else {
-  log_info("Creating Table 2: Primary IVW estimates...")
-  
-  # Load results
-  ivw_res <- read.csv(ivw_file, stringsAsFactors = FALSE)
-  
-  # Format and rename for publication
-  ivw_tab_pub <- ivw_res %>%
-    filter(method == "Inverse variance weighted") %>%
-    mutate(
-      `Data source` = case_when(
-        grepl("^finngen_R12_", outcome) ~ "FinnGen R12",
-        grepl("Postpartum|Antepartum|Early_bleeding", outcome) ~ "Westergaard (PPH)",
-        TRUE ~ "MR-PREG"
-      ),
-      OR_val = exp(b),
-      CI_low = exp(b - 1.96 * se),
-      CI_high = exp(b + 1.96 * se),
-      `OR` = sprintf("%.2f", OR_val),
-      `95% CI` = sprintf("(%.2f–%.2f)", CI_low, CI_high),
-      `P` = case_when(
-        pval < 0.001 ~ sprintf("%.2e", pval),
-        pval < 0.01 ~ sprintf("%.3f", pval),
-        TRUE ~ sprintf("%.2f", pval)
-      ),
-      `P (Bonferroni)` = ifelse(pval * n() < 0.05, "<0.05", sprintf("%.2e", pval * n())),
-      `Q (FDR)` = sprintf("%.2e", p.adjust(pval, method = "fdr")),
-      `Significance` = case_when(
-        pval < 0.05 & pval * n() < 0.05 ~ "Yes (Bonf)",
-        pval < 0.05 ~ "Yes",
-        TRUE ~ "No"
-      ),
-      Outcome = recode(outcome, !!!outcome_labels)
-    ) %>%
-    select(
-      `Data source`, Outcome, `No. SNPs` = nsnp, `OR`, `95% CI`, `P`, `P (Bonferroni)`, `Q (FDR)`, `Significance`
-    ) %>%
-    arrange(`Data source`, Outcome)
-  
-  # Preview
-  cat("\n=== TABLE 2: PRIMARY IVW ESTIMATES ===\n")
-  if (requireNamespace("knitr", quietly = TRUE)) {
-    print(knitr::kable(ivw_tab_pub, align = "llrrrrrrr", caption = "Table 2. Primary IVW Estimates"))
-  } else {
-    print(as.data.frame(ivw_tab_pub), row.names = FALSE)
-  }
-  
-  # Export
-  if (requireNamespace("openxlsx", quietly = TRUE)) {
-    xlsx_file <- file.path(PATHS$results, "ivw_results_pregnancy_table.xlsx")
-    write.xlsx(ivw_tab_pub, file = xlsx_file, overwrite = TRUE)
-    log_info("Table 2 (Excel) saved:", xlsx_file)
-  }
-  
-  csv_file <- file.path(PATHS$results, "ivw_results_pregnancy_table.csv")
-  write.csv(ivw_tab_pub, csv_file, row.names = FALSE)
-  log_info("Table 2 (CSV) saved:", csv_file)
+log_info("Creating Table 3: primary IVW MR estimates with FDR correction...")
 
-  ###############################################
-  # Table 3. Sensitivity Analyses Summary (IVW / WM / Egger)
-  ###############################################
-  
-  # Load other MR results
-  wm_file <- file.path(PATHS$results, "weighted_median_results.csv")
-  egger_file <- file.path(PATHS$results, "egger_results.csv")
-  
-  if (file.exists(wm_file) && file.exists(egger_file)) {
-    log_info("Creating Table 3: Sensitivity analyses summary...")
-    
-    wm_res <- read.csv(wm_file, stringsAsFactors = FALSE)
-    egger_res <- read.csv(egger_file, stringsAsFactors = FALSE)
-    
-    # Helper formatters
-    fmt_or   <- function(b) sprintf("%.2f", exp(b))
-    fmt_ci   <- function(b,se) paste0(sprintf("%.2f", exp(b - 1.96*se)),
-                                      "–",
-                                      sprintf("%.2f", exp(b + 1.96*se)))
-    fmt_p    <- function(p)  {
-      case_when(
-        p < 0.001 ~ formatC(p, format = "e", digits = 2),
-        p < 0.01 ~ sprintf("%.3f", p),
-        TRUE ~ sprintf("%.2f", p)
+ivw_res <- load_mr_results("ivw_results") %>%
+  dplyr::filter(
+    outcome %in% vars_keep,
+    method == "Inverse variance weighted"
+  ) %>%
+  dplyr::left_join(type_df, by = "outcome") %>%
+  dplyr::mutate(
+    Outcome_label = dplyr::recode(outcome, !!!outcome_labels, .default = outcome),
+    `Data source` = label_source(outcome),
+    q_fdr         = p.adjust(pval, method = "fdr")
+  )
+
+table3_main <- ivw_res %>%
+  dplyr::mutate(
+    Effect_scale = if_else(Type == "Binary", "OR", "Beta"),
+    Estimate_val = if_else(Type == "Binary", exp(b), b),
+    CI_low_val   = if_else(
+      Type == "Binary",
+      exp(b - 1.96 * se),
+      b - 1.96 * se
+    ),
+    CI_high_val  = if_else(
+      Type == "Binary",
+      exp(b + 1.96 * se),
+      b + 1.96 * se
+    ),
+    `Estimate`   = if_else(
+      Type == "Binary",
+      sprintf("%.2f", Estimate_val),
+      sprintf("%.3f", Estimate_val)
+    ),
+    `95% CI`     = if_else(
+      Type == "Binary",
+      sprintf("(%.2f–%.2f)", CI_low_val, CI_high_val),
+      sprintf("(%.3f–%.3f)", CI_low_val, CI_high_val)
+    ),
+    `P-value` = fmt_p(pval),
+    `q (FDR)` = sprintf("%.3f", q_fdr)
+  ) %>%
+  dplyr::select(
+    `Data source`,
+    Outcome      = outcome,
+    Outcome_label,
+    Type,
+    Effect_scale,
+    `Estimate`,
+    `95% CI`,
+    `P-value`,
+    `q (FDR)`,
+    `No. SNPs` = nsnp
+  ) %>%
+  dplyr::arrange(`Data source`, Outcome_label)
+
+table3_file <- file.path(tables_dir, "Table3_IVW_FDR_main_results.csv")
+write.csv(table3_main, table3_file, row.names = FALSE)
+log_info("Table 3 (IVW main FDR) saved: ", table3_file)
+
+if (requireNamespace("knitr", quietly = TRUE)) {
+  cat("\n=== TABLE 3: PRIMARY IVW MR ESTIMATES WITH FDR CORRECTION ===\n")
+  print(knitr::kable(
+    table3_main,
+    align = c("l","l","l","l","l","r","r","r","r","r"),
+    caption = "Table 3. IVW Mendelian randomization estimates for genetic liability to endometriosis and pregnancy outcomes (FDR-corrected)."
+  ))
+}
+
+###############################################################################
+# 6) SUPPLEMENTARY TABLES 1A–C — DEFINITIONS OF PERINATAL OUTCOMES
+###############################################################################
+
+log_info("Creating Supplementary Tables 1A–C (definitions of perinatal outcomes)...")
+
+Supp_1A <- tibble::tribble(
+  ~`Binary outcomes`,                ~`Case definition`,                                                ~`Control definition`,                                        ~`Exclusion criteria`,                                                                                         ~`Contributing studies`,
+  "Pregnancy loss outcomes",         NA_character_,                                                    NA_character_,                                                NA_character_,                                                                                                 NA_character_,
+  "Miscarriage",                     "≥1 pregnancy loss before 20 gestational weeks",                  "No pregnancy loss",                                          "Multiple births",                                                                                             "ALSPAC, MoBa, UKB, FinnGen",
+  "Stillbirth",                      "≥1 pregnancy loss at or after 20 gestational weeks",             "No pregnancy loss",                                          "Multiple births",                                                                                             "ALSPAC, BiB, MoBa, UKB",
+  "Maternal morbidity outcomes",     NA_character_,                                                    NA_character_,                                                NA_character_,                                                                                                 NA_character_,
+  "GDM",                             "Diabetes mellitus diagnosed in pregnancy",                       "No GDM or pre-existing diabetes mellitus",                   "Pre-existing diabetes, multiple births, non-live births",                                                     "BiB, MoBa, UKB, GenDIP",
+  "Perinatal depression",            "Maternal depression during pregnancy and up to one year after birth", "No maternal depression",                               "Pre-existing depression, multiple births, non-live births",                                                   "ALSPAC, MoBa, UKB, PGC",
+  "Labour outcomes",                 NA_character_,                                                    NA_character_,                                                NA_character_,                                                                                                 NA_character_,
+  "Induction of labour",             "Artificial stimulation of uterine contractions",                 "No artificial stimulation of uterine contractions",         "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
+  "Prelabour rupture of membranes",  "Rupture of the amniotic sac before 37 gestational weeks",       "No rupture of the amniotic sac before 37 gestational weeks","Multiple births, non-live births",                                                                           "ALSPAC, MoBa, FinnGen",
+  "Caesarean section",               "Delivery by caesarean section",                                 "No delivery by caesarean section",                          "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB, FinnGen",
+  "Offspring birth outcomes",        NA_character_,                                                    NA_character_,                                                NA_character_,                                                                                                 NA_character_,
+  "LBW",                             "<2,500 g",                                                       "≥2,500 to 4,500 g",                                          "Multiple births, non-live births, PTBs (GA <37 weeks)",                                                      "ALSPAC, MoBa, UKB",
+  "HBW",                             ">4,500 g",                                                       "≥2,500 to 4,500 g",                                          "Multiple births, non-live births, PTBs (GA <37 weeks)",                                                      "ALSPAC, MoBa, UKB",
+  "Pre-term birth",                  "GA <37 weeks",                                                   "GA ≥37 to <42 weeks",                                       "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB, FinnGen, EGG",
+  "Post-term birth",                 "GA ≥42 weeks",                                                   "GA ≥37 to <42 weeks",                                       "Multiple births, non-live births, elective caesarean section, physician-induced labour",                      "ALSPAC, BiB, MoBa, UKB, FinnGen, EGG",
+  "SGA",                             "Birth weight <10th percentile for GA",                          "Birth weight ≥10th percentile for GA",                      "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
+  "LGA",                             "Birth weight >90th percentile for GA",                          "Birth weight ≤90th percentile for GA",                      "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
+  "Low Apgar score at 1 minute",     "<7 points",                                                      "≥7 points",                                                  "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa",
+  "Low Apgar score at 5 minutes",    "<7 points",                                                      "≥7 points",                                                  "Multiple births, non-live births",                                                                           "ALSPAC, MoBa",
+  "NICU admission",                  "Offspring admitted to the NICU",                                "Offspring not admitted to the NICU",                        "Multiple births, non-live births",                                                                           "ALSPAC, MoBa"
+)
+
+s1A_file <- file.path(tables_dir, "Supp_Table_1A_primary_perinatal_definitions.csv")
+write.csv(Supp_1A, s1A_file, row.names = FALSE)
+log_info("Supplementary Table 1A saved: ", s1A_file)
+
+Supp_1B <- tibble::tribble(
+  ~`Binary outcomes`,          ~`Case definition`,                                      ~`Control definition`,                   ~`Exclusion criteria`,                                                                                         ~`Contributing studies`,
+  "Pregnancy loss outcomes",   NA_character_,                                          NA_character_,                          NA_character_,                                                                                                 NA_character_,
+  "Sporadic miscarriage",      "1–2 pregnancy loss before 20 gestational weeks",       "No pregnancy loss",                    "Age at menarche <9 or >17, underlying conditions leading to miscarriage (see supplement), multiple births",   "ALSPAC, MoBa, UKB",
+  "Recurrent miscarriage",     "≥3 pregnancy loss before 20 gestational weeks",        "No pregnancy loss",                    "Age at menarche <9 or >17, underlying conditions leading to miscarriage (see supplement), multiple births",   "ALSPAC, MoBa, UKB, FinnGen",
+  "Labour outcomes",           NA_character_,                                          NA_character_,                          NA_character_,                                                                                                 NA_character_,
+  "Emergency caesarean section","Delivery by emergency caesarean section",            "No delivery by caesarean section",     "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
+  "Elective caesarean section","Delivery by elective caesarean section",               "No delivery by caesarean section",     "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
+  "Offspring birth outcomes",  NA_character_,                                          NA_character_,                          NA_character_,                                                                                                 NA_character_,
+  "Very PTB",                  "GA <34 weeks",                                         "GA ≥37 to <42 weeks",                  "Multiple births, non-live births, elective caesarean section, physician-induced labour",                      "ALSPAC, BiB, MoBa, UKB",
+  "Spontaneous PTB",           "GA <37 weeks",                                         "GA ≥37 to <42 weeks",                  "Multiple births, non-live births, elective caesarean section, physician-induced labour",                      "ALSPAC, BiB, MoBa, UKB"
+)
+
+s1B_file <- file.path(tables_dir, "Supp_Table_1B_secondary_binary_perinatal_definitions.csv")
+write.csv(Supp_1B, s1B_file, row.names = FALSE)
+log_info("Supplementary Table 1B saved: ", s1B_file)
+
+Supp_1C <- tibble::tribble(
+  ~`Continuous outcomes`,      ~Units,       ~`Exclusion criteria`,                                                                                                    ~`Contributing studies`,
+  "Offspring birth outcomes",  NA_character_,  NA_character_,                                                                                                         NA_character_,
+  "Birth weight*",             "SD",         "Multiple births, non-live births, extreme birth weight (>5 SD from sex-specific study mean), PTBs (GA <37 weeks)",      "ALSPAC, BiB, MoBa, UKB",
+  "Gestational age*",          "Weeks",      "Multiple births, non-live births",                                                                                      "ALSPAC, BiB, MoBa, UKB, EGG"
+)
+
+s1C_file <- file.path(tables_dir, "Supp_Table_1C_continuous_perinatal_definitions.csv")
+write.csv(Supp_1C, s1C_file, row.names = FALSE)
+log_info("Supplementary Table 1C saved: ", s1C_file)
+
+###############################################################################
+# 7) TABLE S1 — HARMONISED DATASET SUMMARY (SNPs PER OUTCOME)
+###############################################################################
+
+log_info("Creating Table S1: harmonised dataset summary...")
+
+Table_S1 <- dat %>%
+  dplyr::filter(SNP %in% snp_whitelist) %>%
+  dplyr::group_by(outcome) %>%
+  dplyr::summarise(
+    `No. SNPs` = dplyr::n_distinct(SNP),
+    .groups    = "drop"
+  ) %>%
+  dplyr::mutate(
+    Outcome_label = dplyr::recode(outcome, !!!outcome_labels, .default = outcome),
+    `Data source` = label_source(outcome)
+  ) %>%
+  dplyr::left_join(type_df, by = "outcome") %>%
+  dplyr::mutate(
+    Type = dplyr::if_else(is.na(Type), "Binary", Type)
+  ) %>%
+  dplyr::select(
+    `Data source`,
+    Outcome       = outcome,
+    Outcome_label,
+    Type,
+    `No. SNPs`
+  ) %>%
+  dplyr::arrange(`Data source`, Outcome_label)
+
+s1_file <- file.path(tables_dir, "Table_S1_harmonised_summary.csv")
+write.csv(Table_S1, s1_file, row.names = FALSE)
+log_info("Table S1 (harmonised summary) saved: ", s1_file)
+
+###############################################################################
+# 8) SUPPLEMENTARY TABLE 2 — GENETIC INSTRUMENTS FOR ENDOMETRIOSIS
+###############################################################################
+
+log_info("Creating Supplementary Table 2: endometriosis instruments...")
+
+if (!exists("coalesce_into")) {
+  coalesce_into <- function(df, new_name, candidates) {
+    df %>%
+      dplyr::mutate(
+        !!new_name := dplyr::coalesce(!!!dplyr::select(., dplyr::any_of(candidates)))
       )
-    }
-    
-    # Prepare method-specific slim tables
-    ivw_slim <- ivw_res %>%
-      transmute(
-        outcome,
-        `Data source` = case_when(
-          grepl("^finngen_R12_", outcome) ~ "FinnGen R12",
-          grepl("Postpartum|Antepartum|Early_bleeding", outcome) ~ "Westergaard (PPH)",
-          TRUE ~ "MR-PREG"
-        ),
-        SNPs = nsnp,
-        IVW_OR   = fmt_or(b),
-        IVW_CI   = fmt_ci(b, se),
-        IVW_P    = fmt_p(pval)
-      )
-    
-    wm_slim <- wm_res %>%
-      transmute(
-        outcome,
-        WM_OR    = fmt_or(b),
-        WM_CI    = fmt_ci(b, se),
-        WM_P     = fmt_p(pval)
-      )
-    
-    egger_slim <- egger_res %>%
-      transmute(
-        outcome,
-        Egger_OR = fmt_or(b),
-        Egger_CI = fmt_ci(b, se),
-        Egger_P  = fmt_p(pval)
-      )
-    
-    # Join all and label outcomes
-    sens_tab <- ivw_slim %>%
-      left_join(wm_slim,    by = "outcome") %>%
-      left_join(egger_slim, by = "outcome") %>%
-      mutate(
-        Outcome = recode(outcome, !!!outcome_labels)
-      ) %>%
-      select(`Data source`, Outcome, SNPs,
-             `IVW OR` = IVW_OR, `IVW 95% CI` = IVW_CI, `IVW P` = IVW_P,
-             `WM OR`  = WM_OR,  `WM 95% CI`  = WM_CI,  `WM P`  = WM_P,
-             `MR-Egger OR` = Egger_OR, `MR-Egger 95% CI` = Egger_CI, `MR-Egger P` = Egger_P) %>%
-      arrange(`Data source`, Outcome)
-    
-    # Print to console
-    sens_tab <- tibble::as_tibble(sens_tab)
-    cat("\n=== TABLE 3: SENSITIVITY ANALYSES (IVW, Weighted Median, MR-Egger) ===\n")
-    if (requireNamespace("knitr", quietly = TRUE)) {
-      print(knitr::kable(sens_tab, align = "lllrrrrrrrr", caption = "Table 3. Sensitivity Analyses Summary"))
-    } else {
-      print(sens_tab, n = Inf, width = Inf, na.print = "")
-    }
-    
-    # Export to Excel and CSV
-    if (requireNamespace("openxlsx", quietly = TRUE)) {
-      xlsx_sens <- file.path(PATHS$results, "mr_sensitivity_pregnancy_summary.xlsx")
-      write.xlsx(sens_tab, xlsx_sens, asTable = TRUE)
-      log_info("Table 3 (Excel) saved:", xlsx_sens)
-    }
-    
-    csv_sens <- file.path(PATHS$results, "mr_sensitivity_pregnancy_summary.csv")
-    write.csv(sens_tab, csv_sens, row.names = FALSE)
-    log_info("Table 3 (CSV) saved:", csv_sens)
-  } else {
-    log_warn("Weighted median or Egger results not found. Skipping sensitivity table.")
   }
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Table 4. Comprehensive MR Results Summary
-# ─────────────────────────────────────────────────────────────────────────────
+if (!exists("clumped2")) {
+  stop("Object 'clumped2' is not available. Please load the clumped instrument dataset (clumped2) before running this script.")
+}
 
-if (exists("ivw_res")) {
-  log_info("Creating Table 4: Comprehensive results summary...")
-  
-  # Create comprehensive results summary
-  comprehensive_summary <- ivw_res %>%
-    filter(method == "Inverse variance weighted") %>%
-    mutate(
-      `Data source` = case_when(
-        grepl("^finngen_R12_", outcome) ~ "FinnGen R12",
-        grepl("Postpartum|Antepartum|Early_bleeding", outcome) ~ "Westergaard (PPH)",
-        TRUE ~ "MR-PREG"
-      ),
-      OR = exp(b),
-      CI_lower = exp(b - 1.96 * se),
-      CI_upper = exp(b + 1.96 * se),
-      # Significance levels
-      Significance_level = case_when(
-        pval < 0.001 ~ "p < 0.001",
-        pval < 0.01 ~ "p < 0.01",
-        pval < 0.05 ~ "p < 0.05",
-        pval < 0.10 ~ "p < 0.10",
-        TRUE ~ "p ≥ 0.10"
-      ),
-      # Effect size classification
-      Effect_magnitude = case_when(
-        OR > 2.0 ~ "Large increase (OR > 2.0)",
-        OR > 1.5 ~ "Moderate increase (1.5 < OR ≤ 2.0)",
-        OR > 1.2 ~ "Small increase (1.2 < OR ≤ 1.5)",
-        OR > 1.05 ~ "Minimal increase (1.05 < OR ≤ 1.2)",
-        OR >= 0.95 ~ "No effect (0.95 ≤ OR ≤ 1.05)",
-        OR >= 0.83 ~ "Minimal decrease (0.83 ≤ OR < 0.95)",
-        OR >= 0.67 ~ "Small decrease (0.67 ≤ OR < 0.83)",
-        OR >= 0.50 ~ "Moderate decrease (0.50 ≤ OR < 0.67)",
-        TRUE ~ "Large decrease (OR < 0.50)"
-      ),
-      # Clinical interpretation
-      Clinical_relevance = case_when(
-        pval < 0.05 & (OR > 1.2 | OR < 0.83) ~ "Clinically significant",
-        pval < 0.05 ~ "Statistically significant",
-        pval < 0.10 ~ "Suggestive evidence",
-        TRUE ~ "No evidence"
-      ),
-      Outcome_label = recode(outcome, !!!outcome_labels)
-    ) %>%
-    select(
-      `Data source`,
-      Outcome = outcome,
-      Outcome_label,
-      `N SNPs` = nsnp,
-      Beta = b,
-      SE = se,
-      OR,
-      `CI lower` = CI_lower,
-      `CI upper` = CI_upper,
-      `P value` = pval,
-      Significance_level,
-      Effect_magnitude,
-      Clinical_relevance
-    ) %>%
-    arrange(`Data source`, `P value`)
-  
-  # Save comprehensive summary
-  comp_file <- file.path(PATHS$results, "comprehensive_mr_pregnancy_summary.csv")
-  write.csv(comprehensive_summary, comp_file, row.names = FALSE)
-  log_info("Table 4 saved:", comp_file)
-  
-  # Create significance breakdown
-  sig_breakdown <- comprehensive_summary %>%
-    group_by(`Data source`, Significance_level) %>%
-    summarise(N_outcomes = n(), .groups = "drop") %>%
-    arrange(`Data source`, Significance_level)
-  
-  # Create effect size breakdown
-  effect_breakdown <- comprehensive_summary %>%
-    group_by(`Data source`, Effect_magnitude) %>%
-    summarise(N_outcomes = n(), Mean_OR = round(mean(OR), 2), .groups = "drop") %>%
-    arrange(`Data source`, desc(Mean_OR))
-  
-  # Save breakdowns
-  write.csv(sig_breakdown, file.path(PATHS$results, "significance_breakdown.csv"), row.names = FALSE)
-  write.csv(effect_breakdown, file.path(PATHS$results, "effect_size_breakdown.csv"), row.names = FALSE)
-  
-  # Print summary statistics to console
-  cat("\n=== MR ANALYSIS OVERVIEW ===\n")
-  cat("Total outcomes analyzed:", nrow(comprehensive_summary), "\n")
-  
-  # Count significant results
-  sig_results <- comprehensive_summary %>% filter(`P value` < 0.05)
-  cat("Significant associations (p < 0.05):", nrow(sig_results), "\n")
-  
-  # Results by data source
-  source_summary <- comprehensive_summary %>%
-    group_by(`Data source`) %>%
-    summarise(
-      Total = n(),
-      Significant = sum(`P value` < 0.05),
-      `% Significant` = round(100 * Significant / Total, 1),
-      .groups = "drop"
+clumped2 <- clumped2 %>%
+  coalesce_into("beta.exposure",       c("beta.exposure",       "beta.exposure.y",       "beta.exposure.x")) %>%
+  coalesce_into("se.exposure",         c("se.exposure",         "se.exposure.y",         "se.exposure.x")) %>%
+  coalesce_into("eaf.exposure",        c("eaf.exposure",        "eaf.exposure.y",        "eaf.exposure.x")) %>%
+  coalesce_into("pval.exposure",       c("pval.exposure",       "pval.exposure.y",       "pval.exposure.x")) %>%
+  coalesce_into("samplesize.exposure", c("samplesize.exposure", "samplesize.exposure.y", "samplesize.exposure.x")) %>%
+  coalesce_into("effect_allele.exposure",
+                c("effect_allele.exposure", "effect_allele.exposure.y", "effect_allele.exposure.x", "effect_allele")) %>%
+  coalesce_into("other_allele.exposure",
+                c("other_allele.exposure",  "other_allele.exposure.y",  "other_allele.exposure.x",  "other_allele"))
+
+if (!all(c("R2_i", "F_i") %in% names(clumped2))) {
+  clumped2 <- clumped2 %>%
+    dplyr::mutate(
+      R2_i = 2 * eaf.exposure * (1 - eaf.exposure) * beta.exposure^2,
+      F_i  = R2_i * (samplesize.exposure - 2) / (1 - R2_i)
     )
-  
-  cat("\n--- Results by Data Source ---\n")
-  print(source_summary)
-  
-  # Top 10 most significant results
-  top_results <- comprehensive_summary %>%
-    arrange(`P value`) %>%
-    head(10) %>%
-    select(`Data source`, Outcome_label, OR, `P value`, Effect_magnitude)
-  
-  cat("\n--- Top 10 Most Significant Associations ---\n")
-  print(top_results, n = 10)
-  
-  # Publication-ready significant results table
-  publication_significant <- comprehensive_summary %>%
-    filter(`P value` < 0.05) %>%
-    mutate(
-      `OR (95% CI)` = sprintf("%.2f (%.2f–%.2f)", OR, `CI lower`, `CI upper`),
-      `P-value` = case_when(
-        `P value` < 0.001 ~ "<0.001",
-        `P value` < 0.01 ~ sprintf("%.3f", `P value`),
-        TRUE ~ sprintf("%.2f", `P value`)
-      )
-    ) %>%
-    select(
-      `Data Source` = `Data source`,
-      Outcome = Outcome_label,
-      `SNPs` = `N SNPs`,
-      `OR (95% CI)`,
-      `P-value`,
-      `Effect Classification` = Effect_magnitude,
-      `Clinical Interpretation` = Clinical_relevance
-    ) %>%
-    arrange(`Data Source`, `P-value`)
-  
-  # Save publication table
-  pub_file <- file.path(PATHS$results, "significant_associations_publication_ready.csv")
-  write.csv(publication_significant, pub_file, row.names = FALSE)
-  
-  if (requireNamespace("openxlsx", quietly = TRUE)) {
-    pub_xlsx <- file.path(PATHS$results, "significant_associations_publication_ready.xlsx")
-    write.xlsx(publication_significant, pub_xlsx, overwrite = TRUE)
-    log_info("Publication table (Excel) saved:", pub_xlsx)
-  }
-  
-  log_info("Publication table (CSV) saved:", pub_file)
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Study-specific methodological notes
-# ─────────────────────────────────────────────────────────────────────────────
+supp_table2 <- clumped2 %>%
+  dplyr::select(
+    SNP,
+    Beta            = beta.exposure,
+    SE              = se.exposure,
+    `P-value`       = pval.exposure,
+    `Effect allele` = effect_allele.exposure,
+    `Other allele`  = other_allele.exposure,
+    EAF             = eaf.exposure,
+    r2              = R2_i,
+    F               = F_i
+  ) %>%
+  dplyr::mutate(
+    Beta    = round(Beta, 4),
+    SE      = round(SE, 4),
+    EAF     = round(EAF, 4),
+    r2      = signif(r2, 3),
+    F       = round(F, 2),
+    `P-value` = formatC(`P-value`, format = "e", digits = 2)
+  )
 
-cat("\n=== METHODOLOGICAL NOTES FOR ENDOMETRIOSIS → PREGNANCY OUTCOMES ===\n")
-cat("Study Design: Two-sample Mendelian Randomization\n")
-cat("Exposure: Endometriosis (41 genome-wide significant SNPs from Rahmioglu et al.)\n")
-cat("Outcomes: 49 pregnancy and reproductive outcomes from multiple sources\n")
-cat("\nData Sources:\n")
-cat("- MR-PREG: Comprehensive pregnancy outcomes consortium\n")
-cat("- FinnGen R12: Finnish population-based biobank\n") 
-cat("- Westergaard (PPH): Postpartum hemorrhage subtypes\n")
-cat("\nMR Methods:\n")
-cat("- Primary: Inverse variance weighted (IVW)\n")
-cat("- Sensitivity: Weighted median, MR-Egger\n")
-cat("- Multiple testing correction: Bonferroni and FDR\n")
-cat("==========================================\n")
+supp2_file <- file.path(tables_dir, "Supplementary_Table_2_Endometriosis_Instruments.xlsx")
+openxlsx::write.xlsx(
+  supp_table2,
+  supp2_file,
+  rowNames = FALSE
+)
+log_info("Supplementary Table 2 saved: ", supp2_file)
 
-log_info("=== TABLE GENERATION COMPLETE ===")
-log_info("Tables saved to:", PATHS$results)
-log_info("\nKey files generated:")
-log_info("- Table1_pregnancy_sample_sizes.csv")
-log_info("- ivw_results_pregnancy_table.xlsx/.csv")
-log_info("- mr_sensitivity_pregnancy_summary.xlsx/.csv")
-log_info("- comprehensive_mr_pregnancy_summary.csv")
-log_info("- significant_associations_publication_ready.xlsx/.csv")
+###############################################################################
+# 9) TABLE S3 — FULL MR RESULTS FOR ALL METHODS
+###############################################################################
+
+log_info("Creating Table S3: all MR methods results...")
+
+all_res <- load_mr_results("all_mr_methods")
+
+label_group <- function(outcome, outcome_label) {
+  placental_disorders <- c(
+    "finngen_R12_O15_PLAC_PRAEVIA",
+    "finngen_R12_O15_PLAC_DISORD",
+    "finngen_R12_O15_PLAC_PREMAT_SEPAR"
+  )
+  
+  hdp_outcomes <- c(
+    "hdp_subsamp",
+    "gh_subsamp",
+    "pe_subsamp"
+  )
+  
+  pregnancy_timing <- c(
+    "ga_all",
+    "ga_subsamp",
+    "pretb_all",
+    "vpretb_all",
+    "posttb_all"
+  )
+  
+  fetal_growth_bw <- c(
+    "hbw_all", "lbw_all", "sga",
+    "lga", "lga_all",
+    "zbw_all",
+    "bw_z", "bw_zscore", "bw_z_score",
+    "birthweight_z", "birth_weight_z"
+  )
+  
+  labour_delivery <- c(
+    "induction",
+    "rup_memb",
+    "cs",
+    "el_cs",
+    "em_cs"
+  )
+  
+  bleeding_haem <- c(
+    "Antepartum_bleeding",
+    "Early_bleeding_with_any_outcome",
+    "Early_bleeding_ending_in_live_birth",
+    "Postpartum_hemorrhage",
+    "Postpartum_hemorrhage_due_to_atony",
+    "Postpartum_hemorrhage_due_to_retained_placenta",
+    "antepartum_bleeding",
+    "ap_bleeding",
+    "pph_all",
+    "pph_atony",
+    "pph_retained_placenta",
+    "pph_other"
+  )
+  
+  maternal_metab_haem <- c(
+    "gdm_subsamp",
+    "anaemia_preg_all"
+  )
+  
+  maternal_mental <- c(
+    "depr_subsamp"
+  )
+  
+  neonatal_condition <- c(
+    "lowapgar1",
+    "lowapgar5",
+    "nicu",
+    "sb_subsamp"
+  )
+  
+  dplyr::case_when(
+    outcome %in% placental_disorders ~ "Placental disorders",
+    outcome %in% hdp_outcomes ~ "Hypertensive disorders of pregnancy",
+    outcome %in% pregnancy_timing |
+      grepl("^ga", outcome, ignore.case = TRUE) ~ "Pregnancy timing",
+    outcome %in% fetal_growth_bw |
+      outcome_label %in% c("Z-score birthweight") ~ "Fetal growth and birthweight",
+    outcome %in% labour_delivery ~ "Labour and delivery complications",
+    outcome %in% bleeding_haem |
+      outcome_label %in% c(
+        "Antepartum bleeding",
+        "PPH due to atony",
+        "PPH due to retained placenta",
+        "Postpartum hemorrhage"
+      ) ~ "Bleeding and haemorrhage",
+    outcome %in% maternal_metab_haem ~ "Maternal metabolic/haematologic complications",
+    outcome %in% maternal_mental |
+      outcome_label %in% c("Postpartum depression", "Perinatal depression") ~
+      "Maternal mental health",
+    outcome %in% neonatal_condition ~ "Neonatal condition at birth",
+    TRUE ~ "Other"
+  )
+}
+
+domain_outcomes <- c(
+  "finngen_R12_O15_PLAC_PRAEVIA",
+  "finngen_R12_O15_PLAC_DISORD",
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR",
+  "hdp_subsamp", "gh_subsamp", "pe_subsamp",
+  "ga_all", "ga_subsamp", "pretb_all", "vpretb_all", "posttb_all",
+  "hbw_all", "lbw_all", "sga",
+  "lga", "lga_all",
+  "zbw_all",
+  "bw_z", "bw_zscore", "bw_z_score",
+  "birthweight_z", "birth_weight_z",
+  "induction", "rup_memb", "cs", "el_cs", "em_cs",
+  "Antepartum_bleeding", "Early_bleeding_with_any_outcome", "Early_bleeding_ending_in_live_birth",
+  "Postpartum_hemorrhage", "Postpartum_hemorrhage_due_to_atony", "Postpartum_hemorrhage_due_to_retained_placenta",
+  "antepartum_bleeding", "ap_bleeding",
+  "pph_all", "pph_atony", "pph_retained_placenta", "pph_other",
+  "gdm_subsamp", "anaemia_preg_all",
+  "depr_subsamp",
+  "lowapgar1", "lowapgar5", "nicu", "sb_subsamp"
+)
+
+vars_domains <- union(vars_keep, domain_outcomes)
+
+has_exposure_source <- "exposure_source" %in% names(all_res)
+
+Table_S3 <- all_res %>%
+  dplyr::filter(outcome %in% vars_domains) %>%
+  dplyr::mutate(
+    Outcome    = dplyr::recode(outcome, !!!outcome_labels, .default = outcome),
+    group      = label_group(outcome, Outcome),
+    instrument = if (has_exposure_source) exposure_source else exposure,
+    exposure   = "Genetic liability to endometriosis",
+    type       = dplyr::if_else(outcome %in% continuous_outcomes, "continuous", "binary"),
+    priority   = "primary"
+  ) %>%
+  dplyr::select(
+    group,
+    instrument,
+    exposure,
+    Outcome,
+    method,
+    nsnp,
+    b,
+    se,
+    pval,
+    type,
+    priority
+  ) %>%
+  dplyr::arrange(group, Outcome, method)
+
+s3_file <- file.path(tables_dir, "Table_S3_all_MR_methods.csv")
+write.csv(Table_S3, s3_file, row.names = FALSE)
+log_info("Table S3 (all MR methods) saved: ", s3_file)
+
+###############################################################################
+# 10) TABLE S4 — HETEROGENEITY STATISTICS (COCHRAN'S Q, IVW ONLY)
+###############################################################################
+
+log_info("Creating Table S4: heterogeneity statistics (IVW only)...")
+
+dat_het <- data.table::fread(harm_file)
+dat_het <- dat_het[dat_het$outcome %in% vars_keep, , drop = FALSE]
+
+het_res <- TwoSampleMR::mr_heterogeneity(dat_het)
+
+Table_S4 <- het_res %>%
+  dplyr::filter(
+    outcome %in% vars_keep,
+    method %in% c("Inverse variance weighted", "IVW")
+  ) %>%
+  dplyr::mutate(
+    Outcome  = dplyr::recode(outcome, !!!outcome_labels, .default = outcome),
+    group    = label_group(outcome, Outcome),
+    exposure = "Genetic liability to endometriosis",
+    type     = dplyr::if_else(outcome %in% continuous_outcomes,
+                              "continuous", "binary"),
+    priority = "primary"
+  ) %>%
+  dplyr::select(
+    group,
+    exposure,
+    Outcome,
+    Q,
+    Q_df,
+    Q_pval,
+    type,
+    priority
+  ) %>%
+  dplyr::arrange(group, Outcome)
+
+s4_file <- file.path(tables_dir, "Table_S4_heterogeneity_IVW.csv")
+write.csv(Table_S4, s4_file, row.names = FALSE)
+log_info("Table S4 (heterogeneity, IVW) saved: ", s4_file)
+
+###############################################################################
+# 11) TABLE S5 — MR-EGGER INTERCEPT (HORIZONTAL PLEIOTROPY)
+###############################################################################
+
+log_info("Creating Table S5: MR-Egger intercept (pleiotropy)...")
+
+pleio_dat <- data.table::fread(harm_file)
+pleio_dat <- pleio_dat[pleio_dat$outcome %in% vars_keep, , drop = FALSE]
+
+egger_res <- TwoSampleMR::mr_pleiotropy_test(pleio_dat)
+
+Table_S5 <- egger_res %>%
+  dplyr::filter(outcome %in% vars_keep) %>%
+  dplyr::mutate(
+    outcome_code = outcome,
+    Outcome      = dplyr::recode(outcome_code, !!!outcome_labels, .default = outcome_code),
+    group        = label_group(outcome_code, Outcome),
+    exposure     = "Genetic liability to endometriosis",
+    type         = dplyr::if_else(outcome_code %in% continuous_outcomes,
+                                  "continuous", "binary"),
+    priority     = "primary"
+  ) %>%
+  dplyr::select(
+    group,
+    exposure,
+    Outcome,
+    egger_intercept,
+    se,
+    pval,
+    type,
+    priority
+  ) %>%
+  dplyr::arrange(group, Outcome)
+
+s5_file <- file.path(tables_dir, "Table_S5_egger_intercept.csv")
+write.csv(Table_S5, s5_file, row.names = FALSE)
+log_info("Table S5 (MR-Egger intercept) saved: ", s5_file)
+
+log_info("=== Table generation for endoMR-PREG completed successfully ===")

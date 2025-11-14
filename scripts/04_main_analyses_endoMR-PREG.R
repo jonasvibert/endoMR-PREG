@@ -1,15 +1,18 @@
 #!/usr/bin/env Rscript
 ###############################################################################
-# Two-Sample MR analysis
+# Script: 04_main_analyses_endoMR-PREG.R
+# Purpose: Two-sample MR analyses on harmonised pregnancy outcomes
 # Input  : results/harmonised_rahmioglu_bpo.csv
-# Output : CSVs and plots for IVW, Egger, WM, heterogeneity, pleiotropy, LOO,
-#          and cohort leave-one-out (results saved under results/)
+# Outputs: IVW, Egger, WM, all MR methods, with FDR correction,
+#          saved under results/
 ###############################################################################
 
-### 1) SETUP ####################################################################
-# Packages
-required_pkgs <- c("TwoSampleMR", "MRPRESSO", "dplyr", "ggplot2",
-                   "here", "readr", "data.table", "devtools")
+### 1) SETUP ###################################################################
+
+required_pkgs <- c(
+  "TwoSampleMR", "MRPRESSO", "dplyr", "ggplot2",
+  "here", "readr", "data.table", "devtools"
+)
 
 safe_install <- function(pkg) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
@@ -31,74 +34,113 @@ invisible(lapply(required_pkgs, safe_install))
 results_dir <- here::here("results")
 dir.create(results_dir, showWarnings = FALSE, recursive = TRUE)
 
-harm_file    <- here::here("results", "harmonised_rahmioglu_bpo.csv")
-# Kept for completeness (not used below but may be needed later)
-path_outcome <- here::here("data", "OUTCOME_MR-PREG", "stu_out_dat.txt")
+harm_file <- here::here("results", "harmonised_rahmioglu_bpo.csv")
 
-### 2) LOAD + RESTRICT OUTCOMES #################################################
-# Read harmonised dataset
+### 2) LOAD + RESTRICT OUTCOMES ################################################
+
 dat <- data.table::fread(harm_file)
 
-# Minimal sanity checks
 stopifnot(all(c("id.exposure", "beta.exposure", "beta.outcome") %in% colnames(dat)))
 stopifnot("outcome" %in% colnames(dat))
 
-# Dictionary of human-readable outcome names (exactly 29)
-outcome_labels <- c(
-  # Placental outcomes
-  finngen_R12_O15_PLAC_PRAEVIA                      = "Placenta praevia",
-  finngen_R12_O15_PLAC_DISORD                       = "Placental disorders",
-  finngen_R12_O15_PLAC_PREMAT_SEPAR                 = "Premature placental separation",
+# ---- 29 OUTCOMES RETENUS -----------------------------------------------------
+
+vars_keep <- c(
+  # Placenta & bleeding (9)
+  "Antepartum_bleeding",
+  "Early_bleeding_with_any_outcome",
+  "Early_bleeding_ending_in_live_birth",
+  "Postpartum_hemorrhage",
+  "Postpartum_hemorrhage_due_to_atony",
+  "Postpartum_hemorrhage_due_to_retained_placenta",
+  "finngen_R12_O15_PLAC_PRAEVIA",
+  "finngen_R12_O15_PLAC_DISORD",
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR",
   
-  # Caesarean delivery
-  el_cs                                            = "Elective caesarean section",
-  em_cs                                            = "Emergency caesarean section",
-  cs                                               = "Caesarean section",
+  # Membranes
+  "rup_memb",
   
-  # Apgar scores
-  lowapgar1                                        = "Low Apgar score at 1 min",
-  lowapgar5                                        = "Low Apgar score at 5 min",
+  # Preterm birth (2)
+  "pretb_all",
+  "vpretb_all",
   
-  # Labor and delivery complications
-  rup_memb                                         = "Premature rupture of membranes",
-  induction                                        = "Labour induction",
+  # Growth / GA / weight (7)
+  "ga_all",
+  "ga_subsamp",
+  "sga",
+  "lbw_all",
+  "hbw_all",
+  "lga",
+  "zbw_all",
   
-  # Gestational age and timing
-  ga_all                                           = "Gestational age",
-  pretb_all                                        = "Preterm birth (any)",
-  vpretb_all                                       = "Very preterm birth",
-  posttb_all                                       = "Post-term birth",
+  # Neonatal/Apgar (3)
+  "lowapgar1",
+  "lowapgar5",
+  "nicu",
   
-  # Birth weight outcomes
-  hbw_all                                          = "High birthweight (>4000g)",
-  lbw_all                                          = "Low birthweight (<2500g)",
-  sga                                              = "Small for gestational age",
+  # Maternal complications (5)
+  "anaemia_preg_all",
+  "gdm_subsamp",
+  "gh_subsamp",
+  "hdp_subsamp",
+  "pe_subsamp",
   
-  # Maternal health
-  depr_subsamp                                     = "Postpartum Depression",
-  anaemia_preg_all                                 = "Pregnancy anemia",
-  
-  # Pregnancy complications
-  gdm_subsamp                                      = "Gestational diabetes mellitus",
-  hdp_subsamp                                      = "Hypertensive disorders of pregnancy",
-  gh_subsamp                                       = "Gestational hypertension",
-  pe_subsamp                                       = "Preeclampsia",
-  
-  # Neonatal outcomes
-  nicu                                             = "NICU admission",
-  sb_subsamp                                       = "Stillbirth",
-  
-  # Hemorrhage and bleeding
-  Antepartum_bleeding_filtered                     = "Antepartum bleeding",
-  Postpartum_hemorrhage_filtered                   = "Postpartum hemorrhage",
-  Postpartum_hemorrhage_due_to_atony_filtered      = "PPH due to atony",
-  Postpartum_hemorrhage_due_to_retained_placenta_filtered = "PPH due to retained placenta"
+  # Other obstetric ≥20 SA (1)
+  "induction",
+  "posttb_all"
 )
 
-# Restrict to the 29 target outcomes only
-dat <- dat[dat$outcome %in% names(outcome_labels), , drop = FALSE]
+# ---- Labels ---------------------------------------------------------------
 
-# Attach readable labels
+outcome_labels <- c(
+  # Placenta & bleeding
+  Antepartum_bleeding                       = "Antepartum bleeding",
+  Early_bleeding_with_any_outcome           = "Early bleeding (any outcome)",
+  Early_bleeding_ending_in_live_birth       = "Early bleeding (live birth)",
+  Postpartum_hemorrhage                     = "Postpartum hemorrhage",
+  Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
+  Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
+  finngen_R12_O15_PLAC_PRAEVIA              = "Placenta praevia",
+  finngen_R12_O15_PLAC_DISORD               = "Placental disorders",
+  finngen_R12_O15_PLAC_PREMAT_SEPAR         = "Premature placental separation",
+  
+  # Membranes
+  rup_memb                                  = "Premature rupture of membranes",
+  
+  # Preterm birth
+  pretb_all                                 = "Preterm birth (all)",
+  vpretb_all                                = "Very preterm birth",
+  
+  # Growth / GA / weight
+  ga_all                                    = "Gestational age (all)",
+  ga_subsamp                                = "Gestational age (subsample)",
+  sga                                       = "Small for gestational age",
+  lbw_all                                   = "Low birthweight",
+  hbw_all                                   = "High birthweight",
+  lga                                       = "Large for gestational age",
+  zbw_all                                   = "Z-score birthweight",
+  
+  # Neonatal/apgar
+  lowapgar1                                 = "Low Apgar score at 1 min",
+  lowapgar5                                 = "Low Apgar score at 5 min",
+  nicu                                      = "NICU admission",
+  
+  # Maternal complications
+  anaemia_preg_all                          = "Pregnancy anemia",
+  gdm_subsamp                               = "Gestational diabetes",
+  gh_subsamp                                = "Gestational hypertension",
+  hdp_subsamp                               = "Hypertensive disorders of pregnancy",
+  pe_subsamp                                = "Preeclampsia",
+  
+  # Other obstetric
+  induction                                 = "Labour induction",
+  posttb_all                                = "Post-term birth"
+)
+
+# ---- Restrict dataset -----------------------------------------------------
+
+dat <- dat[dat$outcome %in% vars_keep, , drop = FALSE]
+
 labels_df <- data.frame(
   outcome      = names(outcome_labels),
   outcome_full = unname(outcome_labels),
@@ -106,26 +148,22 @@ labels_df <- data.frame(
 )
 
 dat <- merge(dat, labels_df, by = "outcome", all.x = TRUE, sort = FALSE)
-dat$outcome_full[is.na(dat$outcome_full)] <- dat$outcome[is.na(dat$outcome_full)]
 dat$id.outcome <- dat$outcome
 
-# Basic cleaning
 dat <- dat %>%
   dplyr::filter(
     !is.na(beta.outcome),
     !is.na(se.outcome),
-    !is.infinite(se.outcome),
-    !is.na(pval.outcome),
-    se.outcome > 0
+    se.outcome > 0,
+    !is.na(pval.outcome)
   )
 
-# Show the final list of outcomes (for a quick visual check)
-message("Outcomes included (n = ", length(unique(dat$outcome_full)), "):")
+message("Outcomes included (n = ", length(unique(dat$outcome)), "):")
 print(sort(unique(dat$outcome_full)))
 
 ### 3) HELPERS ##################################################################
+
 run_mr_methods <- function(data, methods) {
-  # data must be a harmonised TwoSampleMR format tibble/data.frame
   out <- mr(data, method_list = methods)
   as.data.frame(out)
 }
@@ -136,13 +174,11 @@ export_csv <- function(df, stem) {
     return(invisible(NULL))
   }
   
-  # Ensure readable labels are present when an 'outcome' column exists
   if ("outcome" %in% colnames(df) && !"outcome_full" %in% colnames(df)) {
     df <- merge(df, labels_df, by = "outcome", all.x = TRUE, sort = FALSE)
     df$outcome_full[is.na(df$outcome_full)] <- df$outcome[is.na(df$outcome_full)]
   }
   
-  # Format numeric columns: round normally; scientific for very small values
   num_cols <- vapply(df, is.numeric, logical(1L))
   if (any(num_cols)) {
     df[num_cols] <- lapply(df[num_cols], function(x) {
@@ -159,21 +195,15 @@ export_csv <- function(df, stem) {
   message("Wrote: ", out_path)
 }
 
-### 4) MAIN MR ESTIMATES ########################################################
-# IVW
-ivw_res <- run_mr_methods(dat, "mr_ivw")
-ivw_res_raw <- ivw_res
+### 4) MAIN MR ANALYSES #########################################################
 
-# MR-Egger
+ivw_res   <- run_mr_methods(dat, "mr_ivw")
 egger_res <- run_mr_methods(dat, "mr_egger_regression")
+wm_res    <- run_mr_methods(dat, "mr_weighted_median")
+all_res   <- mr(dat)
 
-# Weighted median
-wm_res <- run_mr_methods(dat, "mr_weighted_median")
+### 4b) MULTIPLE TESTING FDR #####################################################
 
-# All default MR methods (IVW, Egger, WM, simple/weighted modes, etc.)
-all_res <- mr(dat)
-
-### 4b) MULTIPLE TESTING CORRECTION (FDR) #######################################
 ivw_res$qval   <- p.adjust(ivw_res$pval,   method = "fdr")
 egger_res$qval <- p.adjust(egger_res$pval, method = "fdr")
 wm_res$qval    <- p.adjust(wm_res$pval,    method = "fdr")

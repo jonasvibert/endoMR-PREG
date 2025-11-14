@@ -1,465 +1,402 @@
-+ ################################################################################
-+ # FETAL GENETIC EFFECT ANALYSIS
-  + # Endometriosis and Pregnancy Outcomes Study
-  + # 
-  + # Purpose: Analyze fetal genetic effects on pregnancy outcomes using MR
-  + # Author: [Your Name]
-  + # Date: August 2025
-  + # 
-  + # Background: 
-  + # In pregnancy outcomes, genetic effects can arise from:
-  + # 1. Maternal genetics (analyzed in main script)
-  + # 2. Fetal genetics (analyzed here)
-  + # 3. Maternal-fetal genetic interactions
-  + #
-  + # This script focuses on fetal genetic contributions to pregnancy outcomes
-  + # using available fetal/birth outcome GWAS data
-  + ################################################################################
-+ 
-  + # Load required libraries
-library(TwoSampleMR)
-+ library(dplyr)
-+ library(purrr)
-+ library(ggplot2)
-+ library(stringr)
-+ library(data.table)
-+ 
-  + ################################################################################
-+ # SECTION 1: FETAL GENETIC DATA PREPARATION
-  + ################################################################################
-+ 
-  + message("=== FETAL GENETIC EFFECT ANALYSIS ===")
-+ 
-  + # Define fetal-relevant outcomes (birth outcomes influenced by fetal genetics)
-  + # Using standardized outcome codes from the main analysis (filtered to 29 outcomes)
-  + fetal_outcomes <- c(
-    +   # Birth size outcomes (strong fetal genetic component)
-      +   "lbw_all",    # Low birthweight (<2500g)
-    +   "hbw_all",    # High birthweight (>4000g)
-    +   "sga",        # Small for gestational age
-    +   
-      +   # Gestational timing (potential fetal contribution)
-      +   "pretb_all",  # Preterm birth (all)
-    +   "vpretb_all", # Very preterm birth
-    +   "ga_all",     # Gestational age
-    +   "rup_memb",   # Premature rupture of membranes
-    +   
-      +   # Neonatal outcomes (fetal development-related)
-      +   "lowapgar1",  # Low Apgar at 1 minute
-    +   "lowapgar5",  # Low Apgar at 5 minutes
-    +   "nicu"        # NICU admission
-    + )
-  + 
-    + # Fetal outcome labels (updated to match filtered 29 outcomes)
-    + fetal_labels <- c(
-      +   "lbw_all" = "Low birthweight (<2500g)",
-      +   "hbw_all" = "High birthweight (>4000g)",
-      +   "sga" = "Small for gestational age",
-      +   "pretb_all" = "Preterm birth (all)",
-      +   "vpretb_all" = "Very preterm birth",
-      +   "ga_all" = "Gestational age",
-      +   "rup_memb" = "Premature rupture of membranes",
-      +   "lowapgar1" = "Low Apgar at 1 minute",
-      +   "lowapgar5" = "Low Apgar at 5 minutes",
-      +   "nicu" = "NICU admission"
-      + )
-    + 
-      + # Clinical groupings for fetal effects (updated to match filtered 29 outcomes)
-      + fetal_groups <- c(
-        +   "lbw_all" = "Birth size", "hbw_all" = "Birth size", "sga" = "Birth size",
-        +   "pretb_all" = "Gestational timing", "vpretb_all" = "Gestational timing", 
-        +   "ga_all" = "Gestational timing", "rup_memb" = "Gestational timing",
-        +   "lowapgar1" = "Neonatal health", "lowapgar5" = "Neonatal health", "nicu" = "Neonatal health"
-        + )
-      + 
-        + ################################################################################
-      + # SECTION 2: FETAL GENETIC INSTRUMENT PREPARATION
-        + ################################################################################
-      + 
-        + # Function to prepare fetal genetic instruments
-        + prepare_fetal_instruments <- function() {
-          +   
-            +   message("Preparing fetal genetic instruments...")
-          +   
-            +   # Note: In practice, you would need fetal GWAS data
-            +   # This example assumes you have prepared fetal instruments
-            +   # Sources might include:
-            +   # - Birth weight GWAS (maternal vs fetal effects separated)
-            +   # - Gestational duration GWAS
-            +   # - Fetal growth GWAS
-            +   
-            +   # Example structure for fetal instruments
-            +   # Replace with your actual fetal genetic data
-            +   
-            +   if (!exists("fetal_instruments")) {
-              +     message("Loading fetal genetic instruments...")
-              +     
-                +     # Example: Load fetal birthweight instruments
-                +     # fetal_instruments <- fread("data/fetal_birthweight_instruments.txt")
-                +     
-                +     # For demonstration, create placeholder structure
-                +     fetal_instruments <- data.frame(
-                  +       SNP = character(0),
-                  +       beta = numeric(0),
-                  +       se = numeric(0),
-                  +       effect_allele = character(0),
-                  +       other_allele = character(0),
-                  +       eaf = numeric(0),
-                  +       pval = numeric(0),
-                  +       exposure = character(0),
-                  +       stringsAsFactors = FALSE
-                  +     )
-                +     
-                  +     message("Warning: No fetal genetic instruments loaded.")
-                +     message("Please prepare fetal GWAS instruments and load into 'fetal_instruments'")
-                +     return(NULL)
-                +   }
-          +   
-            +   # Format fetal instruments for TwoSampleMR
-            +   fetal_exp <- format_data(
-              +     fetal_instruments,
-              +     type = "exposure",
-              +     snp_col = "SNP",
-              +     beta_col = "beta",
-              +     se_col = "se",
-              +     effect_allele_col = "effect_allele",
-              +     other_allele_col = "other_allele",
-              +     eaf_col = "eaf",
-              +     pval_col = "pval"
-              +   )
-            +   
-              +   return(fetal_exp)
-            + }
-        + 
-          + ################################################################################
-        + # SECTION 3: FETAL GENETIC EFFECT ANALYSIS
-          + ################################################################################
-        + 
-          + analyze_fetal_effects <- function(fetal_exposure_data, outcome_data) {
-            +   
-              +   if (is.null(fetal_exposure_data)) {
-                +     message("Skipping fetal analysis - no fetal instruments available")
-                +     return(NULL)
-                +   }
-            +   
-              +   message("Running fetal genetic effect analysis...")
-            +   
-              +   # Harmonize fetal exposure with outcomes
-              +   fetal_harmonised <- harmonise_data(
-                +     exposure_dat = fetal_exposure_data,
-                +     outcome_dat = outcome_data
-                +   )
-              +   
-                +   # Filter for fetal-relevant outcomes
-                +   fetal_harmonised <- fetal_harmonised %>%
-                  +     filter(id.outcome %in% fetal_outcomes)
-                +   
-                  +   if (nrow(fetal_harmonised) == 0) {
-                    +     message("No harmonised data for fetal analysis")
-                    +     return(NULL)
-                    +   }
-                +   
-                  +   # Run MR analysis
-                  +   fetal_mr_results <- mr(fetal_harmonised)
-                  +   
-                    +   # Add fetal-specific formatting
-                    +   fetal_results_formatted <- fetal_mr_results %>%
-                      +     filter(method == "Inverse variance weighted") %>%
-                      +     mutate(
-                        +       outcome_label = dplyr::recode(id.outcome, !!!fetal_labels),
-                        +       group = dplyr::recode(id.outcome, !!!fetal_groups),
-                        +       OR = exp(b),
-                        +       LCL = exp(b - 1.96 * se),
-                        +       UCL = exp(b + 1.96 * se),
-                        +       Effect_CI = sprintf("%.2f (%.2f-%.2f)", OR, LCL, UCL),
-                        +       P_value = formatC(pval, format = "e", digits = 2),
-                        +       Analysis_type = "Fetal genetic effect"
-                        +     )
-                    +   
-                      +   return(list(
-                        +     harmonised = fetal_harmonised,
-                        +     results = fetal_mr_results,
-                        +     formatted = fetal_results_formatted
-                        +   ))
-                    + }
-          + 
-            + ################################################################################
-          + # SECTION 4: MATERNAL VS FETAL EFFECT COMPARISON
-            + ################################################################################
-          + 
-            + compare_maternal_fetal_effects <- function(maternal_results, fetal_results) {
-              +   
-                +   if (is.null(fetal_results)) {
-                  +     message("Cannot compare - no fetal results available")
-                  +     return(NULL)
-                  +   }
-              +   
-                +   message("Comparing maternal vs fetal genetic effects...")
-              +   
-                +   # Prepare maternal results for comparison
-                +   maternal_formatted <- maternal_results %>%
-                  +     filter(
-                    +       method == "Inverse variance weighted",
-                    +       id.outcome %in% fetal_outcomes
-                    +     ) %>%
-                  +     mutate(
-                    +       outcome_label = dplyr::recode(id.outcome, !!!fetal_labels),
-                    +       group = dplyr::recode(id.outcome, !!!fetal_groups),
-                    +       OR = exp(b),
-                    +       LCL = exp(b - 1.96 * se),
-                    +       UCL = exp(b + 1.96 * se),
-                    +       Effect_CI = sprintf("%.2f (%.2f-%.2f)", OR, LCL, UCL),
-                    +       P_value = formatC(pval, format = "e", digits = 2),
-                    +       Analysis_type = "Maternal genetic effect"
-                    +     )
-                +   
-                  +   # Combine maternal and fetal results
-                  +   comparison_data <- bind_rows(
-                    +     maternal_formatted %>% select(id.outcome, outcome_label, group, b, se, OR, LCL, UCL, 
-                                                        +                                   Effect_CI, P_value, Analysis_type, nsnp),
-                    +     fetal_results$formatted %>% select(id.outcome, outcome_label, group, b, se, OR, LCL, UCL,
-                                                             +                                        Effect_CI, P_value, Analysis_type, nsnp)
-                    +   ) %>%
-                    +     arrange(group, id.outcome, Analysis_type)
-                  +   
-                    +   return(comparison_data)
-                  + }
-            + 
-              + ################################################################################
-            + # SECTION 5: FETAL EFFECT VISUALIZATION
-              + ################################################################################
-            + 
-              + create_fetal_comparison_plot <- function(comparison_data) {
-                +   
-                  +   if (is.null(comparison_data)) {
-                    +     message("Cannot create comparison plot - no comparison data")
-                    +     return(NULL)
-                    +   }
-                +   
-                  +   message("Creating maternal vs fetal effect comparison plot...")
-                +   
-                  +   # Create output directory
-                  +   fetal_dir <- "fetal_genetic_analysis"
-                  +   if (!dir.exists(fetal_dir)) dir.create(fetal_dir, recursive = TRUE)
-                  +   
-                    +   # Create comparison forest plot
-                    +   comparison_plot <- ggplot(comparison_data, aes(x = OR, y = outcome_label)) +
-                      +     geom_vline(xintercept = 1, linetype = "dashed", color = "gray50") +
-                      +     geom_errorbarh(aes(xmin = LCL, xmax = UCL, color = Analysis_type), 
-                                           +                    height = 0.2, position = position_dodge(width = 0.5)) +
-                      +     geom_point(aes(color = Analysis_type), size = 3, 
-                                       +                position = position_dodge(width = 0.5)) +
-                      +     facet_wrap(~group, scales = "free_y", ncol = 1) +
-                      +     scale_color_manual(
-                        +       values = c("Maternal genetic effect" = "#2E86AB", 
-                                           +                 "Fetal genetic effect" = "#A23B72"),
-                        +       name = "Effect Origin"
-                        +     ) +
-                      +     scale_x_log10(
-                        +       breaks = c(0.5, 0.7, 1.0, 1.4, 2.0),
-                        +       labels = c("0.5", "0.7", "1.0", "1.4", "2.0")
-                        +     ) +
-                      +     labs(
-                        +       title = "Maternal vs Fetal Genetic Effects on Pregnancy Outcomes",
-                        +       subtitle = "Endometriosis Genetic Liability",
-                        +       x = "Odds Ratio (95% CI)",
-                        +       y = "Pregnancy Outcome"
-                        +     ) +
-                      +     theme_minimal(base_size = 11) +
-                      +     theme(
-                        +       plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
-                        +       plot.subtitle = element_text(size = 12, hjust = 0.5),
-                        +       strip.text = element_text(size = 11, face = "bold"),
-                        +       legend.position = "bottom",
-                        +       panel.grid.minor = element_blank()
-                        +     )
-                    +   
-                      +   # Save comparison plot
-                      +   ggsave(file.path(fetal_dir, "maternal_vs_fetal_effects.png"), 
-                                 +          comparison_plot, width = 10, height = 8, dpi = 300)
-                    +   ggsave(file.path(fetal_dir, "maternal_vs_fetal_effects.pdf"), 
-                               +          comparison_plot, width = 10, height = 8)
-                    +   
-                      +   return(comparison_plot)
-                    + }
-              + 
-                + ################################################################################
-              + # SECTION 6: FETAL SENSITIVITY ANALYSIS
-                + ################################################################################
-              + 
-                + fetal_sensitivity_analysis <- function(fetal_harmonised_data) {
-                  +   
-                    +   if (is.null(fetal_harmonised_data)) {
-                      +     message("No fetal data for sensitivity analysis")
-                      +     return(NULL)
-                      +   }
-                  +   
-                    +   message("Running fetal genetic effect sensitivity analyses...")
-                  +   
-                    +   # Create output directory
-                    +   fetal_sens_dir <- "fetal_genetic_analysis/sensitivity"
-                    +   if (!dir.exists(fetal_sens_dir)) dir.create(fetal_sens_dir, recursive = TRUE)
-                    +   
-                      +   sensitivity_results <- list()
-                      +   
-                        +   # For each fetal outcome with sufficient SNPs
-                        +   for (outcome_id in unique(fetal_harmonised_data$id.outcome)) {
-                          +     
-                            +     dat_outcome <- fetal_harmonised_data %>% filter(id.outcome == outcome_id)
-                            +     
-                              +     if (nrow(dat_outcome) < 3) {
-                                +       message("Insufficient SNPs for sensitivity analysis: ", outcome_id)
-                                +       next
-                                +     }
-                            +     
-                              +     # Heterogeneity test
-                              +     het_test <- mr_heterogeneity(dat_outcome)
-                              +     
-                                +     # Pleiotropy test (if ≥3 SNPs)
-                                +     if (nrow(dat_outcome) >= 3) {
-                                  +       pleio_test <- mr_pleiotropy_test(dat_outcome)
-                                  +     } else {
-                                    +       pleio_test <- NULL
-                                    +     }
-                              +     
-                                +     # Leave-one-out analysis
-                                +     loo_results <- mr_leaveoneout(dat_outcome)
-                                +     
-                                  +     # Store results
-                                  +     sensitivity_results[[outcome_id]] <- list(
-                                    +       heterogeneity = het_test,
-                                    +       pleiotropy = pleio_test,
-                                    +       leaveoneout = loo_results
-                                    +     )
-                                  +     
-                                    +     # Create leave-one-out plot
-                                    +     if (nrow(loo_results) > 0) {
-                                      +       loo_plot <- mr_leaveoneout_plot(loo_results)[[1]] +
-                                        +         ggtitle(paste0("Fetal Effect Leave-One-Out: ", fetal_labels[[outcome_id]])) +
-                                        +         theme_minimal()
-                                      +       
-                                        +       ggsave(file.path(fetal_sens_dir, paste0(outcome_id, "_fetal_loo.png")), 
-                                                       +              loo_plot, width = 8, height = 6, dpi = 300)
-                                      +     }
-                                  +   }
-                      +   
-                        +   return(sensitivity_results)
-                      + }
-                + 
-                  + ################################################################################
-                + # SECTION 7: FETAL ANALYSIS SUMMARY TABLE
-                  + ################################################################################
-                + 
-                  + create_fetal_summary_table <- function(comparison_data, sensitivity_results) {
-                    +   
-                      +   if (is.null(comparison_data)) {
-                        +     message("Cannot create summary table - no comparison data")
-                        +     return(NULL)
-                        +   }
-                    +   
-                      +   message("Creating fetal genetic effect summary table...")
-                    +   
-                      +   # Create comprehensive summary
-                      +   summary_table <- comparison_data %>%
-                        +     select(outcome_label, group, Analysis_type, OR, Effect_CI, P_value, nsnp) %>%
-                        +     pivot_wider(
-                          +       names_from = Analysis_type,
-                          +       values_from = c(OR, Effect_CI, P_value, nsnp),
-                          +       names_sep = "_"
-                          +     ) %>%
-                        +     arrange(group, outcome_label)
-                      +   
-                        +   # Add heterogeneity information if available
-                        +   if (!is.null(sensitivity_results)) {
-                          +     het_summary <- map_dfr(names(sensitivity_results), function(outcome_id) {
-                            +       het_data <- sensitivity_results[[outcome_id]]$heterogeneity
-                            +       if (!is.null(het_data)) {
-                              +         data.frame(
-                                +           outcome_id = outcome_id,
-                                +           Q_pval = het_data$Q_pval[het_data$method == "Inverse variance weighted"],
-                                +           stringsAsFactors = FALSE
-                                +         )
-                              +       }
-                            +     })
-                          +     
-                            +     if (nrow(het_summary) > 0) {
-                              +       # Add outcome labels for joining
-                                +       het_summary <- het_summary %>%
-                                  +         mutate(outcome_label = dplyr::recode(outcome_id, !!!fetal_labels))
-                                +       
-                                  +       # Join with summary table
-                                  +       summary_table <- summary_table %>%
-                                    +         left_join(het_summary %>% select(outcome_label, Q_pval), by = "outcome_label")
-                                  +     }
-                          +   }
-                      +   
-                        +   # Save summary table
-                        +   fetal_dir <- "fetal_genetic_analysis"
-                        +   write.csv(summary_table, file.path(fetal_dir, "fetal_genetic_effects_summary.csv"), 
-                                      +             row.names = FALSE)
-                        +   
-                          +   return(summary_table)
-                        + }
-                  + 
-                    + ################################################################################
-                  + # SECTION 8: MAIN EXECUTION FUNCTION
-                    + ################################################################################
-                  + 
-                    + run_fetal_genetic_analysis <- function(maternal_mr_results = NULL) {
-                      +   
-                        +   message("\n=== STARTING FETAL GENETIC EFFECT ANALYSIS ===")
-                      +   
-                        +   # Step 1: Prepare fetal instruments
-                        +   fetal_exposure <- prepare_fetal_instruments()
-                        +   
-                          +   # Step 2: Load outcome data (assumes same outcomes as maternal analysis)
-                          +   if (!exists("outcome_data_formatted")) {
-                            +     message("Warning: outcome_data_formatted not found")
-                            +     message("Please ensure outcome data is prepared from main analysis")
-                            +     return(NULL)
-                            +   }
-                        +   
-                          +   # Step 3: Run fetal analysis
-                          +   fetal_analysis <- analyze_fetal_effects(fetal_exposure, outcome_data_formatted)
-                          +   
-                            +   # Step 4: Compare with maternal effects
-                            +   comparison_data <- compare_maternal_fetal_effects(maternal_mr_results, fetal_analysis)
-                            +   
-                              +   # Step 5: Create visualization
-                              +   comparison_plot <- create_fetal_comparison_plot(comparison_data)
-                              +   
-                                +   # Step 6: Sensitivity analysis
-                                +   sensitivity_results <- fetal_sensitivity_analysis(fetal_analysis$harmonised)
-                                +   
-                                  +   # Step 7: Summary table
-                                  +   summary_table <- create_fetal_summary_table(comparison_data, sensitivity_results)
-                                  +   
-                                    +   message("\n=== FETAL GENETIC ANALYSIS COMPLETE ===")
-                                  +   
-                                    +   return(list(
-                                      +     fetal_results = fetal_analysis,
-                                      +     comparison_data = comparison_data,
-                                      +     comparison_plot = comparison_plot,
-                                      +     sensitivity = sensitivity_results,
-                                      +     summary_table = summary_table
-                                      +   ))
-                                  + }
-                    + 
-                      + ################################################################################
-                    + # USAGE INSTRUCTIONS
-                      + ################################################################################
-                    + 
-                      + # To run the fetal genetic analysis:
-                      + # 
-                      + # 1. Ensure you have fetal genetic instruments prepared
-                      + # 2. Load the main MR results (maternal effects)
-                      + # 3. Run: fetal_analysis_results <- run_fetal_genetic_analysis(res)
-                      + #
-                      + # Note: This script requires fetal GWAS data which may need to be:
-                      + # - Downloaded from appropriate consortiums
-                      + # - Processed to separate maternal vs fetal effects
-                      + # - Formatted for TwoSampleMR package
-                      + 
-                      + message("Fetal genetic effect analysis script loaded.")
-                    + message("Run run_fetal_genetic_analysis() to execute the analysis.")
-                    + message("Ensure fetal genetic instruments are prepared first.")
+#!/usr/bin/env Rscript
+################################################################################
+# Script: 04.2_fetal_effect_endoMR-PREG.R
+# Project: endoMR-PREG
+#
+# Purpose:
+#   Use trio-based GWAS (maternal / offspring / paternal effects) to estimate
+#   MR effects of endometriosis genetic liability on pregnancy outcomes, and
+#   compare:
+#     - Maternal genetic effects
+#     - Fetal (offspring) genetic effects
+#     - Paternal genetic effects
+#
+# Input:
+#   - results/Exposure_Endometriosis_Rahmioglu_clumped_snps.tsv (exposure)
+#   - data/OUTCOME_MR-PREG/trios_out_dat.txt (or .dat)             (outcomes)
+#
+# Output:
+#   - results/trios_mr_results_maternal.csv
+#   - results/trios_mr_results_fetal.csv
+#   - results/trios_mr_results_paternal.csv
+#   - results/trios_mr_results_comparison.csv
+#   - results/plots/Figure_trios_maternal_fetal_paternal.png / .pdf
+################################################################################
+
+### 0) SETUP ###################################################################
+
+required_pkgs <- c(
+  "TwoSampleMR",
+  "dplyr",
+  "data.table",
+  "here",
+  "ggplot2",
+  "readr",
+  "tidyr"
+)
+
+safe_install <- function(pkg) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg, repos = "https://cloud.r-project.org")
+  }
+  suppressPackageStartupMessages(
+    library(pkg, character.only = TRUE)
+  )
+}
+
+invisible(lapply(required_pkgs, safe_install))
+
+project_dir <- here::here()
+data_dir    <- file.path(project_dir, "data")
+results_dir <- file.path(project_dir, "results")
+plots_dir   <- file.path(results_dir, "plots")
+
+dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(plots_dir,   recursive = TRUE, showWarnings = FALSE)
+
+message("=== TRIOS MR: maternal vs fetal vs paternal genetic effects ===")
+
+################################################################################
+# 1) LOAD EXPOSURE: ENDOMETRIOSIS (RAHMIOLU) INSTRUMENTS                        #
+################################################################################
+
+# Exposure file saved in Script 01 (clumped instruments)
+exposure_file <- file.path(
+  results_dir,
+  "Exposure_Endometriosis_Rahmioglu_clumped_snps.tsv"
+)
+
+stopifnot(file.exists(exposure_file))
+
+exposure_dat <- data.table::fread(exposure_file, data.table = FALSE)
+
+# Minimal sanity checks
+stopifnot(all(c("SNP", "beta.exposure", "se.exposure") %in% colnames(exposure_dat)))
+stopifnot("id.exposure" %in% colnames(exposure_dat))
+
+message("Loaded exposure instruments: ", nrow(exposure_dat), " SNPs.")
+
+################################################################################
+# 2) LOAD TRIOS OUTCOME DATA                                                   #
+################################################################################
+
+# Try .txt, then fallback to no extension if needed
+trios_path_txt <- file.path(data_dir, "OUTCOME_MR-PREG", "trios_out_dat.txt")
+trios_path_raw <- file.path(data_dir, "OUTCOME_MR-PREG", "trios_out_dat")
+
+if (file.exists(trios_path_txt)) {
+  trios_path <- trios_path_txt
+} else if (file.exists(trios_path_raw)) {
+  trios_path <- trios_path_raw
+} else {
+  stop("Could not find trios_out_dat file in data/OUTCOME_MR-PREG/")
+}
+
+message("Reading trios file from: ", trios_path)
+
+trios_raw <- data.table::fread(trios_path, data.table = FALSE)
+
+# Expected columns (from your example)
+expected_cols <- c(
+  "SNP", "chr", "pos",
+  "effect_allele", "other_allele",
+  "beta_mat", "se_mat", "p_mat", "n_mat",
+  "beta_mat_donuts", "se_mat_donuts", "p_mat_donuts",
+  "eaf_mat", "n_studies_mat",
+  "beta_off", "se_off", "p_off", "n_off",
+  "beta_off_donuts", "se_off_donuts", "p_off_donuts",
+  "beta_pat", "se_pat", "p_pat", "n_pat",
+  "beta_pat_donuts", "se_pat_donuts", "p_pat_donuts",
+  "Phenotype", "type", "analyses", "study"
+)
+
+missing_cols <- setdiff(expected_cols, colnames(trios_raw))
+if (length(missing_cols)) {
+  warning("The following expected columns are missing in trios_out_dat: ",
+          paste(missing_cols, collapse = ", "))
+}
+
+message("Trios data: ", nrow(trios_raw), " rows, ",
+        ncol(trios_raw), " columns, ",
+        length(unique(trios_raw$Phenotype)), " distinct phenotypes.")
+
+################################################################################
+# 3) LIMIT TO THE 29 MAIN OUTCOMES                                             #
+################################################################################
+
+# Must match the 29 outcomes kept in your main script (04_main_analyses_endoMR-PREG.R)
+outcome_labels_29 <- c(
+  # Placental outcomes
+  finngen_R12_O15_PLAC_PRAEVIA                      = "Placenta praevia",
+  finngen_R12_O15_PLAC_DISORD                       = "Placental disorders",
+  finngen_R12_O15_PLAC_PREMAT_SEPAR                 = "Premature placental separation",
+  
+  # Caesarean delivery
+  el_cs                                            = "Elective caesarean section",
+  em_cs                                            = "Emergency caesarean section",
+  cs                                               = "Caesarean section",
+  
+  # Apgar scores
+  lowapgar1                                        = "Low Apgar score at 1 min",
+  lowapgar5                                        = "Low Apgar score at 5 min",
+  
+  # Labor and delivery complications
+  rup_memb                                         = "Premature rupture of membranes",
+  induction                                        = "Labour induction",
+  
+  # Gestational age and timing
+  ga_all                                           = "Gestational age",
+  pretb_all                                        = "Preterm birth (any)",
+  vpretb_all                                       = "Very preterm birth",
+  posttb_all                                       = "Post-term birth",
+  
+  # Birth weight outcomes
+  hbw_all                                          = "High birthweight (>4000g)",
+  lbw_all                                          = "Low birthweight (<2500g)",
+  sga                                              = "Small for gestational age",
+  
+  # Maternal health
+  depr_subsamp                                     = "Postpartum Depression",
+  anaemia_preg_all                                 = "Pregnancy anemia",
+  
+  # Pregnancy complications
+  gdm_subsamp                                      = "Gestational diabetes mellitus",
+  hdp_subsamp                                      = "Hypertensive disorders of pregnancy",
+  gh_subsamp                                       = "Gestational hypertension",
+  pe_subsamp                                       = "Preeclampsia",
+  
+  # Neonatal outcomes
+  nicu                                             = "NICU admission",
+  sb_subsamp                                       = "Stillbirth",
+  
+  # Hemorrhage and bleeding (filtered versions in main analysis)
+  Antepartum_bleeding_filtered                     = "Antepartum bleeding",
+  Postpartum_hemorrhage_filtered                   = "Postpartum hemorrhage",
+  Postpartum_hemorrhage_due_to_atony_filtered      = "PPH due to atony",
+  Postpartum_hemorrhage_due_to_retained_placenta_filtered = "PPH due to retained placenta"
+)
+
+# Restrict trios data to phenotypes present in the 29-set
+trios <- trios_raw %>%
+  dplyr::filter(Phenotype %in% names(outcome_labels_29))
+
+message("Trios rows after restricting to 29 outcomes: ", nrow(trios))
+message("Phenotypes in trios after restriction: ",
+        paste(sort(unique(trios$Phenotype)), collapse = ", "))
+
+################################################################################
+# 4) FORMAT TRIOS AS OUTCOME DATA (MATERNAL / FETAL / PATERNAL)                #
+################################################################################
+
+format_trios_component <- function(trios_df, component = c("maternal", "fetal", "paternal")) {
+  component <- match.arg(component)
+  
+  if (component == "maternal") {
+    beta_col <- "beta_mat"
+    se_col   <- "se_mat"
+    p_col    <- "p_mat"
+    n_col    <- "n_mat"
+    eaf_col  <- "eaf_mat"
+    origin   <- "Maternal"
+  } else if (component == "fetal") {
+    beta_col <- "beta_off"
+    se_col   <- "se_off"
+    p_col    <- "p_off"
+    n_col    <- "n_off"
+    eaf_col  <- "eaf_mat"   # use maternal EAF as approximation
+    origin   <- "Fetal"
+  } else {
+    beta_col <- "beta_pat"
+    se_col   <- "se_pat"
+    p_col    <- "p_pat"
+    n_col    <- "n_pat"
+    eaf_col  <- "eaf_mat"   # use maternal EAF as approximation
+    origin   <- "Paternal"
+  }
+  
+  dat_comp <- trios_df %>%
+    dplyr::transmute(
+      SNP            = SNP,
+      chr            = chr,
+      pos            = pos,
+      effect_allele  = effect_allele,
+      other_allele   = other_allele,
+      beta           = !!rlang::sym(beta_col),
+      se             = !!rlang::sym(se_col),
+      pval           = !!rlang::sym(p_col),
+      n              = !!rlang::sym(n_col),
+      eaf            = !!rlang::sym(eaf_col),
+      outcome        = Phenotype,
+      id.outcome     = Phenotype,
+      study          = study,
+      component      = origin
+    )
+  
+  # Drop rows with missing beta or se
+  dat_comp <- dat_comp %>%
+    dplyr::filter(
+      !is.na(beta),
+      !is.na(se),
+      se > 0
+    )
+  
+  # Format as outcome data for TwoSampleMR
+  out_formatted <- TwoSampleMR::format_data(
+    dat               = dat_comp,
+    type              = "outcome",
+    snp_col           = "SNP",
+    beta_col          = "beta",
+    se_col            = "se",
+    effect_allele_col = "effect_allele",
+    other_allele_col  = "other_allele",
+    eaf_col           = "eaf",
+    pval_col          = "pval",
+    samplesize_col    = "n",
+    phenotype_col     = "outcome",
+    id_col            = "id.outcome",
+    chr_col           = "chr",
+    pos_col           = "pos"
+  )
+  
+  out_formatted$component <- origin
+  out_formatted
+}
+
+outcome_mat <- format_trios_component(trios, "maternal")
+outcome_fet <- format_trios_component(trios, "fetal")
+outcome_pat <- format_trios_component(trios, "paternal")
+
+message("Maternal outcome rows: ", nrow(outcome_mat))
+message("Fetal outcome rows   : ", nrow(outcome_fet))
+message("Paternal outcome rows: ", nrow(outcome_pat))
+
+################################################################################
+# 5) MR ANALYSIS FUNCTION                                                      #
+################################################################################
+
+run_trios_mr <- function(exposure_dat, outcome_dat, label_origin) {
+  message("Harmonising and running MR for ", label_origin, " outcomes...")
+  
+  dat_harm <- TwoSampleMR::harmonise_data(
+    exposure_dat = exposure_dat,
+    outcome_dat  = outcome_dat,
+    action       = 2
+  )
+  
+  # MR (all default methods, but we will mainly use IVW)
+  mr_res <- TwoSampleMR::mr(dat_harm)
+  
+  # Add human-readable labels
+  mr_res <- mr_res %>%
+    dplyr::mutate(
+      outcome_full = dplyr::recode(id.outcome, !!!outcome_labels_29),
+      origin       = label_origin
+    )
+  
+  list(harmonised = dat_harm, results = mr_res)
+}
+
+################################################################################
+# 6) RUN MR FOR MATERNAL, FETAL, PATERNAL                                     #
+################################################################################
+
+res_mat <- run_trios_mr(exposure_dat, outcome_mat, "Maternal")
+res_fet <- run_trios_mr(exposure_dat, outcome_fet, "Fetal")
+res_pat <- run_trios_mr(exposure_dat, outcome_pat, "Paternal")
+
+mr_mat <- res_mat$results
+mr_fet <- res_fet$results
+mr_pat <- res_pat$results
+
+# Keep IVW only for comparison
+ivw_mat <- mr_mat %>% dplyr::filter(method == "Inverse variance weighted")
+ivw_fet <- mr_fet %>% dplyr::filter(method == "Inverse variance weighted")
+ivw_pat <- mr_pat %>% dplyr::filter(method == "Inverse variance weighted")
+
+################################################################################
+# 7) COMBINE AND FORMAT RESULTS                                               #
+################################################################################
+
+ivw_all <- dplyr::bind_rows(ivw_mat, ivw_fet, ivw_pat) %>%
+  dplyr::mutate(
+    OR   = exp(b),
+    LCL  = exp(b - 1.96 * se),
+    UCL  = exp(b + 1.96 * se),
+    OR_CI = sprintf("%.2f (%.2f–%.2f)", OR, LCL, UCL),
+    pval_fmt = formatC(pval, format = "e", digits = 2)
+  )
+
+# FDR correction across all (maternal+fetal+paternal) IVW tests
+ivw_all$qval <- p.adjust(ivw_all$pval, method = "fdr")
+
+# Export separate CSVs
+readr::write_csv(ivw_mat, file.path(results_dir, "trios_mr_results_maternal.csv"))
+readr::write_csv(ivw_fet, file.path(results_dir, "trios_mr_results_fetal.csv"))
+readr::write_csv(ivw_pat, file.path(results_dir, "trios_mr_results_paternal.csv"))
+readr::write_csv(ivw_all, file.path(results_dir, "trios_mr_results_comparison.csv"))
+
+message("Saved MR results (maternal / fetal / paternal) in results/")
+
+################################################################################
+# 8) FOREST-PLOT COMPARISON: MATERNAL vs FETAL vs PATERNAL                   #
+################################################################################
+
+# Order outcomes by maternal OR magnitude (or any criterion you prefer)
+ivw_all$order_outcome <- dplyr::dense_rank(dplyr::desc(abs(ivw_all$b)))
+
+p_trios <- ggplot(ivw_all, aes(x = OR, y = reorder(outcome_full, order_outcome))) +
+  geom_vline(xintercept = 1, linetype = "dashed", colour = "grey60") +
+  geom_errorbarh(
+    aes(xmin = LCL, xmax = UCL, colour = origin),
+    height = 0.25,
+    position = position_dodge(width = 0.6)
+  ) +
+  geom_point(
+    aes(colour = origin),
+    size = 2.7,
+    position = position_dodge(width = 0.6)
+  ) +
+  scale_x_log10(
+    breaks = c(0.5, 0.7, 1.0, 1.4, 2.0),
+    labels = c("0.5", "0.7", "1.0", "1.4", "2.0")
+  ) +
+  labs(
+    title    = "Maternal vs fetal vs paternal genetic effects",
+    subtitle = "Endometriosis genetic liability (trios-based MR)",
+    x        = "Odds ratio (95% CI, log scale)",
+    y        = "Pregnancy outcome"
+  ) +
+  scale_colour_manual(
+    values = c(
+      "Maternal" = "#1f78b4",
+      "Fetal"    = "#33a02c",
+      "Paternal" = "#e31a1c"
+    ),
+    name = "Genetic effect"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    legend.position = "bottom",
+    panel.grid.minor = element_blank()
+  )
+
+ggsave(
+  file.path(plots_dir, "Figure_trios_maternal_fetal_paternal.png"),
+  p_trios, width = 9, height = 7, dpi = 300
+)
+ggsave(
+  file.path(plots_dir, "Figure_trios_maternal_fetal_paternal.pdf"),
+  p_trios, width = 9, height = 7
+)
+
+message("Saved comparison plot to results/plots/Figure_trios_maternal_fetal_paternal.*")
+
+################################################################################
+# 9) SUMMARY MESSAGE                                                          #
+################################################################################
+
+message("=== TRIOS MR ANALYSIS COMPLETE ===")
+message("  - CSVs: trios_mr_results_*.csv in results/")
+message("  - Figure: Figure_trios_maternal_fetal_paternal.(png/pdf) in results/plots/")
