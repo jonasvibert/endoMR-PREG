@@ -87,8 +87,7 @@ if (!"outcome_full" %in% names(all_results)) {
   all_results$outcome_full <- all_results$outcome
 }
 
-### Harmonised data (optional; used only for scatter / funnel / LOO plots) #####
-
+# Harmonised data (optional; used only for scatter / funnel / LOO plots)
 if (file.exists(harm_path)) {
   harm_list <- readRDS(harm_path)
   message("Loaded harmonised datasets (n = ", length(harm_list), ")")
@@ -101,9 +100,134 @@ if (file.exists(harm_path)) {
 message("Loaded IVW results: ", nrow(ivw_results))
 message("Loaded all-methods results: ", nrow(all_results))
 
-### Outcomes labels
-outcome_labels <- c( Antepartum_bleeding = "Antepartum bleeding", Postpartum_hemorrhage = "Postpartum hemorrhage", Postpartum_hemorrhage_due_to_atony = "PPH due to atony", Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta", finngen_R12_O15_PLAC_PRAEVIA = "Placenta praevia", finngen_R12_O15_PLAC_DISORD = "Placental disorders", finngen_R12_O15_PLAC_PREMAT_SEPAR = "Premature placental separation", rup_memb = "Premature rupture of membranes", pretb_all = "Preterm birth (all)", vpretb_all = "Very preterm birth", ga_all = "Gestational age (all)", ga_subsamp = "Gestational age (subsample)", sga = "Small for gestational age", lbw_all = "Low birthweight", hbw_all = "High birthweight", lga = "Large for gestational age", zbw_all = "Z-score birthweight", lowapgar1 = "Low Apgar score at 1 min", lowapgar5 = "Low Apgar score at 5 min", nicu = "NICU admission", anaemia_preg_all = "Pregnancy anemia", gdm_subsamp = "Gestational diabetes", gh_subsamp = "Gestational hypertension", hdp_subsamp = "Hypertensive disorders of pregnancy", pe_subsamp = "Preeclampsia", induction = "Labour induction", posttb_all = "Post-term birth" )
+###############################################################################
+# 2B) DEFINE PRIMARY OUTCOMES & LABELS (aligned with 06_tables script)
+###############################################################################
 
+vars_keep <- c(
+  # Placenta & bleeding (7)
+  "Antepartum_bleeding",
+  "Postpartum_hemorrhage",
+  "Postpartum_hemorrhage_due_to_atony",
+  "Postpartum_hemorrhage_due_to_retained_placenta",
+  "finngen_R12_O15_PLAC_PRAEVIA",
+  "finngen_R12_O15_PLAC_DISORD",
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR",
+  
+  # Membranes (1)
+  "rup_memb",
+  
+  # Preterm birth (2)
+  "pretb_all",
+  "vpretb_all",
+  
+  # Growth / GA / weight (6)
+  "ga_all",
+  "sga",
+  "lbw_all",
+  "hbw_all",
+  "lga",
+  "zbw_all",
+  
+  # Neonatal / Apgar (3)
+  "lowapgar1",
+  "lowapgar5",
+  "nicu",
+  
+  # Maternal complications (6)
+  "anaemia_preg_all",
+  "gdm_subsamp",
+  "gh_subsamp",
+  "hdp_subsamp",
+  "pe_subsamp",
+  "depr_subsamp",
+  
+  # Other obstetric (4)
+  "induction",
+  "posttb_all",
+  "el_cs",
+  "em_cs"
+)
+
+outcome_labels <- c(
+  # Bleeding (4)
+  Antepartum_bleeding                       = "Antepartum bleeding",
+  Postpartum_hemorrhage                     = "Postpartum hemorrhage (any)",
+  Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
+  Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
+  
+  # Placenta (3)
+  finngen_R12_O15_PLAC_PRAEVIA              = "Placenta praevia",
+  finngen_R12_O15_PLAC_DISORD               = "Placental disorders",
+  finngen_R12_O15_PLAC_PREMAT_SEPAR         = "Premature placental separation",
+  
+  # Membranes (1)
+  rup_memb                                  = "Premature rupture of membranes",
+  
+  # Birth timing (4)
+  pretb_all                                 = "Preterm birth <37 weeks (any)",
+  vpretb_all                                = "Very preterm birth < 34weeks",
+  posttb_all                                = "Post-term birth",
+  ga_all                                    = "Gestational age",
+  
+  # Fetal Growth (5)
+  sga                                       = "Small for gestational age",
+  lbw_all                                   = "Low birthweight <2500g",
+  hbw_all                                   = "High birthweight >4000g",
+  lga                                       = "Large for gestational age",
+  zbw_all                                   = "Z-score birthweight",
+  
+  # Neonatal adaptation (3)
+  lowapgar1                                 = "Low Apgar score at 1 min",
+  lowapgar5                                 = "Low Apgar score at 5 min",
+  nicu                                      = "NICU admission",
+  
+  # Maternal complications (6)
+  anaemia_preg_all                          = "Pregnancy anemia",
+  gdm_subsamp                               = "Gestational diabetes",
+  gh_subsamp                                = "Gestational hypertension",
+  hdp_subsamp                               = "Hypertensive disorders of pregnancy",
+  pe_subsamp                                = "Preeclampsia",
+  depr_subsamp                              = "Postpartum depression",
+  
+  # Caesarean section (2)
+  el_cs                                     = "Elective caesarean section",
+  em_cs                                     = "Emergency caesarean section",
+  
+  # Other obstetric timing (1)
+  induction                                 = "Labour induction"
+)
+
+###############################################################################
+# 2C) PREPARE FILTERED OBJECTS (IVW + ALL METHODS, WITH FDR q-VALUES)
+###############################################################################
+
+# IVW results restricted to primary outcomes, with FDR q-values
+ivw_filtered <- ivw_results %>%
+  dplyr::filter(
+    method  == "Inverse variance weighted",
+    outcome %in% vars_keep
+  ) %>%
+  dplyr::mutate(
+    outcome_full = ifelse(is.na(outcome_full), outcome, outcome_full),
+    qval         = p.adjust(pval, method = "fdr")
+  )
+
+# All methods for primary outcomes + IVW q-values carried to other methods
+method_levels <- c("MR Egger", "Weighted median", "Inverse variance weighted", "Weighted mode")
+
+all_filtered <- all_results %>%
+  dplyr::filter(
+    method  %in% method_levels,
+    outcome %in% vars_keep
+  ) %>%
+  dplyr::mutate(
+    outcome_full = ifelse(is.na(outcome_full), outcome, outcome_full)
+  ) %>%
+  dplyr::left_join(
+    ivw_filtered %>% dplyr::select(outcome, qval),
+    by = "outcome"
+  )
 ###########################
 ### FIGURE 1.FLOWCHART  ###
 ###########################

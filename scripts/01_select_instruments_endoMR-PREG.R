@@ -1,7 +1,11 @@
 ################################################################################
 # Script: 01_select_instruments_endoMR-PREG.R
 # Project: endoMR-PREG
-# Purpose: Select and clump SNP instruments for endometriosis (Rahmioglu GWAS)
+#
+# Purpose:
+#   Select, map and clump SNP instruments for endometriosis using the
+#   Rahmioglu et al. GWAS (Supp. Table 33 – "Supp33.Top10K-SNPs")
+#   extracted from: NIHMS1873427-Supplementary_Materials.xlsx
 ################################################################################
 
 ### 0) Setup ###################################################################
@@ -37,8 +41,8 @@ for (pkg in required_pkgs) {
 data_dir    <- here::here("data")
 results_dir <- here::here("results")
 scripts_dir <- here::here("scripts")
-plots_dir   <- file.path(results_dir, "plots")
-tables_dir  <- file.path(results_dir, "tables")
+plots_dir   <- file.path(results_dir, "plots instruments selection")
+tables_dir  <- file.path(results_dir, "tables instruments selection")
 
 dir.create(data_dir,    showWarnings = FALSE, recursive = TRUE)
 dir.create(results_dir, showWarnings = FALSE, recursive = TRUE)
@@ -434,5 +438,7 @@ openxlsx::write.xlsx(
   file.path(tables_dir, "Endometriosis_Instruments.xlsx"),
   rowNames = FALSE
 )
+saveRDS(clumped2, file.path(results_dir, "clumped2_with_stats.rds"))
+message("Saved clumped2 object to: ", file.path(results_dir, "clumped2_with_stats.rds"))
 
 cat("Saved: ", file.path(tables_dir, "Endometriosis_Instruments.xlsx"), "\n")

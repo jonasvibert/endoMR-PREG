@@ -44,6 +44,8 @@ log_info("Loaded harmonised data with ", nrow(dat), " rows")
 stopifnot(all(c("id.exposure", "beta.exposure", "beta.outcome") %in% colnames(dat)))
 stopifnot("outcome" %in% colnames(dat))
 
+# ---- 29 retained outcomes (aligned across scripts) ---------------------------
+
 vars_keep <- c(
   # Placenta & bleeding (7)
   "Antepartum_bleeding",
@@ -61,9 +63,8 @@ vars_keep <- c(
   "pretb_all",
   "vpretb_all",
   
-  # Growth / GA / weight (7)
+  # Growth / GA / weight (6)
   "ga_all",
-  "ga_subsamp",
   "sga",
   "lbw_all",
   "hbw_all",
@@ -75,48 +76,71 @@ vars_keep <- c(
   "lowapgar5",
   "nicu",
   
-  # Maternal complications (5)
+  # Maternal complications (6)
   "anaemia_preg_all",
   "gdm_subsamp",
   "gh_subsamp",
   "hdp_subsamp",
   "pe_subsamp",
+  "depr_subsamp",
   
-  # Other obstetric ≥20 SA (2)
+  # Other obstetric (4)
   "induction",
-  "posttb_all"
+  "posttb_all",
+  "el_cs",
+  "em_cs"
 )
 
 outcome_labels <- c(
-  Antepartum_bleeding                       = "Antepartum bleeding",
-  Postpartum_hemorrhage                     = "Postpartum hemorrhage",
-  Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
-  Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
-  finngen_R12_O15_PLAC_PRAEVIA              = "Placenta praevia",
-  finngen_R12_O15_PLAC_DISORD               = "Placental disorders",
-  finngen_R12_O15_PLAC_PREMAT_SEPAR         = "Premature placental separation",
-  rup_memb                                  = "Premature rupture of membranes",
-  pretb_all                                 = "Preterm birth (all)",
-  vpretb_all                                = "Very preterm birth",
-  ga_all                                    = "Gestational age (all)",
-  ga_subsamp                                = "Gestational age (subsample)",
-  sga                                       = "Small for gestational age",
-  lbw_all                                   = "Low birthweight",
-  hbw_all                                   = "High birthweight",
-  lga                                       = "Large for gestational age",
-  zbw_all                                   = "Z-score birthweight",
-  lowapgar1                                 = "Low Apgar score at 1 min",
-  lowapgar5                                 = "Low Apgar score at 5 min",
-  nicu                                      = "NICU admission",
-  anaemia_preg_all                          = "Pregnancy anemia",
-  gdm_subsamp                               = "Gestational diabetes",
-  gh_subsamp                                = "Gestational hypertension",
-  hdp_subsamp                               = "Hypertensive disorders of pregnancy",
-  pe_subsamp                                = "Preeclampsia",
-  induction                                 = "Labour induction",
-  posttb_all                                = "Post-term birth"
-)
+    # Bleeding (4)
+    Antepartum_bleeding                       = "Antepartum bleeding",
+    Postpartum_hemorrhage                     = "Postpartum hemorrhage (any)",
+    Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
+    Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
+    
+    # Placenta (3)
+    finngen_R12_O15_PLAC_PRAEVIA              = "Placenta praevia",
+    finngen_R12_O15_PLAC_DISORD               = "Placental disorders",
+    finngen_R12_O15_PLAC_PREMAT_SEPAR         = "Premature placental separation",
+    
+    # Membranes (1)
+    rup_memb                                  = "Premature rupture of membranes",
+    
+    # Birth timing (4)
+    pretb_all                                 = "Preterm birth <37 weeks (any)",
+    vpretb_all                                = "Very preterm birth < 34weeks",
+    posttb_all                                = "Post-term birth",
+    ga_all                                    = "Gestational age",
+    
+    # Fetal Growth (5)
+    sga                                       = "Small for gestational age",
+    lbw_all                                   = "Low birthweight <2500g",
+    hbw_all                                   = "High birthweight >4000g",
+    lga                                       = "Large for gestational age",
+    zbw_all                                   = "Z-score birthweight",
+    
+    # Neonatal adaptation (3)
+    lowapgar1                                 = "Low Apgar score at 1 min",
+    lowapgar5                                 = "Low Apgar score at 5 min",
+    nicu                                      = "NICU admission",
+    
+    # Maternal complications (6)
+    anaemia_preg_all                          = "Pregnancy anemia",
+    gdm_subsamp                               = "Gestational diabetes",
+    gh_subsamp                                = "Gestational hypertension",
+    hdp_subsamp                               = "Hypertensive disorders of pregnancy",
+    pe_subsamp                                = "Preeclampsia",
+    depr_subsamp                              = "Postpartum depression",
+    
+    # Caesarean section (2)
+    el_cs                                     = "Elective caesarean section",
+    em_cs                                     = "Emergency caesarean section",
+    
+    # Other obstetric timing (1)
+    induction                                 = "Labour induction"
+  )
 
+# Restrict to the 29 outcomes
 dat <- dat[dat$outcome %in% vars_keep, , drop = FALSE]
 
 labels_df <- data.frame(
@@ -139,7 +163,8 @@ dat <- dat %>%
 log_info("Outcomes included in tables (n = ", length(unique(dat$outcome)), "):")
 print(sort(unique(dat$outcome_full)))
 
-continuous_outcomes <- c("zbw_all")
+# Continuous outcomes (aligned with sensitivity script)
+continuous_outcomes <- c("ga_all", "zbw_all")
 
 ###############################################################################
 # 2) HELPERS
@@ -196,6 +221,7 @@ if (file.exists(snps_file)) {
 }
 log_info("Using ", length(snp_whitelist), " SNP instruments")
 
+# Outcome types for main MR tables
 type_df <- tibble::tibble(
   outcome = vars_keep,
   Type    = dplyr::if_else(outcome %in% continuous_outcomes, "Continuous", "Binary")
@@ -286,6 +312,7 @@ table1_preg <- preg_summary %>%
   ) %>%
   dplyr::arrange(Source, Outcome)
 
+# Manual sizes (kept as in original code; only rows that match an Outcome will be used)
 manual_sizes <- tibble::tribble(
   ~Source,             ~Outcome,                             ~`N total`, ~Cases,  ~Controls,
   "Westergaard (PPH)", "Antepartum bleeding",                  331792L,     3236L,   328556L,
@@ -506,9 +533,11 @@ if (!exists("coalesce_into")) {
   }
 }
 
-if (!exists("clumped2")) {
-  stop("Object 'clumped2' is not available. Please load the clumped instrument dataset (clumped2) before running this script.")
+clumped2_file <- file.path(results_dir, "clumped2_with_stats.rds")
+if (!file.exists(clumped2_file)) {
+  stop("File 'clumped2_with_stats.rds' not found. Please run 01_select_instruments_endoMR-PREG.R first.")
 }
+clumped2 <- readRDS(clumped2_file)
 
 clumped2 <- clumped2 %>%
   coalesce_into("beta.exposure",       c("beta.exposure",       "beta.exposure.y",       "beta.exposure.x")) %>%
@@ -791,3 +820,87 @@ write.csv(Table_S5, s5_file, row.names = FALSE)
 log_info("Table S5 (MR-Egger intercept) saved: ", s5_file)
 
 log_info("=== Table generation for endoMR-PREG completed successfully ===")
+
+###############################################################################
+# 12) EXPORT ALL TABLES TO HTML
+###############################################################################
+
+log_info("Exporting all tables to HTML...")
+
+suppressPackageStartupMessages(library(gt))
+
+html_dir <- file.path(tables_dir, "html")
+dir.create(html_dir, showWarnings = FALSE, recursive = TRUE)
+
+tables_to_export <- list(
+  Table1_GWAS_sources                      = table1_gwas,
+  Table2_pregnancy_sample_sizes            = table1_preg,
+  Table3_IVW_FDR_main_results              = table3_main,
+  Supp_Table_1A_primary_perinatal_def      = Supp_1A,
+  Supp_Table_1B_secondary_binary_perinatal = Supp_1B,
+  Supp_Table_1C_continuous_perinatal       = Supp_1C,
+  Table_S1_harmonised_summary              = Table_S1,
+  Supplementary_Table_2_Endometriosis_Instruments = supp_table2,
+  Table_S3_all_MR_methods                  = Table_S3,
+  Table_S4_heterogeneity_IVW               = Table_S4,
+  Table_S5_egger_intercept                 = Table_S5
+)
+
+table_titles <- list(
+  Table1_GWAS_sources =
+    "Table 1. Overview of GWAS datasets for endometriosis and pregnancy outcomes in the endoMR-PREG study",
+  
+  Table2_pregnancy_sample_sizes =
+    "Table 2. Pregnancy outcomes and sample sizes in MR-PREG and related cohorts",
+  
+  Table3_IVW_FDR_main_results =
+    "Table 3. Main inverse-variance weighted Mendelian randomisation results with FDR correction",
+  
+  Supp_Table_1A_primary_perinatal_def =
+    "Supplementary Table 1A. Definitions and sources of primary perinatal outcomes",
+  
+  Supp_Table_1B_secondary_binary_perinatal =
+    "Supplementary Table 1B. Definitions and sources of secondary binary perinatal outcomes",
+  
+  Supp_Table_1C_continuous_perinatal =
+    "Supplementary Table 1C. Definitions and sources of continuous perinatal outcomes",
+  
+  Table_S1_harmonised_summary =
+    "Table S1. Summary of harmonised exposure–outcome datasets used in MR analyses",
+  
+  Supplementary_Table_2_Endometriosis_Instruments =
+    "Supplementary Table 2. Genetic instruments for endometriosis liability (Rahmioglu et al.)",
+  
+  Table_S3_all_MR_methods =
+    "Table S3. Mendelian randomisation results across all MR methods and pregnancy outcomes",
+  
+  Table_S4_heterogeneity_IVW =
+    "Table S4. Heterogeneity statistics for inverse-variance weighted MR models",
+  
+  Table_S5_egger_intercept =
+    "Table S5. MR-Egger intercept estimates for directional pleiotropy assessment"
+)
+
+for (nm in names(tables_to_export)) {
+  df <- tables_to_export[[nm]]
+  
+  if (is.null(df) || !is.data.frame(df) || nrow(df) == 0L) {
+    next
+  }
+  
+  title_text <- table_titles[[nm]]
+  if (is.null(title_text)) {
+    title_text <- nm
+  }
+  
+  gt_tbl <- df %>%
+    gt::gt() %>%
+    gt::tab_header(
+      title = gt::md(paste0("**", title_text, "**"))
+    )
+  
+  out_file <- file.path(html_dir, paste0(nm, ".html"))
+  
+  gt::gtsave(gt_tbl, out_file)
+  log_info("Saved HTML table: ", out_file)
+}

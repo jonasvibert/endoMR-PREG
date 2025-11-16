@@ -43,13 +43,11 @@ dat <- data.table::fread(harm_file)
 stopifnot(all(c("id.exposure", "beta.exposure", "beta.outcome") %in% colnames(dat)))
 stopifnot("outcome" %in% colnames(dat))
 
-# ---- 29 OUTCOMES RETENUS -----------------------------------------------------
+# ---- 29 retained outcomes ---------------------------------------------------
 
 vars_keep <- c(
-  # Placenta & bleeding (9)
+  # Placenta & bleeding (7)
   "Antepartum_bleeding",
-  "Early_bleeding_with_any_outcome",
-  "Early_bleeding_ending_in_live_birth",
   "Postpartum_hemorrhage",
   "Postpartum_hemorrhage_due_to_atony",
   "Postpartum_hemorrhage_due_to_retained_placenta",
@@ -57,87 +55,92 @@ vars_keep <- c(
   "finngen_R12_O15_PLAC_DISORD",
   "finngen_R12_O15_PLAC_PREMAT_SEPAR",
   
-  # Membranes
+  # Membranes (1)
   "rup_memb",
   
   # Preterm birth (2)
   "pretb_all",
   "vpretb_all",
   
-  # Growth / GA / weight (7)
+  # Growth / GA / weight (6)
   "ga_all",
-  "ga_subsamp",
   "sga",
   "lbw_all",
   "hbw_all",
   "lga",
   "zbw_all",
   
-  # Neonatal/Apgar (3)
+  # Neonatal / Apgar (3)
   "lowapgar1",
   "lowapgar5",
   "nicu",
   
-  # Maternal complications (5)
+  # Maternal complications (6)
   "anaemia_preg_all",
   "gdm_subsamp",
   "gh_subsamp",
   "hdp_subsamp",
   "pe_subsamp",
+  "depr_subsamp",
   
-  # Other obstetric ≥20 SA (1)
+  # Other obstetric (4)
   "induction",
-  "posttb_all"
+  "posttb_all",
+  "el_cs",
+  "em_cs"
 )
 
-# ---- Labels ---------------------------------------------------------------
-
-outcome_labels <- c(
-  # Placenta & bleeding
-  Antepartum_bleeding                       = "Antepartum bleeding",
-  Early_bleeding_with_any_outcome           = "Early bleeding (any outcome)",
-  Early_bleeding_ending_in_live_birth       = "Early bleeding (live birth)",
-  Postpartum_hemorrhage                     = "Postpartum hemorrhage",
-  Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
-  Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
-  finngen_R12_O15_PLAC_PRAEVIA              = "Placenta praevia",
-  finngen_R12_O15_PLAC_DISORD               = "Placental disorders",
-  finngen_R12_O15_PLAC_PREMAT_SEPAR         = "Premature placental separation",
+# ---- Labels -----------------------------------------------------------------
   
-  # Membranes
-  rup_memb                                  = "Premature rupture of membranes",
-  
-  # Preterm birth
-  pretb_all                                 = "Preterm birth (all)",
-  vpretb_all                                = "Very preterm birth",
-  
-  # Growth / GA / weight
-  ga_all                                    = "Gestational age (all)",
-  ga_subsamp                                = "Gestational age (subsample)",
-  sga                                       = "Small for gestational age",
-  lbw_all                                   = "Low birthweight",
-  hbw_all                                   = "High birthweight",
-  lga                                       = "Large for gestational age",
-  zbw_all                                   = "Z-score birthweight",
-  
-  # Neonatal/apgar
-  lowapgar1                                 = "Low Apgar score at 1 min",
-  lowapgar5                                 = "Low Apgar score at 5 min",
-  nicu                                      = "NICU admission",
-  
-  # Maternal complications
-  anaemia_preg_all                          = "Pregnancy anemia",
-  gdm_subsamp                               = "Gestational diabetes",
-  gh_subsamp                                = "Gestational hypertension",
-  hdp_subsamp                               = "Hypertensive disorders of pregnancy",
-  pe_subsamp                                = "Preeclampsia",
-  
-  # Other obstetric
-  induction                                 = "Labour induction",
-  posttb_all                                = "Post-term birth"
-)
-
-# ---- Restrict dataset -----------------------------------------------------
+  outcome_labels <- c(
+    # Bleeding (4)
+    Antepartum_bleeding                       = "Antepartum bleeding",
+    Postpartum_hemorrhage                     = "Postpartum hemorrhage (any)",
+    Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
+    Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
+    
+    # Placenta (3)
+    finngen_R12_O15_PLAC_PRAEVIA              = "Placenta praevia",
+    finngen_R12_O15_PLAC_DISORD               = "Placental disorders",
+    finngen_R12_O15_PLAC_PREMAT_SEPAR         = "Premature placental separation",
+    
+    # Membranes (1)
+    rup_memb                                  = "Premature rupture of membranes",
+    
+    # Birth timing (4)
+    pretb_all                                 = "Preterm birth <37 weeks (any)",
+    vpretb_all                                = "Very preterm birth < 34weeks",
+    posttb_all                                = "Post-term birth",
+    ga_all                                    = "Gestational age",
+    
+    # Fetal Growth (5)
+    sga                                       = "Small for gestational age",
+    lbw_all                                   = "Low birthweight <2500g",
+    hbw_all                                   = "High birthweight >4000g",
+    lga                                       = "Large for gestational age",
+    zbw_all                                   = "Z-score birthweight",
+    
+    # Neonatal adaptation (3)
+    lowapgar1                                 = "Low Apgar score at 1 min",
+    lowapgar5                                 = "Low Apgar score at 5 min",
+    nicu                                      = "NICU admission",
+    
+    # Maternal complications (6)
+    anaemia_preg_all                          = "Pregnancy anemia",
+    gdm_subsamp                               = "Gestational diabetes",
+    gh_subsamp                                = "Gestational hypertension",
+    hdp_subsamp                               = "Hypertensive disorders of pregnancy",
+    pe_subsamp                                = "Preeclampsia",
+    depr_subsamp                              = "Postpartum depression",
+    
+    # Caesarean section (2)
+    el_cs                                     = "Elective caesarean section",
+    em_cs                                     = "Emergency caesarean section",
+    
+    # Other obstetric timing (1)
+    induction                                 = "Labour induction"
+  )
+# ---- Restrict dataset -------------------------------------------------------
 
 dat <- dat[dat$outcome %in% vars_keep, , drop = FALSE]
 

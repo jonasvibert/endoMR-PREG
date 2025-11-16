@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-###############################################################################
+################################################################################
 # Script: 05_sensitivity_analyses_endoMR-PREG.R
 # Project: endoMR-PREG
 #
@@ -22,7 +22,7 @@
 #   - mr_leaveoneout_snp_*.csv
 #   - leave_one_cohort_results.csv
 #   - cohort_composition.csv
-###############################################################################
+################################################################################
 
 ### 1) SETUP ####################################################################
 
@@ -71,6 +71,115 @@ stopifnot(all(c("beta.outcome", "se.outcome", "pval.outcome",
 
 message("Loaded harmonised dataset: ", nrow(dat), " rows.")
 
+### 1b) RESTRICT TO THE 29 MAIN OUTCOMES #######################################
+
+vars_keep <- c(
+  # Placenta & bleeding (7)
+  "Antepartum_bleeding",
+  "Postpartum_hemorrhage",
+  "Postpartum_hemorrhage_due_to_atony",
+  "Postpartum_hemorrhage_due_to_retained_placenta",
+  "finngen_R12_O15_PLAC_PRAEVIA",
+  "finngen_R12_O15_PLAC_DISORD",
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR",
+  
+  # Membranes (1)
+  "rup_memb",
+  
+  # Preterm birth (2)
+  "pretb_all",
+  "vpretb_all",
+  
+  # Growth / GA / weight (6)
+  "ga_all",
+  "sga",
+  "lbw_all",
+  "hbw_all",
+  "lga",
+  "zbw_all",
+  
+  # Neonatal / Apgar (3)
+  "lowapgar1",
+  "lowapgar5",
+  "nicu",
+  
+  # Maternal complications (6)
+  "anaemia_preg_all",
+  "gdm_subsamp",
+  "gh_subsamp",
+  "hdp_subsamp",
+  "pe_subsamp",
+  "depr_subsamp",
+  
+  # Other obstetric (4)
+  "induction",
+  "posttb_all",
+  "el_cs",
+  "em_cs"
+)
+
+outcome_labels <- c(
+  # Bleeding (4)
+  Antepartum_bleeding                       = "Antepartum bleeding",
+  Postpartum_hemorrhage                     = "Postpartum hemorrhage (any)",
+  Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
+  Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
+  
+  # Placenta (3)
+  finngen_R12_O15_PLAC_PRAEVIA              = "Placenta praevia",
+  finngen_R12_O15_PLAC_DISORD               = "Placental disorders",
+  finngen_R12_O15_PLAC_PREMAT_SEPAR         = "Premature placental separation",
+  
+  # Membranes (1)
+  rup_memb                                  = "Premature rupture of membranes",
+  
+  # Birth timing (4)
+  pretb_all                                 = "Preterm birth <37 weeks (any)",
+  vpretb_all                                = "Very preterm birth < 34weeks",
+  posttb_all                                = "Post-term birth",
+  ga_all                                    = "Gestational age",
+
+  # Fetal Growth (5)
+  sga                                       = "Small for gestational age",
+  lbw_all                                   = "Low birthweight <2500g",
+  hbw_all                                   = "High birthweight >4000g",
+  lga                                       = "Large for gestational age",
+  zbw_all                                   = "Z-score birthweight",
+  
+  # Neonatal adaptation (3)
+  lowapgar1                                 = "Low Apgar score at 1 min",
+  lowapgar5                                 = "Low Apgar score at 5 min",
+  nicu                                      = "NICU admission",
+  
+  # Maternal complications (6)
+  anaemia_preg_all                          = "Pregnancy anemia",
+  gdm_subsamp                               = "Gestational diabetes",
+  gh_subsamp                                = "Gestational hypertension",
+  hdp_subsamp                               = "Hypertensive disorders of pregnancy",
+  pe_subsamp                                = "Preeclampsia",
+  depr_subsamp                              = "Postpartum depression",
+  
+  # Caesarean section (2)
+  el_cs                                     = "Elective caesarean section",
+  em_cs                                     = "Emergency caesarean section",
+  
+  # Other obstetric timing (1)
+  induction                                 = "Labour induction"
+)
+
+# Restrict harmonised dataset to the 29 outcomes
+dat <- dat[dat$outcome %in% vars_keep, , drop = FALSE]
+
+# Label mapping (if needed later)
+labels_df <- data.frame(
+  outcome      = names(outcome_labels),
+  outcome_full = unname(outcome_labels),
+  stringsAsFactors = FALSE
+)
+
+message("Outcomes included in sensitivity analyses (n = ",
+        length(unique(dat$outcome)), "):")
+print(sort(unique(dat$outcome)))
 
 ### 2) HELPERS ##################################################################
 
@@ -103,18 +212,9 @@ if (!exists("export_csv")) {
   }
 }
 
-if (!exists("labels_df")) {
-  labels_df <- data.frame(
-    outcome      = character(),
-    outcome_full = character(),
-    stringsAsFactors = FALSE
-  )
-}
-
-
 ### 3) STANDARD SENSITIVITY ANALYSES ###########################################
 
-message("=== Standard TwoSampleMR sensitivity analyses ===")
+message("=== Standard TwoSampleMR sensitivity analyses (29 outcomes) ===")
 
 het_res     <- mr_heterogeneity(dat)      # Cochran’s Q
 plt_res     <- mr_pleiotropy_test(dat)    # MR-Egger intercept
@@ -125,7 +225,6 @@ export_csv(het_res,     "mr_heterogeneity")
 export_csv(plt_res,     "mr_pleiotropy")
 export_csv(single_res,  "mr_single_snp")
 export_csv(loo_snp_res, "mr_leaveoneout_snp")
-
 
 ### 4) LEAVE-ONE-COHORT-OUT MR (MR-PREG) #######################################
 
@@ -153,10 +252,10 @@ message("Outcome rows: ", nrow(mr_data))
 cohort_summary <- mr_data |>
   dplyr::group_by(study) |>
   dplyr::summarise(
-    n_snps         = dplyr::n_distinct(SNP),
-    n_phenotypes   = dplyr::n_distinct(Phenotype),
+    n_snps          = dplyr::n_distinct(SNP),
+    n_phenotypes    = dplyr::n_distinct(Phenotype),
     mean_samplesize = mean(samplesize, na.rm = TRUE),
-    .groups        = "drop"
+    .groups         = "drop"
   ) |>
   dplyr::arrange(dplyr::desc(n_snps))
 
@@ -165,117 +264,61 @@ if (nrow(cohort_summary) < 2) {
   stop("Need ≥ 2 cohorts for leave-one-cohort-out analysis.")
 }
 
-# 4.3 Outcome labels and types (restricted to the 29 kept outcomes) -----------
+# 4.3 Restrict to the same 29 outcomes and define types ------------------------
 
-outcome_labels <- c(
-  # Placental outcomes
-  finngen_R12_O15_PLAC_PRAEVIA = "Placenta praevia",
-  finngen_R12_O15_PLAC_DISORD  = "Placental disorders",
-  finngen_R12_O15_PLAC_PREMAT_SEPAR = "Premature placental separation",
-  
-  # Caesarean delivery
-  el_cs   = "Elective caesarean section",
-  em_cs   = "Emergency caesarean section",
-  cs      = "Caesarean section",
-  
-  # Apgar scores
-  lowapgar1 = "Low Apgar score at 1 min",
-  lowapgar5 = "Low Apgar score at 5 min",
-  
-  # Labour and delivery complications
-  rup_memb  = "Premature rupture of membranes",
-  induction = "Labour induction",
-  
-  # Gestational age and timing
-  ga_all    = "Gestational age",
-  pretb_all = "Preterm birth (any)",
-  vpretb_all = "Very preterm birth",
-  posttb_all = "Post-term birth",
-  
-  # Birth weight outcomes
-  hbw_all   = "High birthweight (>4000g)",
-  lbw_all   = "Low birthweight (<2500g)",
-  sga       = "Small for gestational age",
-  
-  # Maternal health
-  depr_subsamp     = "Postpartum depression",
-  anaemia_preg_all = "Pregnancy anaemia",
-  
-  # Pregnancy complications
-  gdm_subsamp = "Gestational diabetes mellitus",
-  hdp_subsamp = "Hypertensive disorders of pregnancy",
-  gh_subsamp  = "Gestational hypertension",
-  pe_subsamp  = "Preeclampsia",
-  
-  # Neonatal outcomes
-  nicu       = "NICU admission",
-  sb_subsamp = "Stillbirth",
-  
-  # Haemorrhage and bleeding
-  Antepartum_bleeding_filtered                        = "Antepartum bleeding",
-  Postpartum_hemorrhage_filtered                      = "Postpartum haemorrhage",
-  Postpartum_hemorrhage_due_to_atony_filtered         = "PPH due to atony",
-  Postpartum_hemorrhage_due_to_retained_placenta_filtered = "PPH due to retained placenta"
-)
+# Re-use the same 29 outcomes
+vars_keep_loo <- vars_keep
 
+# Outcome types: ga_all and zbw_all are continuous, all others binary
 outcome_types <- c(
-  # Placental outcomes
-  finngen_R12_O15_PLAC_PRAEVIA = "binary",
-  finngen_R12_O15_PLAC_DISORD  = "binary",
-  finngen_R12_O15_PLAC_PREMAT_SEPAR = "binary",
+  Antepartum_bleeding                       = "binary",
+  Postpartum_hemorrhage                     = "binary",
+  Postpartum_hemorrhage_due_to_atony        = "binary",
+  Postpartum_hemorrhage_due_to_retained_placenta = "binary",
+  finngen_R12_O15_PLAC_PRAEVIA              = "binary",
+  finngen_R12_O15_PLAC_DISORD               = "binary",
+  finngen_R12_O15_PLAC_PREMAT_SEPAR         = "binary",
   
-  # Caesarean delivery
-  el_cs   = "binary",
-  em_cs   = "binary",
-  cs      = "binary",
+  rup_memb                                  = "binary",
   
-  # Apgar scores
-  lowapgar1 = "binary",
-  lowapgar5 = "binary",
+  pretb_all                                 = "binary",
+  vpretb_all                                = "binary",
   
-  # Labour and delivery complications
-  rup_memb  = "binary",
-  induction = "binary",
+  ga_all                                    = "continuous",
+  sga                                       = "binary",
+  lbw_all                                   = "binary",
+  hbw_all                                   = "binary",
+  lga                                       = "binary",
+  zbw_all                                   = "continuous",
   
-  # Gestational age and timing
-  ga_all    = "continuous",
-  pretb_all = "binary",
-  vpretb_all = "binary",
-  posttb_all = "binary",
+  lowapgar1                                 = "binary",
+  lowapgar5                                 = "binary",
+  nicu                                      = "binary",
   
-  # Birth weight outcomes
-  hbw_all   = "binary",
-  lbw_all   = "binary",
-  sga       = "binary",
+  anaemia_preg_all                          = "binary",
+  gdm_subsamp                               = "binary",
+  gh_subsamp                                = "binary",
+  hdp_subsamp                               = "binary",
+  pe_subsamp                                = "binary",
+  depr_subsamp                              = "binary",
   
-  # Maternal health
-  depr_subsamp     = "binary",
-  anaemia_preg_all = "binary",
-  
-  # Pregnancy complications
-  gdm_subsamp = "binary",
-  hdp_subsamp = "binary",
-  gh_subsamp  = "binary",
-  pe_subsamp  = "binary",
-  
-  # Neonatal outcomes
-  nicu       = "binary",
-  sb_subsamp = "binary",
-  
-  # Haemorrhage and bleeding
-  Antepartum_bleeding_filtered                        = "binary",
-  Postpartum_hemorrhage_filtered                      = "binary",
-  Postpartum_hemorrhage_due_to_atony_filtered         = "binary",
-  Postpartum_hemorrhage_due_to_retained_placenta_filtered = "binary"
+  induction                                 = "binary",
+  posttb_all                                = "binary",
+  el_cs                                     = "binary",
+  em_cs                                     = "binary"
 )
 
+# Restrict raw MR-PREG outcome data to the 29 outcomes
 mr_data <- mr_data |>
+  dplyr::filter(Phenotype %in% vars_keep_loo) |>
   dplyr::mutate(
     id.outcome    = Phenotype,
     outcome_label = dplyr::coalesce(outcome_labels[Phenotype], Phenotype),
     outcome_type  = dplyr::coalesce(outcome_types[Phenotype], "binary")
   )
 
+message("Phenotypes in leave-one-cohort-out analysis: ",
+        paste(sort(unique(mr_data$Phenotype)), collapse = ", "))
 
 # 4.4 Exposure reconstruction from harmonised data -----------------------------
 
@@ -314,7 +357,6 @@ exposure_formatted <- TwoSampleMR::format_data(
 
 message("Exposure SNPs (after deduplication): ",
         dplyr::n_distinct(exposure_formatted$SNP))
-
 
 # 4.5 Helper functions: meta-analysis and formatting ---------------------------
 
@@ -392,7 +434,6 @@ build_outcome_formatted <- function(meta_df, outcome_id, outcome_label) {
   TwoSampleMR::format_data(tmp, type = "outcome", phenotype_col = "phenotype")
 }
 
-
 # 4.6 Run main + leave-one-cohort-out MR per outcome ---------------------------
 
 message("Preparing outcome data frame for leave-one-cohort-out...")
@@ -400,17 +441,17 @@ message("Preparing outcome data frame for leave-one-cohort-out...")
 mr_outcome_raw <- mr_data |>
   dplyr::transmute(
     SNP,
-    beta.outcome         = beta,
-    se.outcome           = se,
-    pval.outcome         = pval,
+    beta.outcome          = beta,
+    se.outcome            = se,
+    pval.outcome          = pval,
     effect_allele.outcome = effect_allele,
     other_allele.outcome  = other_allele,
-    eaf.outcome          = eaf,
-    samplesize.outcome   = samplesize,
-    ncase.outcome        = ncase,
-    ncontrol.outcome     = ncontrol,
+    eaf.outcome           = eaf,
+    samplesize.outcome    = samplesize,
+    ncase.outcome         = ncase,
+    ncontrol.outcome      = ncontrol,
     id.outcome,
-    outcome              = outcome_label,
+    outcome               = outcome_label,
     outcome_type,
     study
   )
@@ -485,7 +526,6 @@ if (!nrow(all_results_raw)) {
   stop("No MR results produced in leave-one-cohort-out analysis.")
 }
 
-
 # 4.7 Summary and export -------------------------------------------------------
 
 all_results <- all_results_raw |>
@@ -511,9 +551,13 @@ all_results <- all_results_raw |>
     est_ci, p_display
   )
 
-readr::write_csv(all_results,
-                 file.path(results_dir, "leave_one_cohort_results.csv"))
-readr::write_csv(cohort_summary,
-                 file.path(results_dir, "cohort_composition.csv"))
+readr::write_csv(
+  all_results,
+  file.path(results_dir, "leave_one_cohort_results.csv")
+)
+readr::write_csv(
+  cohort_summary,
+  file.path(results_dir, "cohort_composition.csv")
+)
 
 message("Sensitivity analyses complete. Results saved to: ", results_dir)

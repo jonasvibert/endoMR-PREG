@@ -60,7 +60,6 @@ message("=== TRIOS MR: maternal vs fetal vs paternal genetic effects ===")
 # 1) LOAD EXPOSURE: ENDOMETRIOSIS (RAHMIOLU) INSTRUMENTS                        #
 ################################################################################
 
-# Exposure file saved in Script 01 (clumped instruments)
 exposure_file <- file.path(
   results_dir,
   "Exposure_Endometriosis_Rahmioglu_clumped_snps.tsv"
@@ -70,7 +69,6 @@ stopifnot(file.exists(exposure_file))
 
 exposure_dat <- data.table::fread(exposure_file, data.table = FALSE)
 
-# Minimal sanity checks
 stopifnot(all(c("SNP", "beta.exposure", "se.exposure") %in% colnames(exposure_dat)))
 stopifnot("id.exposure" %in% colnames(exposure_dat))
 
@@ -80,7 +78,6 @@ message("Loaded exposure instruments: ", nrow(exposure_dat), " SNPs.")
 # 2) LOAD TRIOS OUTCOME DATA                                                   #
 ################################################################################
 
-# Try .txt, then fallback to no extension if needed
 trios_path_txt <- file.path(data_dir, "OUTCOME_MR-PREG", "trios_out_dat.txt")
 trios_path_raw <- file.path(data_dir, "OUTCOME_MR-PREG", "trios_out_dat")
 
@@ -96,7 +93,6 @@ message("Reading trios file from: ", trios_path)
 
 trios_raw <- data.table::fread(trios_path, data.table = FALSE)
 
-# Expected columns (from your example)
 expected_cols <- c(
   "SNP", "chr", "pos",
   "effect_allele", "other_allele",
@@ -112,77 +108,126 @@ expected_cols <- c(
 
 missing_cols <- setdiff(expected_cols, colnames(trios_raw))
 if (length(missing_cols)) {
-  warning("The following expected columns are missing in trios_out_dat: ",
-          paste(missing_cols, collapse = ", "))
+  warning(
+    "The following expected columns are missing in trios_out_dat: ",
+    paste(missing_cols, collapse = ", ")
+  )
 }
 
-message("Trios data: ", nrow(trios_raw), " rows, ",
-        ncol(trios_raw), " columns, ",
-        length(unique(trios_raw$Phenotype)), " distinct phenotypes.")
+message(
+  "Trios data: ", nrow(trios_raw), " rows, ",
+  ncol(trios_raw), " columns, ",
+  length(unique(trios_raw$Phenotype)), " distinct phenotypes."
+)
 
 ################################################################################
 # 3) LIMIT TO THE 29 MAIN OUTCOMES                                             #
 ################################################################################
 
-# Must match the 29 outcomes kept in your main script (04_main_analyses_endoMR-PREG.R)
-outcome_labels_29 <- c(
-  # Placental outcomes
-  finngen_R12_O15_PLAC_PRAEVIA                      = "Placenta praevia",
-  finngen_R12_O15_PLAC_DISORD                       = "Placental disorders",
-  finngen_R12_O15_PLAC_PREMAT_SEPAR                 = "Premature placental separation",
+# Must match the 29 outcomes kept in 04_main_analyses_endoMR-PREG.R
+
+vars_keep_trios <- c(
+  # Placenta & bleeding (7)
+  "Antepartum_bleeding",
+  "Postpartum_hemorrhage",
+  "Postpartum_hemorrhage_due_to_atony",
+  "Postpartum_hemorrhage_due_to_retained_placenta",
+  "finngen_R12_O15_PLAC_PRAEVIA",
+  "finngen_R12_O15_PLAC_DISORD",
+  "finngen_R12_O15_PLAC_PREMAT_SEPAR",
   
-  # Caesarean delivery
-  el_cs                                            = "Elective caesarean section",
-  em_cs                                            = "Emergency caesarean section",
-  cs                                               = "Caesarean section",
+  # Membranes (1)
+  "rup_memb",
   
-  # Apgar scores
-  lowapgar1                                        = "Low Apgar score at 1 min",
-  lowapgar5                                        = "Low Apgar score at 5 min",
+  # Preterm birth (2)
+  "pretb_all",
+  "vpretb_all",
   
-  # Labor and delivery complications
-  rup_memb                                         = "Premature rupture of membranes",
-  induction                                        = "Labour induction",
+  # Growth / GA / weight (6)
+  "ga_all",
+  "sga",
+  "lbw_all",
+  "hbw_all",
+  "lga",
+  "zbw_all",
   
-  # Gestational age and timing
-  ga_all                                           = "Gestational age",
-  pretb_all                                        = "Preterm birth (any)",
-  vpretb_all                                       = "Very preterm birth",
-  posttb_all                                       = "Post-term birth",
+  # Neonatal / Apgar (3)
+  "lowapgar1",
+  "lowapgar5",
+  "nicu",
   
-  # Birth weight outcomes
-  hbw_all                                          = "High birthweight (>4000g)",
-  lbw_all                                          = "Low birthweight (<2500g)",
-  sga                                              = "Small for gestational age",
+  # Maternal complications (6)
+  "anaemia_preg_all",
+  "gdm_subsamp",
+  "gh_subsamp",
+  "hdp_subsamp",
+  "pe_subsamp",
+  "depr_subsamp",
   
-  # Maternal health
-  depr_subsamp                                     = "Postpartum Depression",
-  anaemia_preg_all                                 = "Pregnancy anemia",
-  
-  # Pregnancy complications
-  gdm_subsamp                                      = "Gestational diabetes mellitus",
-  hdp_subsamp                                      = "Hypertensive disorders of pregnancy",
-  gh_subsamp                                       = "Gestational hypertension",
-  pe_subsamp                                       = "Preeclampsia",
-  
-  # Neonatal outcomes
-  nicu                                             = "NICU admission",
-  sb_subsamp                                       = "Stillbirth",
-  
-  # Hemorrhage and bleeding (filtered versions in main analysis)
-  Antepartum_bleeding_filtered                     = "Antepartum bleeding",
-  Postpartum_hemorrhage_filtered                   = "Postpartum hemorrhage",
-  Postpartum_hemorrhage_due_to_atony_filtered      = "PPH due to atony",
-  Postpartum_hemorrhage_due_to_retained_placenta_filtered = "PPH due to retained placenta"
+  # Other obstetric (4)
+  "induction",
+  "posttb_all",
+  "el_cs",
+  "em_cs"
 )
 
-# Restrict trios data to phenotypes present in the 29-set
+outcome_labels_29 <- c(
+    # Bleeding (4)
+    Antepartum_bleeding                       = "Antepartum bleeding",
+    Postpartum_hemorrhage                     = "Postpartum hemorrhage (any)",
+    Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
+    Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
+    
+    # Placenta (3)
+    finngen_R12_O15_PLAC_PRAEVIA              = "Placenta praevia",
+    finngen_R12_O15_PLAC_DISORD               = "Placental disorders",
+    finngen_R12_O15_PLAC_PREMAT_SEPAR         = "Premature placental separation",
+    
+    # Membranes (1)
+    rup_memb                                  = "Premature rupture of membranes",
+    
+    # Birth timing (4)
+    pretb_all                                 = "Preterm birth <37 weeks (any)",
+    vpretb_all                                = "Very preterm birth < 34weeks",
+    posttb_all                                = "Post-term birth",
+    ga_all                                    = "Gestational age",
+    
+    # Fetal Growth (5)
+    sga                                       = "Small for gestational age",
+    lbw_all                                   = "Low birthweight <2500g",
+    hbw_all                                   = "High birthweight >4000g",
+    lga                                       = "Large for gestational age",
+    zbw_all                                   = "Z-score birthweight",
+    
+    # Neonatal adaptation (3)
+    lowapgar1                                 = "Low Apgar score at 1 min",
+    lowapgar5                                 = "Low Apgar score at 5 min",
+    nicu                                      = "NICU admission",
+    
+    # Maternal complications (6)
+    anaemia_preg_all                          = "Pregnancy anemia",
+    gdm_subsamp                               = "Gestational diabetes",
+    gh_subsamp                                = "Gestational hypertension",
+    hdp_subsamp                               = "Hypertensive disorders of pregnancy",
+    pe_subsamp                                = "Preeclampsia",
+    depr_subsamp                              = "Postpartum depression",
+    
+    # Caesarean section (2)
+    el_cs                                     = "Elective caesarean section",
+    em_cs                                     = "Emergency caesarean section",
+    
+    # Other obstetric timing (1)
+    induction                                 = "Labour induction"
+  )
+
 trios <- trios_raw %>%
-  dplyr::filter(Phenotype %in% names(outcome_labels_29))
+  dplyr::filter(Phenotype %in% vars_keep_trios)
 
 message("Trios rows after restricting to 29 outcomes: ", nrow(trios))
-message("Phenotypes in trios after restriction: ",
-        paste(sort(unique(trios$Phenotype)), collapse = ", "))
+message(
+  "Phenotypes in trios after restriction: ",
+  paste(sort(unique(trios$Phenotype)), collapse = ", ")
+)
 
 ################################################################################
 # 4) FORMAT TRIOS AS OUTCOME DATA (MATERNAL / FETAL / PATERNAL)                #
@@ -203,14 +248,14 @@ format_trios_component <- function(trios_df, component = c("maternal", "fetal", 
     se_col   <- "se_off"
     p_col    <- "p_off"
     n_col    <- "n_off"
-    eaf_col  <- "eaf_mat"   # use maternal EAF as approximation
+    eaf_col  <- "eaf_mat"
     origin   <- "Fetal"
   } else {
     beta_col <- "beta_pat"
     se_col   <- "se_pat"
     p_col    <- "p_pat"
     n_col    <- "n_pat"
-    eaf_col  <- "eaf_mat"   # use maternal EAF as approximation
+    eaf_col  <- "eaf_mat"
     origin   <- "Paternal"
   }
   
@@ -232,7 +277,6 @@ format_trios_component <- function(trios_df, component = c("maternal", "fetal", 
       component      = origin
     )
   
-  # Drop rows with missing beta or se
   dat_comp <- dat_comp %>%
     dplyr::filter(
       !is.na(beta),
@@ -240,7 +284,6 @@ format_trios_component <- function(trios_df, component = c("maternal", "fetal", 
       se > 0
     )
   
-  # Format as outcome data for TwoSampleMR
   out_formatted <- TwoSampleMR::format_data(
     dat               = dat_comp,
     type              = "outcome",
@@ -283,14 +326,16 @@ run_trios_mr <- function(exposure_dat, outcome_dat, label_origin) {
     action       = 2
   )
   
-  # MR (all default methods, but we will mainly use IVW)
   mr_res <- TwoSampleMR::mr(dat_harm)
   
-  # Add human-readable labels
   mr_res <- mr_res %>%
     dplyr::mutate(
-      outcome_full = dplyr::recode(id.outcome, !!!outcome_labels_29),
-      origin       = label_origin
+      outcome_full = dplyr::recode(
+        id.outcome,
+        !!!outcome_labels_29,
+        .default = id.outcome        # <- key change so labels are never blank
+      ),
+      origin = label_origin
     )
   
   list(harmonised = dat_harm, results = mr_res)
@@ -308,7 +353,6 @@ mr_mat <- res_mat$results
 mr_fet <- res_fet$results
 mr_pat <- res_pat$results
 
-# Keep IVW only for comparison
 ivw_mat <- mr_mat %>% dplyr::filter(method == "Inverse variance weighted")
 ivw_fet <- mr_fet %>% dplyr::filter(method == "Inverse variance weighted")
 ivw_pat <- mr_pat %>% dplyr::filter(method == "Inverse variance weighted")
@@ -319,17 +363,15 @@ ivw_pat <- mr_pat %>% dplyr::filter(method == "Inverse variance weighted")
 
 ivw_all <- dplyr::bind_rows(ivw_mat, ivw_fet, ivw_pat) %>%
   dplyr::mutate(
-    OR   = exp(b),
-    LCL  = exp(b - 1.96 * se),
-    UCL  = exp(b + 1.96 * se),
-    OR_CI = sprintf("%.2f (%.2f–%.2f)", OR, LCL, UCL),
+    OR      = exp(b),
+    LCL     = exp(b - 1.96 * se),
+    UCL     = exp(b + 1.96 * se),
+    OR_CI   = sprintf("%.2f (%.2f–%.2f)", OR, LCL, UCL),
     pval_fmt = formatC(pval, format = "e", digits = 2)
   )
 
-# FDR correction across all (maternal+fetal+paternal) IVW tests
 ivw_all$qval <- p.adjust(ivw_all$pval, method = "fdr")
 
-# Export separate CSVs
 readr::write_csv(ivw_mat, file.path(results_dir, "trios_mr_results_maternal.csv"))
 readr::write_csv(ivw_fet, file.path(results_dir, "trios_mr_results_fetal.csv"))
 readr::write_csv(ivw_pat, file.path(results_dir, "trios_mr_results_paternal.csv"))
@@ -338,22 +380,21 @@ readr::write_csv(ivw_all, file.path(results_dir, "trios_mr_results_comparison.cs
 message("Saved MR results (maternal / fetal / paternal) in results/")
 
 ################################################################################
-# 8) FOREST-PLOT COMPARISON: MATERNAL vs FETAL vs PATERNAL                   #
+# 8) FOREST-PLOT COMPARISON: MATERNAL vs FETAL vs PATERNAL                     #
 ################################################################################
 
-# Order outcomes by maternal OR magnitude (or any criterion you prefer)
 ivw_all$order_outcome <- dplyr::dense_rank(dplyr::desc(abs(ivw_all$b)))
 
 p_trios <- ggplot(ivw_all, aes(x = OR, y = reorder(outcome_full, order_outcome))) +
   geom_vline(xintercept = 1, linetype = "dashed", colour = "grey60") +
   geom_errorbarh(
     aes(xmin = LCL, xmax = UCL, colour = origin),
-    height = 0.25,
+    height   = 0.25,
     position = position_dodge(width = 0.6)
   ) +
   geom_point(
     aes(colour = origin),
-    size = 2.7,
+    size     = 2.7,
     position = position_dodge(width = 0.6)
   ) +
   scale_x_log10(
@@ -376,8 +417,8 @@ p_trios <- ggplot(ivw_all, aes(x = OR, y = reorder(outcome_full, order_outcome))
   ) +
   theme_minimal(base_size = 11) +
   theme(
-    plot.title    = element_text(size = 14, face = "bold", hjust = 0.5),
-    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    plot.title      = element_text(size = 14, face = "bold", hjust = 0.5),
+    plot.subtitle   = element_text(size = 12, hjust = 0.5),
     legend.position = "bottom",
     panel.grid.minor = element_blank()
   )
