@@ -5,68 +5,17 @@
 
 ## 👥 Authors
 
-<table>
-<tr>
-<td align="left"><b>Author</b></td>
-<td align="left"><b>Affiliation</b></td>
-<td align="left"><b>Role</b></td>
-</tr>
-<tr>
-<td><strong>Jonas Vibert, MD</strong></td>
-<td>🏥 Department of Obstetrics and Gynecology<br>Lausanne University Hospital, Switzerland</td>
-<td>📧 <em>Corresponding Author</em></td>
-</tr>
-<tr>
-<td><strong>Maria Christine Magnus, PhD</strong></td>
-<td>🇳🇴 Centre for Fertility and Health<br>Norwegian Institute of Public Health, Oslo, Norway</td>
-<td>Co-investigator</td>
-</tr>
-<tr>
-<td><strong>Lizzy Aiton</strong></td>
-<td>🔬 MRC Integrative Epidemiology Unit<br>🎓 Population Health Sciences, Bristol Medical School<br>University of Bristol, UK</td>
-<td>Research Associate</td>
-</tr>
-<tr>
-<td><strong>Zoltán Kutalik, PhD</strong></td>
-<td>📊 University Center for Primary Care and Public Health<br>Lausanne, Switzerland</td>
-<td>Senior Investigator</td>
-</tr>
-<tr>
-<td><strong>David Baud, MD, PhD</strong></td>
-<td>🏥 Department of Obstetrics and Gynecology<br>Lausanne University Hospital, Switzerland</td>
-<td>Senior Author</td>
-</tr>
-<tr>
-<td><strong>Deborah A. Lawlor, PhD</strong></td>
-<td>🔬 MRC Integrative Epidemiology Unit<br>🎓 Population Health Sciences, Bristol Medical School<br>University of Bristol, UK</td>
-<td>Senior Investigator</td>
-</tr>
-<tr>
-<td><strong>Carolina Borges, PhD</strong> *</td>
-<td>🔬 MRC Integrative Epidemiology Unit<br>🎓 Population Health Sciences, Bristol Medical School<br>University of Bristol, UK</td>
-<td>Senior Investigator</td>
-</tr>
-<tr>
-<td><strong>Nicola Pluchino, MD, PhD</strong> *</td>
-<td>🏥 Department of Obstetrics and Gynecology<br>Lausanne University Hospital, Switzerland</td>
-<td>Principal Investigator</td>
-</tr>
-</table>
+**Jonas Vibert, MD¹, Maria Christine Magnus, PhD⁵, Lizzy Aiton²,³, Zoltán Kutalik, PhD⁴, David Baud, MD, PhD¹, Deborah A. Lawlor, PhD²,³, Carolina Borges, PhD²,³*, Nicola Pluchino, MD, PhD¹***
 
-<small><em>* Contributed equally as senior authors</em></small>
+### 🏛️ Affiliations
 
-### 🏛️ Institutional Affiliations
+¹ Department of Obstetrics and Gynecology, Lausanne University Hospital, Lausanne, Switzerland  
+² MRC Integrative Epidemiology Unit, University of Bristol, Bristol, UK  
+³ Population Health Sciences, Bristol Medical School, University of Bristol, Bristol, UK  
+⁴ University Center for Primary Care and Public Health, Lausanne, Switzerland  
+⁵ Centre for Fertility and Health, Norwegian Institute of Public Health, Oslo, Norway  
 
-**🇨🇭 Switzerland**
-- 🏥 **Lausanne University Hospital (CHUV)** - Department of Obstetrics and Gynecology  
-- 📊 **University Center for Primary Care and Public Health (Unisanté)** - Lausanne
-
-**🇬🇧 United Kingdom** 
-- 🔬 **University of Bristol** - MRC Integrative Epidemiology Unit
-- 🎓 **University of Bristol** - Population Health Sciences, Bristol Medical School
-
-**🇳🇴 Norway**
-- 🇳🇴 **Norwegian Institute of Public Health** - Centre for Fertility and Health, Oslo
+*\* These authors contributed equally to this work*
 ---
 
 This repository contains the complete analysis code and results for a comprehensive two-sample Mendelian randomization study investigating causal relationships between genetic liability to endometriosis and **29 specialized pregnancy and perinatal outcomes**.
