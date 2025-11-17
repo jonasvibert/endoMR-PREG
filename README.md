@@ -17,9 +17,14 @@
 <td>📧 <em>Corresponding Author</em></td>
 </tr>
 <tr>
-<td><strong>Carolina Borges, PhD</strong></td>
-<td>🔬 MRC Integrative Epidemiology Unit<br>University of Bristol, UK</td>
+<td><strong>Maria Christine Magnus, PhD</strong></td>
+<td>🇳🇴 Centre for Fertility and Health<br>Norwegian Institute of Public Health, Oslo, Norway</td>
 <td>Co-investigator</td>
+</tr>
+<tr>
+<td><strong>Lizzy Aiton</strong></td>
+<td>🔬 MRC Integrative Epidemiology Unit<br>🎓 Population Health Sciences, Bristol Medical School<br>University of Bristol, UK</td>
+<td>Research Associate</td>
 </tr>
 <tr>
 <td><strong>Zoltán Kutalik, PhD</strong></td>
@@ -33,25 +38,35 @@
 </tr>
 <tr>
 <td><strong>Deborah A. Lawlor, PhD</strong></td>
-<td>🔬 MRC Integrative Epidemiology Unit<br>University of Bristol, UK</td>
+<td>🔬 MRC Integrative Epidemiology Unit<br>🎓 Population Health Sciences, Bristol Medical School<br>University of Bristol, UK</td>
 <td>Senior Investigator</td>
 </tr>
 <tr>
-<td><strong>Nicola Pluchino, MD, PhD</strong></td>
+<td><strong>Carolina Borges, PhD</strong> *</td>
+<td>🔬 MRC Integrative Epidemiology Unit<br>🎓 Population Health Sciences, Bristol Medical School<br>University of Bristol, UK</td>
+<td>Senior Investigator</td>
+</tr>
+<tr>
+<td><strong>Nicola Pluchino, MD, PhD</strong> *</td>
 <td>🏥 Department of Obstetrics and Gynecology<br>Lausanne University Hospital, Switzerland</td>
 <td>Principal Investigator</td>
 </tr>
 </table>
 
+<small><em>* Contributed equally as senior authors</em></small>
+
 ### 🏛️ Institutional Affiliations
 
 **🇨🇭 Switzerland**
-- 🏥 **Lausanne University Hospital (CHUV)** - Department of Obstetrics and Gynecology
+- 🏥 **Lausanne University Hospital (CHUV)** - Department of Obstetrics and Gynecology  
 - 📊 **University Center for Primary Care and Public Health (Unisanté)** - Lausanne
 
 **🇬🇧 United Kingdom** 
 - 🔬 **University of Bristol** - MRC Integrative Epidemiology Unit
+- 🎓 **University of Bristol** - Population Health Sciences, Bristol Medical School
 
+**🇳🇴 Norway**
+- 🇳🇴 **Norwegian Institute of Public Health** - Centre for Fertility and Health, Oslo
 ---
 
 This repository contains the complete analysis code and results for a comprehensive two-sample Mendelian randomization study investigating causal relationships between genetic liability to endometriosis and **29 specialized pregnancy and perinatal outcomes**.
@@ -321,11 +336,6 @@ For major changes, please open an issue first to discuss proposed modifications.
 ### 🤝 Research Collaboration Inquiries
 For questions about methodology, data access, or collaboration opportunities, please contact the corresponding author.
 
----
-
-## ⚖️ License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
