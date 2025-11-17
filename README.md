@@ -3,11 +3,54 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/jonasvibert/endoMR-PREG) [![R](https://img.shields.io/badge/R-v4.3.2+-blue)](https://www.r-project.org/) [![DOI](https://img.shields.io/badge/DOI-Pending-yellow)]()
 
-**Authors:** Jonas Vibert, MD¹, Carolina Borges, PhD², Zoltán Kutalik, PhD³, David Baud, MD, PhD¹, Deborah A. Lawlor, PhD², Nicola Pluchino, MD, PhD¹
+## 👥 Authors
 
-¹Department of Obstetrics and Gynecology, Lausanne University Hospital, Lausanne, Switzerland  
-²MRC Integrative Epidemiology Unit at the University of Bristol, Bristol, UK  
-³University Center for Primary Care and Public Health, Lausanne, Switzerland
+<table>
+<tr>
+<td align="left"><b>Author</b></td>
+<td align="left"><b>Affiliation</b></td>
+<td align="left"><b>Role</b></td>
+</tr>
+<tr>
+<td><strong>Jonas Vibert, MD</strong></td>
+<td>🏥 Department of Obstetrics and Gynecology<br>Lausanne University Hospital, Switzerland</td>
+<td>📧 <em>Corresponding Author</em></td>
+</tr>
+<tr>
+<td><strong>Carolina Borges, PhD</strong></td>
+<td>🔬 MRC Integrative Epidemiology Unit<br>University of Bristol, UK</td>
+<td>Co-investigator</td>
+</tr>
+<tr>
+<td><strong>Zoltán Kutalik, PhD</strong></td>
+<td>📊 University Center for Primary Care and Public Health<br>Lausanne, Switzerland</td>
+<td>Senior Investigator</td>
+</tr>
+<tr>
+<td><strong>David Baud, MD, PhD</strong></td>
+<td>🏥 Department of Obstetrics and Gynecology<br>Lausanne University Hospital, Switzerland</td>
+<td>Senior Author</td>
+</tr>
+<tr>
+<td><strong>Deborah A. Lawlor, PhD</strong></td>
+<td>🔬 MRC Integrative Epidemiology Unit<br>University of Bristol, UK</td>
+<td>Senior Investigator</td>
+</tr>
+<tr>
+<td><strong>Nicola Pluchino, MD, PhD</strong></td>
+<td>🏥 Department of Obstetrics and Gynecology<br>Lausanne University Hospital, Switzerland</td>
+<td>Principal Investigator</td>
+</tr>
+</table>
+
+### 🏛️ Institutional Affiliations
+
+**🇨🇭 Switzerland**
+- 🏥 **Lausanne University Hospital (CHUV)** - Department of Obstetrics and Gynecology
+- 📊 **University Center for Primary Care and Public Health (Unisanté)** - Lausanne
+
+**🇬🇧 United Kingdom** 
+- 🔬 **University of Bristol** - MRC Integrative Epidemiology Unit
 
 ---
 
@@ -257,10 +300,26 @@ For major changes, please open an issue first to discuss proposed modifications.
 
 ## 📧 Contact
 
-**Corresponding Author:** Jonas Vibert, MD  
-**Email:** jonas.vibert@chuv.ch  
-**ORCID:** [0009-0000-2449-7734](https://orcid.org/0009-0000-2449-7734)  
-**Institution:** Lausanne University Hospital, Department of Obstetrics and Gynecology
+<table>
+<tr>
+<td rowspan="4" width="100px" align="center">
+<strong>📧<br>Corresponding<br>Author</strong>
+</td>
+<td><strong>Dr. Jonas Vibert, MD</strong></td>
+</tr>
+<tr>
+<td>✉️ <strong>Email:</strong> <a href="mailto:jonas.vibert@chuv.ch">jonas.vibert@chuv.ch</a></td>
+</tr>
+<tr>
+<td>🆔 <strong>ORCID:</strong> <a href="https://orcid.org/0009-0000-2449-7734" target="_blank">0009-0000-2449-7734</a></td>
+</tr>
+<tr>
+<td>🏥 <strong>Institution:</strong> Lausanne University Hospital (CHUV)<br>&nbsp;&nbsp;&nbsp;&nbsp;Department of Obstetrics and Gynecology</td>
+</tr>
+</table>
+
+### 🤝 Research Collaboration Inquiries
+For questions about methodology, data access, or collaboration opportunities, please contact the corresponding author.
 
 ---
 
