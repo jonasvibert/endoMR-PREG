@@ -3,12 +3,13 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/jonasvibert/endoMR-PREG) [![R](https://img.shields.io/badge/R-v4.3.2+-blue)](https://www.r-project.org/) [![DOI](https://img.shields.io/badge/DOI-Pending-yellow)]()
 
-**Authors:** Jonas Vibert, MD¹, Carolina Borges, PhD², Zoltán Kutalik, PhD³, David Baud, MD, PhD¹, Deborah A. Lawlor, PhD², Nicola Pluchino, MD, PhD¹
+**Authors:** Jonas Vibert, MD¹, Maria Christine Magnus5,  Lizzy Aiton²,3, Zoltán Kutalik, PhD4, David Baud, MD, PhD¹, Deborah A. Lawlor, PhD²,3, Carolina Borges, PhD²,3* and Nicola Pluchino, MD, PhD¹*
 
-¹Department of Obstetrics and Gynecology, Lausanne University Hospital, Lausanne, Switzerland  
-²MRC Integrative Epidemiology Unit at the University of Bristol, Bristol, UK  
-³University Center for Primary Care and Public Health, Lausanne, Switzerland
-
+1Departement of obstetrics and gynecology, Lausanne University Hospital, Lausanne, Switzerland
+5Centre for Fertility and Health, Norwegian Institute of Public Health, Oslo, Norway
+2 MRC Integrative Epidemiology Unit, University of Bristol, Bristol, UK.
+3 Population Health Sciences, Bristol Medical School, University of Bristol, Bristol, UK.
+4University Center for Primary Care and Public Health, Lausanne, Switzerland
 ---
 
 This repository contains the complete analysis code and results for a comprehensive two-sample Mendelian randomization study investigating causal relationships between genetic liability to endometriosis and **29 specialized pregnancy and perinatal outcomes**.
@@ -262,11 +263,6 @@ For major changes, please open an issue first to discuss proposed modifications.
 **ORCID:** [0009-0000-2449-7734](https://orcid.org/0009-0000-2449-7734)  
 **Institution:** Lausanne University Hospital, Department of Obstetrics and Gynecology
 
----
-
-## ⚖️ License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
