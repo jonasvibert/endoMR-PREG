@@ -1,279 +1,113 @@
-# Supplementary Material
+Supplementary Methods
 
-## Additional Analyses and Supporting Information
+This two-sample Mendelian randomization (MR) study was designed to evaluate whether genetic liability to endometriosis has a causal effect on a range of adverse pregnancy and perinatal outcomes. The analysis pipeline was implemented in R using a set of modular scripts stored in the endoMR-PREG GitHub repository (https://github.com/jonasvibert/endoMR-PREG/tree/3c6357c4e89748dc67e96dd292d10615feffbb93/scripts):
+01_select_instruments_endoMR-PREG.R
+02_prepare_outcomes_endoMR-PREG.R
+03_harmonise_data_endoMR-PREG.R
+04_main_analyses_endoMR-PREG.R
+04.2_fetal_effect_endoMR-PREG.R
+05_sensitivity_analyses_endoMR-PREG.R
+06_tables_endoMR-PREG.R
+07_plots_endoMR-PREG.R)
+Together, these scripts reproduce the full workflow, from instrument selection to figure generation.
 
-**Updated for 29 specialized pregnancy outcomes with novel fetal genetic effect analysis**
+Exposure: genetic liability to endometriosis
 
-### Supplementary Tables
+Genetic instruments for endometriosis were derived from the largest published genome-wide association study (GWAS) meta-analysis of clinically confirmed endometriosis by Rahmioglu et al. (Nature Genetics 2023) (1). This meta-analysis included approximately 58,000 surgically and/or clinically diagnosed cases and about 733,000 female controls, predominantly of European ancestry, contributed by the International Endometriosis Genetics Consortium, 23andMe, FinnGen and other cohorts. In 01_select_instruments_endoMR-PREG.R, we imported the European-ancestry summary statistics from the meta-analysis that included 23andMe, and restricted all subsequent analyses to these data to maintain ancestry compatibility with the outcome GWAS.
 
-#### Table S1: Endometriosis Genetic Instruments
-*Location*: `Supplementary_Table_S1_Endometriosis_Instruments.xlsx`
+Instrument selection followed a two-step procedure. First, we extracted all variants reaching conventional genome-wide significance for endometriosis (P < 5 × 10^-8) together with their rsIDs, effect and non-effect alleles, effect sizes (beta), standard errors (SE), effect allele frequencies (EAF) and, where available, sample size (N). Some variants were reported by Rahmioglu et al. in chromosome:position (chr:pos) format rather than rsID. For these, 01_select_instruments_endoMR-PREG.R mapped coordinates to rsIDs using the 1000 Genomes Project Phase 3 European reference panel (2). When multiple rsIDs were present at a given position, we retained the allele-specific identifier consistent with the effect allele reported in the GWAS. Variants with ambiguous mapping or unresolved alleles were excluded at this stage.
 
-**Columns**:
-- SNP: rsID identifier
-- Chromosome: Chromosome number
-- Position: Base pair position (GRCh37)
-- Effect allele: Allele increasing endometriosis risk
-- Other allele: Reference allele
-- EAF: Effect allele frequency
-- Beta: Effect size (log odds)
-- SE: Standard error
-- P-value: Association p-value
-- F-statistic: Instrument strength
+To ensure independence between instruments, we performed linkage disequilibrium (LD) clumping using PLINK 1.9 with 1000 Genomes Phase 3 Europeans as the reference population. The script 01_select_instruments_endoMR-PREG.R applied an r^2 threshold of 0.001 within a 10,000 kb physical window (parameters clump_r2 = 0.001, clump_kb = 10,000), using 5 × 10^-8 as the primary P-value threshold (clump_p1) and 1 as the secondary threshold (clump_p2). After clumping, 41 independent single nucleotide polymorphisms (SNPs) were retained as instruments for genetic liability to endometriosis.
 
-#### Table S2: Sample Sizes by Outcome
-*Location*: `results/Table1_sample_sizes_clean.csv`
+Instrument strength was systematically evaluated in the same script. For each SNP, we calculated a simple F-statistic as:
 
-**Content**: Sample sizes for all pregnancy outcomes analyzed
+F_simple = (beta / SE)^2
 
-#### Table S3: Complete MR Results
-*Location*: `results/all_mr_methods.csv`
+We then estimated the variance explained in endometriosis liability (R^2) using the standard formula:
 
-**Content**: Results from all MR methods for all outcomes
+R^2 = [ 2 × EAF × (1 − EAF) × beta^2 ] / [ 2 × EAF × (1 − EAF) × beta^2 + SE^2 × N ]
 
-#### Table S4: Sensitivity Analysis Summary
-*Location*: `results/Supplementary_Table_S2_Sensitivity_Analysis.csv`
+From this, we derived an exact per-SNP F-statistic:
 
-**Content**: 
-- Heterogeneity statistics (Cochran's Q)
-- Pleiotropy tests (MR-Egger intercept)
-- Method comparison (IVW, MR-Egger, Weighted Median)
-- Leave-one-out summaries
+F_exact = R^2 × (N − 2) / (1 − R^2)
 
-#### 🆕 Table S5: TRIOS Fetal Genetic Effect Analysis
-*Location*: `fetal_genetic_analysis/trios_maternal_fetal_paternal_summary.csv`
+Summing R^2 across all independent SNPs (assuming negligible LD after clumping) gave a total variance explained of approximately 5.6%. The mean per-SNP F-statistic was around 279, substantially above the conventional threshold of 10 and indicating a very low risk of weak instrument bias. Full instrument characteristics (rsID, genomic position, alleles, beta, SE, EAF, R^2, F) are provided in Supplementary Table S1.
 
-**Content**:
-- Maternal genetic effects (using maternal genotypes)
-- Fetal genetic effects (using offspring genotypes)  
-- Paternal genetic effects (negative control)
-- Effect size comparisons and pathway identification
-- Birth weight detailed analysis (primary fetal pathway finding)
+Outcome GWAS and phenotype definition
 
-### Supplementary Figures
+We evaluated 29 maternal and perinatal outcomes. These outcomes were chosen based on prior epidemiological evidence linking endometriosis with obstetric complications, clinical relevance for maternal–fetal health, and the availability of adequately powered GWAS in European-ancestry populations. We drew outcome summary statistics from three sources: the Mendelian Randomization in Pregnancy (MR-PREG) collaboration (3), FinnGen release 12 (4), and a large postpartum haemorrhage (PPH) meta-analysis (5). Extraction, cleaning and initial formatting of these GWAS were performed in 02_prepare_outcomes_endoMR-PREG.R.
+MR-PREG is an international consortium that harmonises and meta-analyses GWAS of pregnancy and perinatal outcomes across several large European birth cohorts, including ALSPAC, Born in Bradford, MoBa and UK Biobank, following a standardised pipeline described in detail in McBride et al. (2025) (3). Briefly, each cohort applied standard sample-level quality control (removal of individuals with low call rate, sex discordance, outlying heterozygosity or cryptic relatedness) and restricted analyses to participants of European genetic ancestry. Variant-level quality control included filters for call rate, minor allele frequency, Hardy–Weinberg equilibrium and imputation quality, as described in McBride et al. (3). Association analyses were performed using logistic or linear regression, or REGENIE for binary and continuous traits, with appropriate adjustment for age, ancestry principal components, batch effects and cohort-specific covariates, and rare outcomes were handled using Firth correction. Cohort-level results were meta-analysed using fixed-effects inverse-variance weighting.
+From MR-PREG we used 21 outcomes provided in the consortium’s meta-analysed GWAS: gestational age (full sample and genotyped subsample), gestational diabetes, gestational hypertension, hypertensive disorders of pregnancy, high and low birthweight, small-for-gestational-age, birthweight z-score, large-for-gestational-age, preterm birth, very preterm birth, post-term birth, labour induction, premature rupture of membranes, Apgar score <7 at 1 and 5 minutes, NICU admission, pregnancy anaemia and preeclampsia. Caesarean section phenotypes (overall, elective and emergency), stillbirth and postpartum/peripartum depression were obtained through MR-PREG or collaborating consortia using the same QC and meta-analytic framework. For each outcome GWAS we extracted SNP-level beta, SE, effect allele, allele frequency and sample size directly from the published summary statistics.
+To complement these outcomes with more detailed placental phenotypes, we used FinnGen release 12 (4). FinnGen GWAS follow a standardised QC and analysis framework described in Kurki et al. (2023), including array-based genotyping, imputation to the SISu v3 Finnish reference panel, strict sample and variant filtering, and association testing using REGENIE. From FinnGen, we extracted placenta praevia, placental disorders and placental abruption, defined through registry-based ICD codes.
+Finally, bleeding-related outcomes were obtained from the GWAS meta-analysis by Westergaard et al. (2024) (5), which aggregates data from multiple Nordic biobanks and UK Biobank. We included antepartum bleeding, postpartum haemorrhage (PPH) overall, PPH due to uterine atony and PPH due to retained placenta as defined in that study. Reported odds ratios were converted to log-odds (beta = log(OR)); when standard errors were not available, they were derived from the reported P-values using SE = |beta| / z, where z is the standard normal quantile corresponding to P/2.
+Overall, the 29 outcomes can be grouped into nine clinical domains: placental disorders (placenta praevia, placental disorders, abruption); hypertensive disorders of pregnancy (hypertensive disorders overall, gestational hypertension, preeclampsia); pregnancy timing (gestational age, preterm birth, very preterm birth, post-term birth); fetal growth and birthweight (high birthweight, low birthweight, small-for-gestational-age, birthweight z-score, large-for-gestational-age); labour and delivery complications (labour induction, premature rupture of membranes, caesarean section overall, elective and emergency caesarean); bleeding and haemorrhage (antepartum bleeding, PPH overall, PPH due to atony, PPH due to retained placenta); maternal metabolic/haematologic complications (gestational diabetes, pregnancy anaemia); maternal mental health (postpartum/peripartum depression); and neonatal condition at birth (low Apgar scores at 1 and 5 minutes, NICU admission, stillbirth). Detailed definitions, case/control counts and contributing cohorts are presented in Table 1 and Supplementary Table S2.
 
-#### Figure S1: Instrument Characteristics
-*Location*: `plot/fig_scatter/`
+Harmonisation of exposure and outcome data
 
-**Description**: Scatter plots showing relationship between endometriosis and significant outcomes
-- Panel A: Female infertility
-- Panel B: Premature rupture of membranes  
-- Panel C: Placenta praevia
-- Panel D: Placental abruption
+Harmonisation of endometriosis and outcome GWAS was carried out in 03_harmonise_data_endoMR-PREG.R using the TwoSampleMR package (version 0.5.6) with additional manual checks. For each outcome, we first matched the 41 endometriosis instrument SNPs to outcome SNPs by rsID. We then aligned alleles so that the effect allele was identical in exposure and outcome datasets, flipping the sign of the outcome beta and adjusting allele frequencies where necessary. Palindromic SNPs with intermediate allele frequencies (A/T or C/G variants with minor allele frequency around 0.5) were removed using the harmonise_data function with action = 2, because strand assignment is ambiguous in this range. Palindromic SNPs with clearly low or high MAF, for which strand could be reliably inferred, were retained. SNPs with unresolved strand issues, mismatched alleles or missing beta/SE in either dataset were excluded.
 
-#### Figure S2: Forest Plots (Individual SNPs)
-*Location*: `plot/fig_forest/`
+Because not all instrument SNPs survived quality control or were available in every outcome GWAS, the effective number of instruments contributing to each MR analysis ranged from 29 to 41. The exact SNP count per outcome is reported in Supplementary Table S2, alongside exposure and outcome sample sizes.
 
-**Description**: Forest plots showing individual SNP effects and overall IVW estimate
+Two-sample MR analyses
 
-#### Figure S3: Leave-One-Out Analysis
-*Location*: `plot/fig_leaveoneout_egger/`
+Primary MR analyses were implemented in 04_main_analyses_endoMR-PREG.R. For each outcome, we used the inverse-variance weighted (IVW) estimator as the main causal effect measure (6). For each SNP i, we denote the SNP–endometriosis association as beta_Xi, the SNP–outcome association as beta_Yi, and the variance of beta_Yi as var_Yi. The IVW estimator can be written as:
 
-**Description**: Leave-one-out plots demonstrating robustness of findings
+beta_IVW = sum( beta_Xi × beta_Yi / var_Yi ) / sum( beta_Xi^2 / var_Yi )
 
-#### Figure S4: Funnel Plots
-*Location*: `plot/fig_funnel/`
+This is equivalent to a weighted regression of beta_Yi on beta_Xi with no intercept and weights equal to 1 / var_Yi. For binary outcomes we exponentiated beta_IVW to obtain odds ratios (OR = exp(beta_IVW)) with 95% confidence intervals, whereas for continuous outcomes (gestational age, birthweight z-score) we reported the beta coefficient and corresponding 95% confidence intervals.
 
-**Description**: Funnel plots for assessment of directional pleiotropy
+Sensitivity analyses and assessment of MR assumptions
 
-#### Figure S5: Enhanced Forest Plots
-*Location*: `plots/forest_endoMR-PREG_*.png`
+Sensitivity analyses were conducted in 05_sensitivity_analyses_endoMR-PREG.R to evaluate the robustness of IVW estimates to potential violations of MR assumptions, particularly horizontal pleiotropy. First, we performed MR-Egger regression, modelling beta_Yi as:
 
-**Description**: Multiple forest plot layouts for 29 specialized outcomes
-- Standard IVW forest plot
-- Multi-method comparison forest
-- Enhanced layout with improved spacing
-- endoPAIN-style layout
+beta_Yi = intercept + beta_MR_Egger × beta_Xi + error
 
-#### 🆕 Figure S6: TRIOS Maternal vs Fetal Genetic Effect Analysis
-*Location*: `fetal_genetic_analysis/mat_fetal_paternal_comparison.png`
+The slope beta_MR_Egger provides a pleiotropy-adjusted causal estimate under the Instrument Strength Independent of Direct Effect (InSIDE) assumption, while the intercept tests for directional pleiotropy: a non-zero intercept suggests that instruments have, on average, direct effects on the outcome independent of endometriosis liability.
 
-**Description**: Comprehensive comparison of maternal, fetal, and paternal genetic effects
-- Birth weight primary analysis (fetal effect β = -0.045, P = 0.007)
-- Maternal effect comparison (β = -0.021, P = 0.21)
-- Paternal negative control validation (β = -0.008, P = 0.63)
+Second, we estimated causal effects using the weighted median estimator, which remains consistent if at least 50% of the total instrument weight is contributed by valid instruments. This estimator is based on the median of SNP-specific ratio estimates (beta_Yi / beta_Xi), weighted by the inverse variance of beta_Yi. Where informative, we additionally computed weighted mode estimates, which assume that the most common (modal) causal estimate across SNPs arises from valid instruments.
 
-#### 🆕 Figure S7: TRIOS Sensitivity Analysis
-*Location*: `fetal_genetic_analysis/sensitivity/`
+Third, we quantified heterogeneity among SNP-specific causal estimates using Cochran’s Q statistic. For each SNP we calculated its ratio estimate beta_i = beta_Yi / beta_Xi and weight w_i = beta_Xi^2 / var_Yi, and then computed:
 
-**Description**: Leave-one-out sensitivity plots for TRIOS analysis
-- Individual outcome sensitivity testing
-- Robustness of fetal vs maternal pathway identification
+Q = sum( w_i × (beta_i − beta_IVW)^2 )
 
-### Additional Analyses
+A large Q statistic with a low P-value indicates heterogeneity and may suggest pleiotropy or violation of model assumptions.
 
-#### Power Calculations
+Fourth, we applied the MR-PRESSO (Pleiotropy RESidual Sum and Outlier) method (MRPRESSO package v1.0.0). For each outcome, the global test examined whether the pattern of residuals was compatible with no horizontal pleiotropy. When the global test was significant, MR-PRESSO identified outlier SNPs and recomputed outlier-corrected IVW estimates after excluding them. We report global test P-values, outlier SNPs where present and corrected effect estimates.
 
-**Method**: Brion et al. (2013) approach
-**Results**: 
-- Power > 80% to detect OR ≥ 1.2 for outcomes with n > 50,000
-- Limited power for smaller effect sizes in smaller studies
+Finally, we performed single-SNP MR and leave-one-SNP-out analyses. Single-SNP estimates examine the contribution of each instrument individually, while leave-one-out analyses re-run IVW MR after removing each SNP in turn to evaluate whether any single variant unduly drives results. Figures summarising these diagnostics (scatter plots, forest plots, funnel plots, leave-one-out plots) were generated in 07_plots_endoMR-PREG.R and are presented in Supplementary Figures S1–S7.
 
-#### Instrumental Variable Assumptions
+Maternal, fetal and paternal genetic effects
 
-**Relevance (F-statistic)**:
-- All instruments: F > 10 (range: [Add range])
-- Cumulative R²: [Add value]% of endometriosis variance explained
+Some outcomes, such as hypertensive disorders of pregnancy, birthweight and preterm birth, may be influenced by both maternal and fetal genomes. Where available, we therefore leveraged trio-based genetic effect estimates from MR-PREG to distinguish maternal and fetal pathways. These analyses were implemented in 04.2_fetal_effect_endoMR-PREG.R.
 
-**Independence**: 
-- No known confounders associated with selected instruments
-- Checked against GWAS catalog for other associations
+MR-PREG provides effect estimates from models jointly including maternal, offspring (fetal) and paternal genotypes, derived from mother–father–child trios or extended parent–offspring structures, using regression models of the form 
 
-**Exclusion restriction**:
-- MR-Egger intercept tests (see Table S4)
-- No evidence of directional pleiotropy
+expected outcome = beta_m × G_m + beta_o × G_o + beta_p × G_p + covariates
 
-#### Subgroup Analyses
+, where GmG_mGm​, GoG_oGo​ and GpG_pGp​ represent maternal, offspring and paternal genotypes. Maternal effects (βm\beta_mβm​) capture direct maternal genetic influence on the intrauterine environment, fetal effects (βo\beta_oβo​) reflect the fetus’s own genome acting on fetal growth and development, and paternal effects (βp\beta_pβp​) serve as a negative control, as paternal genotype should not directly affect maternal pregnancy complications.
 
-**By instrument strength**:
-- Top 20 vs. all 41 instruments
-- Results consistent (see `results/` folder)
+Trio-based genetic associations were available for 21 of the 29 investigated outcomes, namely small-for-gestational-age, large-for-gestational-age, high birthweight (>4000 g), low birthweight (<2500 g), birthweight z-score, gestational age, post-term birth, preterm birth <37 weeks, preeclampsia, gestational hypertension, hypertensive disorders of pregnancy, gestational diabetes, pregnancy anemia, labour induction, emergency caesarean section, elective caesarean section, low Apgar score at 1 minute, low Apgar score at 5 minutes, neonatal intensive care unit admission, postpartum depression and premature rupture of membranes. 
+For each of these outcomes, we performed three parallel MR analyses using the endometriosis SNP instruments: one using maternal effect estimates, one using fetal effect estimates and one using paternal effect estimates as a negative control. The same causal estimators were applied in each pathway (IVW, MR-Egger, weighted median, weighted mode), together with heterogeneity statistics, MR-Egger intercepts, MR-PRESSO global and outlier tests and leave-one-out analyses. Because not all trio-based SNP associations were available for all outcomes, the number of instruments contributing to each maternal, fetal, and paternal analysis varied accordingly, ranging from 27 to 34 SNPs (details in Supplementary Table S3). Results of these analyses, allowing direct comparison of maternal, fetal and paternal pathways, are reported in Supplementary Tables S3–S4 and Supplementary Figure S8.
 
-**By outcome type**:
-- FinnGen vs. other sources
-- Similar effect patterns observed
+Multiple testing correction
 
-#### Validation Analyses
+Because we evaluated causal estimates for 29 outcomes, we controlled for multiplicity using the false discovery rate (FDR). In 05_sensitivity_analyses_endoMR-PREG.R, we applied the Benjamini–Hochberg procedure to the two-sided IVW P-values across all outcomes using R’s p.adjust function in R with method = "fdr". The resulting FDR-adjusted P-values (q-values) reflect the expected proportion of false positives among declared significant findings. We considered associations with q < 0.05 as statistically significant after FDR correction, and we report both nominal P-values and q-values in Supplementary Table S2.
 
-**Alternative clumping thresholds**:
-- r² < 0.01: 35 instruments, consistent results
-- r² < 0.1: 28 instruments, similar estimates
+Tables, figures and reproducibility
 
-**Different P-value thresholds**:
-- P < 1×10⁻⁶: 67 instruments (exploratory)
-- P < 5×10⁻⁸: 41 instruments (primary analysis)
+The script 06_tables_endoMR-PREG.R assembled results from all previous steps into the tables presented in the main manuscript and supplementary material. It joins MR estimates, confidence intervals, heterogeneity statistics, MR-Egger intercepts, MR-PRESSO outputs, SNP counts and sample sizes into publication-ready tables (for example, for IVW estimates, sensitivity analyses and trio-based MR). 07_plots_endoMR-PREG.R uses the same underlying results to generate forest plots of IVW estimates across outcomes (including the main 29-outcome figure), scatter plots contrasting SNP–exposure and SNP–outcome associations, funnel plots for asymmetry, leave-one-out plots and trio comparison plots.
 
-#### 🆕 TRIOS Fetal Genetic Effect Analysis
-
-**Methodology**: Novel application of family trio data to distinguish maternal vs fetal genetic pathways
-
-**Key findings**:
-- **Birth weight**: Predominant fetal genetic effect (β = -0.045, P = 0.007) vs weaker maternal effect (β = -0.021, P = 0.21)
-- **Pathway validation**: Paternal genetic effects minimal across outcomes (negative control confirmation)
-- **Maternal pathway dominance**: Most pregnancy complications driven by maternal genetic liability
-
-**Technical validation**:
-- Leave-one-out sensitivity analysis confirms robustness
-- Consistent findings across different SNP subsets
-- Biological plausibility of pathway-specific effects
-
-**Clinical implications**:
-- Birth weight monitoring may need fetal-specific considerations
-- Pathway-specific counseling for different pregnancy outcomes
-- Distinction between intrinsic vs extrinsic fetal growth effects
-
-### Biological Plausibility
-
-#### Proposed Mechanisms
-
-**Endometriosis → Infertility**:
-- Anatomical distortion
-- Inflammatory environment
-- Ovarian reserve impact
-
-**Endometriosis → Placental disorders**:
-- Shared inflammatory pathways
-- Vascular dysfunction
-- Immune dysregulation
-
-**Endometriosis → Preterm birth**:
-- Systemic inflammation
-- Cervical factors
-- Uterine contractility
-
-**🆕 Endometriosis → Fetal birth weight (direct fetal pathway)**:
-- Inherited genetic liability affecting fetal growth pathways
-- Direct impact on fetal growth hormone signaling
-- Intrinsic fetal metabolic programming
-- Independent of maternal placental function
-
-**🆕 Maternal vs Fetal pathway distinction**:
-- **Maternal pathways**: Placental complications, delivery decisions, maternal health
-- **Fetal pathways**: Growth parameters, developmental timing
-- **Validation**: Paternal genetic effects as negative controls
-
-#### Supporting Literature
-
-1. Inflammatory markers elevated in endometriosis
-2. Placental vascular abnormalities in endometriosis patients
-3. Obstetric complications well-documented observationally
-
-### Limitations and Considerations
-
-#### Study Limitations
-
-1. **Population ancestry**: European-focused analysis
-2. **Pleiotropy**: Cannot completely rule out horizontal pleiotropy
-3. **Non-linear effects**: MR assumes linear relationships
-4. **Timing**: Cannot assess age-specific effects
-
-#### Technical Limitations
-
-1. **Winner's curse**: Potential overestimation of instrument effects
-2. **Linkage disequilibrium**: Possible confounding through LD
-3. **Population stratification**: Residual confounding possible
-
-#### Clinical Considerations
-
-1. **Effect sizes**: Moderate effects, clinical significance varies
-2. **Individual prediction**: Population-level estimates only
-3. **Intervention**: MR shows causal potential, not treatment targets
-
-### Software Versions
-
-**Primary analysis**:
-- R version: 4.3.1
-- TwoSampleMR: 0.5.7
-- dplyr: 1.1.2
-- ggplot2: 3.4.2
-
-**Sensitivity analyses**:
-- MendelianRandomization: 0.8.0
-- MRPRESSO: 1.0
-
-### Data Processing Details
-
-#### SNP Selection Process
-1. Genome-wide significant SNPs (P < 5×10⁻⁸)
-2. LD clumping (r² < 0.001, 10Mb window)
-3. Instrument validation (F-statistic calculation)
-4. Palindromic SNP handling
-
-#### Quality Control Steps
-1. Allele frequency checks (MAF > 0.01)
-2. Effect size sanity checks
-3. Duplicate SNP removal
-4. Cross-reference with outcome data
-
-#### Harmonization Process
-1. Effect allele alignment
-2. Strand flip correction  
-3. Palindromic SNP exclusion (MAF > 0.42)
-4. Final dataset validation
-
-### Reproducibility Information
-
-**Random seeds**: Set to 12345 for all analyses
-**System information**: macOS, 16GB RAM
-**Computational time**: ~30 minutes for full analysis
-
-**Exact package versions**:
-```r
-sessionInfo()
-# Add output here
-```
-
-### Future Research Directions
-
-1. **Multi-ancestry validation**: Replicate TRIOS findings in diverse populations
-2. **🆕 Extended TRIOS application**: Apply maternal/fetal pathway analysis to other complex traits
-3. **🆕 Mechanistic pathway studies**: Investigate specific biological pathways mediating fetal vs maternal effects
-4. **Age and timing-stratified analyses**: Critical windows for genetic effect expression
-5. **🆕 Gene-environment interaction studies**: How genetic pathways interact with environmental factors during pregnancy
-6. **Integration with omics data**: Proteomics/metabolomics to understand pathway mechanisms
-7. **🆕 Therapeutic targeting**: Develop pathway-specific interventions (maternal vs fetal)
-8. **🆕 Precision counseling**: Risk prediction models incorporating pathway-specific genetic effects
-
----
-
-*For questions about supplementary material, contact: [Your email]*
+All analyses were conducted in R version 4.3.2. Key packages included TwoSampleMR (v0.5.6) for harmonisation and MR methods, MRPRESSO (v1.0.0) for pleiotropy assessment, data.table and dplyr for data handling, ggplot2 for visualisation, and readr, stringr, tidyr and here for import and project organisation. LD clumping was performed using PLINK 1.9. The full set of scripts (01–07) and a detailed README are available in the publicly accessible endoMR-PREG repository (https://github.com/jonasvibert/endoMR-PREG
+), allowing complete reproducibility of the analysis pipeline.
+
+Data availability and ethics
+
+This study relied exclusively on de-identified summary-level GWAS data from previously approved studies and consortia. Endometriosis GWAS summary statistics were obtained from Rahmioglu et al. (Nature Genetics 2023) (1). MR-PREG outcome GWAS were accessed through the MR-PREG collaboration under its data-sharing policies (3). FinnGen summary statistics (release 12) are publicly available through the FinnGen results portal (4), and bleeding outcomes were obtained from Westergaard et al. (Nature Genetics 2024) (5). Because only aggregated summary statistics were used and no individual-level genetic or clinical data were accessed, the present analyses do not constitute human subjects research as defined by 45 CFR 46.102, and no additional institutional review board approval was required. All original contributing studies obtained appropriate ethical approvals and informed consent from participants.
+
+References
+1.	Rahmioglu N, Mortlock S, Ghiasi M, Møller PL, Stefansdottir L, Galarneau G, et al. The genetic basis of endometriosis and comorbidity with other pain and inflammatory conditions. Nat Genet. 2023 Mar;55(3):423–36. 
+2.	The 1000 Genomes Project Consortium, Corresponding authors, Auton A, Abecasis GR, Steering committee, Altshuler DM, et al. A global reference for human genetic variation. Nature. 2015 Oct 1;526(7571):68–74. 
+3.	McBride N, Clayton GL, Goncalves Soares A, Yang Q, Bond TA, Taylor A, et al. Cohort Profile: The Mendelian Randomization in Pregnancy (MR-PREG) collaboration - Improving evidence for prevention and treatment of adverse pregnancy and perinatal outcomes [Internet]. Epidemiology; 2025 [cited 2025 Aug 9]. Available from: http://medrxiv.org/lookup/doi/10.1101/2025.03.22.25324447 
+4.	Kurki MI, Karjalainen J, Palta P, Sipilä TP, Kristiansson K, Donner KM, et al. FinnGen provides genetic insights from a well-phenotyped isolated population. Nature. 2023 Jan 19;613(7944):508–18. 
+5.	Westergaard D, Steinthorsdottir V, Stefansdottir L, Rohde PD, Wu X, Geller F, et al. Genome-wide association meta-analysis identifies five loci associated with postpartum hemorrhage. Nat Genet. 2024 Aug;56(8):1597–603. 
+6.	Burgess S, Davey Smith G, Davies NM, Dudbridge F, Gill D, Glymour MM, et al. Guidelines for performing Mendelian randomization investigations: update for summer 2023. Wellcome Open Res. 2023 Aug 4;4:186. 
