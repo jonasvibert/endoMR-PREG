@@ -1,60 +1,229 @@
-Supplementary Methods
+# 📊 Supplementary Methods
 
-This two-sample Mendelian randomization (MR) study was designed to evaluate whether genetic liability to endometriosis has a causal effect on a range of adverse pregnancy and perinatal outcomes. The analysis pipeline was implemented in R using a set of modular scripts stored in the endoMR-PREG GitHub repository (https://github.com/jonasvibert/endoMR-PREG/tree/3c6357c4e89748dc67e96dd292d10615feffbb93/scripts):
-01_select_instruments_endoMR-PREG.R
-02_prepare_outcomes_endoMR-PREG.R
-03_harmonise_data_endoMR-PREG.R
-04_main_analyses_endoMR-PREG.R
-04.2_fetal_effect_endoMR-PREG.R
-05_sensitivity_analyses_endoMR-PREG.R
-06_tables_endoMR-PREG.R
-07_plots_endoMR-PREG.R)
+This two-sample Mendelian randomization (MR) study was designed to evaluate whether genetic liability to endometriosis has a causal effect on a range of adverse pregnancy and perinatal outcomes. 
+
+## 🔬 Analysis Pipeline
+
+The analysis pipeline was implemented in R using a set of modular scripts stored in the [endoMR-PREG GitHub repository](https://github.com/jonasvibert/endoMR-PREG/tree/3c6357c4e89748dc67e96dd292d10615feffbb93/scripts):
+
+```
+📁 scripts/
+├── 01_select_instruments_endoMR-PREG.R
+├── 02_prepare_outcomes_endoMR-PREG.R
+├── 03_harmonise_data_endoMR-PREG.R
+├── 04_main_analyses_endoMR-PREG.R
+├── 04.2_fetal_effect_endoMR-PREG.R
+├── 05_sensitivity_analyses_endoMR-PREG.R
+├── 06_tables_endoMR-PREG.R
+└── 07_plots_endoMR-PREG.R
+```
+
 Together, these scripts reproduce the full workflow, from instrument selection to figure generation.
 
-Exposure: genetic liability to endometriosis
+## 🧬 Exposure: Genetic Liability to Endometriosis
 
-Genetic instruments for endometriosis were derived from the largest published genome-wide association study (GWAS) meta-analysis of clinically confirmed endometriosis by Rahmioglu et al. (Nature Genetics 2023) (1). This meta-analysis included approximately 58,000 surgically and/or clinically diagnosed cases and about 733,000 female controls, predominantly of European ancestry, contributed by the International Endometriosis Genetics Consortium, 23andMe, FinnGen and other cohorts. In 01_select_instruments_endoMR-PREG.R, we imported the European-ancestry summary statistics from the meta-analysis that included 23andMe, and restricted all subsequent analyses to these data to maintain ancestry compatibility with the outcome GWAS.
+Genetic instruments for endometriosis were derived from the largest published genome-wide association study (GWAS) meta-analysis of clinically confirmed endometriosis by **Rahmioglu et al.** *(Nature Genetics 2023)* <sup>[1]</sup>. 
 
-Instrument selection followed a two-step procedure. First, we extracted all variants reaching conventional genome-wide significance for endometriosis (P < 5 × 10^-8) together with their rsIDs, effect and non-effect alleles, effect sizes (beta), standard errors (SE), effect allele frequencies (EAF) and, where available, sample size (N). Some variants were reported by Rahmioglu et al. in chromosome:position (chr:pos) format rather than rsID. For these, 01_select_instruments_endoMR-PREG.R mapped coordinates to rsIDs using the 1000 Genomes Project Phase 3 European reference panel (2). When multiple rsIDs were present at a given position, we retained the allele-specific identifier consistent with the effect allele reported in the GWAS. Variants with ambiguous mapping or unresolved alleles were excluded at this stage.
+### 📈 Study Characteristics
+- **Cases**: ~58,000 surgically and/or clinically diagnosed
+- **Controls**: ~733,000 female controls  
+- **Ancestry**: Predominantly European
+- **Contributing cohorts**: International Endometriosis Genetics Consortium, 23andMe, FinnGen and others
 
-To ensure independence between instruments, we performed linkage disequilibrium (LD) clumping using PLINK 1.9 with 1000 Genomes Phase 3 Europeans as the reference population. The script 01_select_instruments_endoMR-PREG.R applied an r^2 threshold of 0.001 within a 10,000 kb physical window (parameters clump_r2 = 0.001, clump_kb = 10,000), using 5 × 10^-8 as the primary P-value threshold (clump_p1) and 1 as the secondary threshold (clump_p2). After clumping, 41 independent single nucleotide polymorphisms (SNPs) were retained as instruments for genetic liability to endometriosis.
+In `01_select_instruments_endoMR-PREG.R`, we imported the European-ancestry summary statistics from the meta-analysis that included 23andMe, and restricted all subsequent analyses to these data to maintain ancestry compatibility with the outcome GWAS.
 
-Instrument strength was systematically evaluated in the same script. For each SNP, we calculated a simple F-statistic as:
+### 🎯 Instrument Selection Procedure
 
-F_simple = (beta / SE)^2
+#### Step 1: Variant Extraction
+We extracted all variants reaching conventional genome-wide significance for endometriosis:
+- **Threshold**: P < 5 × 10⁻⁸
+- **Data extracted**: rsIDs, effect/non-effect alleles, beta, SE, EAF, sample size (N)
+- **Coordinate mapping**: chr:pos format variants mapped to rsIDs using 1000 Genomes Project Phase 3 European reference panel <sup>[2]</sup>
+- **Quality control**: Variants with ambiguous mapping or unresolved alleles were excluded
 
-We then estimated the variance explained in endometriosis liability (R^2) using the standard formula:
+#### Step 2: Linkage Disequilibrium (LD) Clumping
+To ensure independence between instruments, we performed LD clumping using **PLINK 1.9**:
 
-R^2 = [ 2 × EAF × (1 − EAF) × beta^2 ] / [ 2 × EAF × (1 − EAF) × beta^2 + SE^2 × N ]
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `clump_r2` | 0.001 | LD threshold |
+| `clump_kb` | 10,000 | Physical window (kb) |
+| `clump_p1` | 5 × 10⁻⁸ | Primary P-value threshold |
+| `clump_p2` | 1 | Secondary threshold |
+| **Reference** | 1000 Genomes Phase 3 Europeans | Population reference |
 
-From this, we derived an exact per-SNP F-statistic:
+> **Result**: 41 independent SNPs retained as instruments for genetic liability to endometriosis
 
-F_exact = R^2 × (N − 2) / (1 − R^2)
+### 💪 Instrument Strength Evaluation
 
-Summing R^2 across all independent SNPs (assuming negligible LD after clumping) gave a total variance explained of approximately 5.6%. The mean per-SNP F-statistic was around 279, substantially above the conventional threshold of 10 and indicating a very low risk of weak instrument bias. Full instrument characteristics (rsID, genomic position, alleles, beta, SE, EAF, R^2, F) are provided in Supplementary Table S1.
+Instrument strength was systematically evaluated using multiple metrics:
 
-Outcome GWAS and phenotype definition
+#### F-Statistics
+**Simple F-statistic** for each SNP:
+```
+F_simple = (beta / SE)²
+```
 
-We evaluated 29 maternal and perinatal outcomes. These outcomes were chosen based on prior epidemiological evidence linking endometriosis with obstetric complications, clinical relevance for maternal–fetal health, and the availability of adequately powered GWAS in European-ancestry populations. We drew outcome summary statistics from three sources: the Mendelian Randomization in Pregnancy (MR-PREG) collaboration (3), FinnGen release 12 (4), and a large postpartum haemorrhage (PPH) meta-analysis (5). Extraction, cleaning and initial formatting of these GWAS were performed in 02_prepare_outcomes_endoMR-PREG.R.
-MR-PREG is an international consortium that harmonises and meta-analyses GWAS of pregnancy and perinatal outcomes across several large European birth cohorts, including ALSPAC, Born in Bradford, MoBa and UK Biobank, following a standardised pipeline described in detail in McBride et al. (2025) (3). Briefly, each cohort applied standard sample-level quality control (removal of individuals with low call rate, sex discordance, outlying heterozygosity or cryptic relatedness) and restricted analyses to participants of European genetic ancestry. Variant-level quality control included filters for call rate, minor allele frequency, Hardy–Weinberg equilibrium and imputation quality, as described in McBride et al. (3). Association analyses were performed using logistic or linear regression, or REGENIE for binary and continuous traits, with appropriate adjustment for age, ancestry principal components, batch effects and cohort-specific covariates, and rare outcomes were handled using Firth correction. Cohort-level results were meta-analysed using fixed-effects inverse-variance weighting.
-From MR-PREG we used 21 outcomes provided in the consortium’s meta-analysed GWAS: gestational age (full sample and genotyped subsample), gestational diabetes, gestational hypertension, hypertensive disorders of pregnancy, high and low birthweight, small-for-gestational-age, birthweight z-score, large-for-gestational-age, preterm birth, very preterm birth, post-term birth, labour induction, premature rupture of membranes, Apgar score <7 at 1 and 5 minutes, NICU admission, pregnancy anaemia and preeclampsia. Caesarean section phenotypes (overall, elective and emergency), stillbirth and postpartum/peripartum depression were obtained through MR-PREG or collaborating consortia using the same QC and meta-analytic framework. For each outcome GWAS we extracted SNP-level beta, SE, effect allele, allele frequency and sample size directly from the published summary statistics.
-To complement these outcomes with more detailed placental phenotypes, we used FinnGen release 12 (4). FinnGen GWAS follow a standardised QC and analysis framework described in Kurki et al. (2023), including array-based genotyping, imputation to the SISu v3 Finnish reference panel, strict sample and variant filtering, and association testing using REGENIE. From FinnGen, we extracted placenta praevia, placental disorders and placental abruption, defined through registry-based ICD codes.
-Finally, bleeding-related outcomes were obtained from the GWAS meta-analysis by Westergaard et al. (2024) (5), which aggregates data from multiple Nordic biobanks and UK Biobank. We included antepartum bleeding, postpartum haemorrhage (PPH) overall, PPH due to uterine atony and PPH due to retained placenta as defined in that study. Reported odds ratios were converted to log-odds (beta = log(OR)); when standard errors were not available, they were derived from the reported P-values using SE = |beta| / z, where z is the standard normal quantile corresponding to P/2.
-Overall, the 29 outcomes can be grouped into nine clinical domains: placental disorders (placenta praevia, placental disorders, abruption); hypertensive disorders of pregnancy (hypertensive disorders overall, gestational hypertension, preeclampsia); pregnancy timing (gestational age, preterm birth, very preterm birth, post-term birth); fetal growth and birthweight (high birthweight, low birthweight, small-for-gestational-age, birthweight z-score, large-for-gestational-age); labour and delivery complications (labour induction, premature rupture of membranes, caesarean section overall, elective and emergency caesarean); bleeding and haemorrhage (antepartum bleeding, PPH overall, PPH due to atony, PPH due to retained placenta); maternal metabolic/haematologic complications (gestational diabetes, pregnancy anaemia); maternal mental health (postpartum/peripartum depression); and neonatal condition at birth (low Apgar scores at 1 and 5 minutes, NICU admission, stillbirth). Detailed definitions, case/control counts and contributing cohorts are presented in Table 1 and Supplementary Table S2.
+**Variance explained** in endometriosis liability (R²):
+```
+R² = [ 2 × EAF × (1 − EAF) × beta² ] / [ 2 × EAF × (1 − EAF) × beta² + SE² × N ]
+```
 
-Harmonisation of exposure and outcome data
+**Exact per-SNP F-statistic**:
+```
+F_exact = R² × (N − 2) / (1 − R²)
+```
 
-Harmonisation of endometriosis and outcome GWAS was carried out in 03_harmonise_data_endoMR-PREG.R using the TwoSampleMR package (version 0.5.6) with additional manual checks. For each outcome, we first matched the 41 endometriosis instrument SNPs to outcome SNPs by rsID. We then aligned alleles so that the effect allele was identical in exposure and outcome datasets, flipping the sign of the outcome beta and adjusting allele frequencies where necessary. Palindromic SNPs with intermediate allele frequencies (A/T or C/G variants with minor allele frequency around 0.5) were removed using the harmonise_data function with action = 2, because strand assignment is ambiguous in this range. Palindromic SNPs with clearly low or high MAF, for which strand could be reliably inferred, were retained. SNPs with unresolved strand issues, mismatched alleles or missing beta/SE in either dataset were excluded.
+#### 📊 Strength Assessment Results
+- **Total variance explained**: ~5.6% (summing R² across all independent SNPs)
+- **Mean per-SNP F-statistic**: ~279
+- **Weak instrument risk**: Very low (F >> 10 threshold)
 
-Because not all instrument SNPs survived quality control or were available in every outcome GWAS, the effective number of instruments contributing to each MR analysis ranged from 29 to 41. The exact SNP count per outcome is reported in Supplementary Table S2, alongside exposure and outcome sample sizes.
+> 📋 Full instrument characteristics (rsID, genomic position, alleles, beta, SE, EAF, R², F) are provided in **Supplementary Table S1**.
 
-Two-sample MR analyses
+## 🎯 Outcome GWAS and Phenotype Definition
 
-Primary MR analyses were implemented in 04_main_analyses_endoMR-PREG.R. For each outcome, we used the inverse-variance weighted (IVW) estimator as the main causal effect measure (6). For each SNP i, we denote the SNP–endometriosis association as beta_Xi, the SNP–outcome association as beta_Yi, and the variance of beta_Yi as var_Yi. The IVW estimator can be written as:
+We evaluated **29 maternal and perinatal outcomes** selected based on:
+- 📚 Prior epidemiological evidence linking endometriosis with obstetric complications
+- 🏥 Clinical relevance for maternal–fetal health  
+- 📊 Availability of adequately powered GWAS in European-ancestry populations
 
-beta_IVW = sum( beta_Xi × beta_Yi / var_Yi ) / sum( beta_Xi^2 / var_Yi )
+### 📋 Data Sources
+We drew outcome summary statistics from three main sources:
 
-This is equivalent to a weighted regression of beta_Yi on beta_Xi with no intercept and weights equal to 1 / var_Yi. For binary outcomes we exponentiated beta_IVW to obtain odds ratios (OR = exp(beta_IVW)) with 95% confidence intervals, whereas for continuous outcomes (gestational age, birthweight z-score) we reported the beta coefficient and corresponding 95% confidence intervals.
+| Source | Description | Reference |
+|--------|-------------|-----------|
+| **MR-PREG** | Mendelian Randomization in Pregnancy collaboration | <sup>[3]</sup> |
+| **FinnGen** | Release 12 | <sup>[4]</sup> |
+| **PPH meta-analysis** | Large postpartum haemorrhage study | <sup>[5]</sup> |
+
+> 🔧 Extraction, cleaning and initial formatting performed in `02_prepare_outcomes_endoMR-PREG.R`
+### 🤝 MR-PREG Collaboration
+**MR-PREG** is an international consortium that harmonises and meta-analyses GWAS of pregnancy and perinatal outcomes across several large European birth cohorts:
+
+**Contributing cohorts**: ALSPAC, Born in Bradford, MoBa, UK Biobank
+
+**Standardised pipeline** <sup>[3]</sup>:
+- **Sample-level QC**: Removal of individuals with low call rate, sex discordance, outlying heterozygosity or cryptic relatedness
+- **Ancestry restriction**: European genetic ancestry participants only
+- **Variant-level QC**: Call rate, MAF, HWE, imputation quality filters  
+- **Association analyses**: Logistic/linear regression or REGENIE with appropriate covariates
+- **Meta-analysis**: Fixed-effects inverse-variance weighting
+
+#### 🏥 MR-PREG Outcomes (21 total)
+**From consortium's meta-analysed GWAS:**
+- Gestational age (full sample and genotyped subsample)
+- Gestational diabetes, gestational hypertension, hypertensive disorders of pregnancy
+- High and low birthweight, small-for-gestational-age, birthweight z-score, large-for-gestational-age
+- Preterm birth, very preterm birth, post-term birth
+- Labour induction, premature rupture of membranes
+- Apgar score <7 at 1 and 5 minutes, NICU admission
+- Pregnancy anaemia, preeclampsia
+
+**Additional outcomes** (same QC framework):
+- Caesarean section phenotypes (overall, elective, emergency)
+- Stillbirth, postpartum/peripartum depression
+### 🇫🇮 FinnGen Release 12
+To complement these outcomes with detailed **placental phenotypes**, we used FinnGen release 12 <sup>[4]</sup>.
+
+**FinnGen framework** (Kurki et al., 2023):
+- Array-based genotyping
+- Imputation to SISu v3 Finnish reference panel  
+- Strict sample and variant filtering
+- Association testing using REGENIE
+- Registry-based ICD code definitions
+
+**FinnGen outcomes extracted:**
+- 🩸 Placenta praevia
+- 🔬 Placental disorders  
+- ⚠️ Placental abruption
+
+### 🩸 Bleeding-Related Outcomes
+From **Westergaard et al. (2024)** meta-analysis <sup>[5]</sup> (Nordic biobanks + UK Biobank):
+- Antepartum bleeding
+- Postpartum haemorrhage (PPH) overall
+- PPH due to uterine atony
+- PPH due to retained placenta
+
+> **Note**: Odds ratios converted to log-odds (β = log(OR)); missing SEs derived from P-values: SE = |β| / z
+
+### 📊 Clinical Domain Organization
+The **29 outcomes** are grouped into **9 clinical domains**:
+
+| Domain | Outcomes |
+|--------|----------|
+| 🩸 **Placental disorders** | Placenta praevia, placental disorders, abruption |
+| 🩺 **Hypertensive disorders** | Hypertensive disorders overall, gestational hypertension, preeclampsia |
+| ⏰ **Pregnancy timing** | Gestational age, preterm birth, very preterm birth, post-term birth |
+| 👶 **Fetal growth/birthweight** | High/low birthweight, SGA, birthweight z-score, LGA |
+| 🏥 **Labour/delivery complications** | Labour induction, PROM, caesarean section (overall, elective, emergency) |
+| 💉 **Bleeding/haemorrhage** | Antepartum bleeding, PPH (overall, atony, retained placenta) |
+| 🔬 **Maternal metabolic/haematologic** | Gestational diabetes, pregnancy anaemia |
+| 🧠 **Maternal mental health** | Postpartum/peripartum depression |
+| 👶 **Neonatal condition** | Low Apgar scores (1 & 5 min), NICU admission, stillbirth |
+
+> 📋 Detailed definitions, case/control counts and contributing cohorts: **Table 1** and **Supplementary Table S2**
+
+## 🔗 Harmonisation of Exposure and Outcome Data
+
+Harmonisation of endometriosis and outcome GWAS was carried out in `03_harmonise_data_endoMR-PREG.R` using:
+- **Package**: TwoSampleMR (version 0.5.6)
+- **Additional**: Manual quality checks
+
+### 🎯 Harmonisation Procedure
+
+#### Step 1: SNP Matching
+- Match 41 endometriosis instrument SNPs to outcome SNPs by **rsID**
+
+#### Step 2: Allele Alignment  
+- Align alleles: identical effect alleles in exposure and outcome datasets
+- **Beta flipping**: Adjust outcome beta sign when necessary
+- **Frequency adjustment**: Modify allele frequencies as required
+
+#### Step 3: Palindromic SNP Handling
+| SNP Type | MAF Range | Action | Rationale |
+|----------|-----------|--------|-----------|
+| A/T or C/G | ~0.5 (intermediate) | **Removed** | Ambiguous strand assignment |
+| A/T or C/G | Clearly low/high | **Retained** | Strand reliably inferred |
+
+#### Step 4: Quality Control
+**Excluded SNPs with:**
+- Unresolved strand issues
+- Mismatched alleles  
+- Missing beta/SE in either dataset
+
+### 📊 Final Instrument Count
+- **Range**: 29-41 instruments per MR analysis
+- **Reason**: Not all instrument SNPs survived QC or were available in every outcome GWAS
+
+> 📋 Exact SNP counts per outcome: **Supplementary Table S2** (includes exposure and outcome sample sizes)
+
+## 🧮 Two-Sample MR Analyses
+
+Primary MR analyses were implemented in `04_main_analyses_endoMR-PREG.R`.
+
+### 📏 Inverse-Variance Weighted (IVW) Estimator  
+**Main causal effect measure** <sup>[6]</sup>
+
+For each SNP *i*:
+- β<sub>Xi</sub> = SNP–endometriosis association  
+- β<sub>Yi</sub> = SNP–outcome association
+- var<sub>Yi</sub> = variance of β<sub>Yi</sub>
+
+**IVW estimator formula:**
+```
+β_IVW = Σ(β_Xi × β_Yi / var_Yi) / Σ(β_Xi² / var_Yi)
+```
+
+> This is equivalent to a weighted regression of β<sub>Yi</sub> on β<sub>Xi</sub> with no intercept and weights = 1/var<sub>Yi</sub>
+
+### 📊 Effect Reporting
+| Outcome Type | Metric | Formula | CI |
+|--------------|--------|---------|-----|
+| **Binary** | Odds Ratio | OR = exp(β<sub>IVW</sub>) | 95% CI |
+| **Continuous** | Beta coefficient | β<sub>IVW</sub> | 95% CI |
+
+*Continuous outcomes: gestational age, birthweight z-score*
 
 Sensitivity analyses and assessment of MR assumptions
 
