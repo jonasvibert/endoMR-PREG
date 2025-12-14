@@ -379,6 +379,41 @@ readr::write_csv(ivw_all, file.path(results_dir, "trios_mr_results_comparison.cs
 
 message("Saved MR results (maternal / fetal / paternal) in results/")
 
+# 7bis) Tableau "par outcome" avec 3 lignes (Maternal/Fetal/Paternal),
+#       chiffres arrondis à 3 décimales -------------------------------------
+
+ivw_by_outcome <- ivw_all %>%
+  dplyr::select(
+    outcome_id   = id.outcome,
+    outcome_full,
+    origin,
+    nsnp,
+    b, se,
+    OR, LCL, UCL,
+    pval, qval
+  ) %>%
+  dplyr::mutate(
+    origin = factor(origin, levels = c("Maternal", "Fetal", "Paternal")),
+    
+    # Arrondir toutes les valeurs numériques à 3 décimales
+    b    = round(b, 3),
+    se   = round(se, 3),
+    OR   = round(OR, 3),
+    LCL  = round(LCL, 3),
+    UCL  = round(UCL, 3),
+    pval = signif(pval, 3),
+    qval = signif(qval, 3),
+    
+    OR_CI = sprintf("%.3f (%.3f–%.3f)", OR, LCL, UCL)
+  ) %>%
+  dplyr::arrange(outcome_full, origin)
+
+readr::write_csv(
+  ivw_by_outcome,
+  file.path(results_dir, "trios_mr_results_by_outcome_long.csv")
+)
+
+
 ################################################################################
 # 8) FOREST-PLOT COMPARISON: MATERNAL vs FETAL vs PATERNAL                     #
 ################################################################################

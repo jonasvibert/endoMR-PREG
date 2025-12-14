@@ -212,6 +212,7 @@ egger_res$qval <- p.adjust(egger_res$pval, method = "fdr")
 wm_res$qval    <- p.adjust(wm_res$pval,    method = "fdr")
 all_res$qval   <- p.adjust(all_res$pval,   method = "fdr")
 
+
 # Export
 export_csv(ivw_res,   "ivw_results")
 export_csv(egger_res, "egger_results")

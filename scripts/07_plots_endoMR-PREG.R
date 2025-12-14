@@ -1030,7 +1030,551 @@ if (!file.exists(trios_path)) {
   }
 }
 
+##################################################################
+### FIGURE 4. Trios forest plot: maternal vs fetal vs paternal ###
+### (binary outcomes – Odds Ratios, IVW-style layout)          ###
+##################################################################
 
+message("Creating Figure 4: trios comparison forest plot (maternal–fetal–paternal, IVW-style layout)...")
+
+if (!file.exists(trios_path)) {
+  warning(
+    "Trios comparison file not found: ", trios_path,
+    "\nSkipping trios forest plots (Figure 4 & 4B)."
+  )
+  
+} else {
+  
+  ivw_all_raw <- readr::read_csv(trios_path, show_col_types = FALSE)
+  
+  # Basic columns required for the OR-based (binary) figure
+  required_cols <- c("outcome_full", "OR", "LCL", "UCL", "origin")
+  if (!all(required_cols %in% names(ivw_all_raw))) {
+    warning(
+      "Trios file missing required columns: ",
+      paste(setdiff(required_cols, names(ivw_all_raw)), collapse = ", "),
+      "\nSkipping Figure 4."
+    )
+    
+  } else {
+    
+    ##########################################################
+    ## 0) Define continuous outcomes and split the dataset  ##
+    ##########################################################
+    
+    # Continuous outcomes to exclude from the OR-based figure
+    continuous_outcomes <- c(
+      "Gestational age",
+      "Z-score birthweight",
+      "ga_all",
+      "zbw_all"
+    )
+    
+    # Binary (OR-based) outcomes
+    ivw_all_binary <- ivw_all_raw %>%
+      dplyr::filter(!outcome_full %in% continuous_outcomes)
+    
+    # Continuous outcomes (for the beta-based secondary figure)
+    ivw_all_cont <- ivw_all_raw %>%
+      dplyr::filter(outcome_full %in% continuous_outcomes)
+    
+    ##########################################################
+    ## FIGURE 4 – BINARY OUTCOMES (ODDS RATIOS)            ##
+    ##########################################################
+    
+    if (nrow(ivw_all_binary) == 0) {
+      warning("No binary outcomes left after excluding gestational age and Z-score birthweight. Figure 4 skipped.")
+    } else {
+      
+      ivw_all <- ivw_all_binary
+      
+      has_p <- "pval" %in% names(ivw_all)
+      
+      ####################################################################
+      ### 1) ORDER OUTCOMES BY THE MATERNAL EFFECT ONLY (DESCENDING)  ###
+      ####################################################################
+      
+      maternal_only <- ivw_all %>%
+        dplyr::filter(origin == "Maternal") %>%
+        dplyr::arrange(dplyr::desc(OR)) %>%   # descending maternal OR
+        dplyr::mutate(order_maternal = dplyr::row_number()) %>%
+        dplyr::select(outcome_full, order_maternal)
+      
+      ivw_all <- ivw_all %>%
+        dplyr::left_join(maternal_only, by = "outcome_full")
+      
+      ####################################################################
+      ### 2) FIX ORIGIN ORDER AND COMPUTE LOG2 VALUES FOR SYMMETRY    ###
+      ####################################################################
+      
+      origin_levels <- c("Maternal", "Fetal", "Paternal")
+      
+      ivw_all <- ivw_all %>%
+        dplyr::mutate(
+          origin      = factor(origin, levels = origin_levels),
+          OR_t        = log2(OR),
+          OR_lower_t  = log2(LCL),
+          OR_upper_t  = log2(UCL),
+          OR_text     = sprintf("%.2f", OR),
+          CI_text     = sprintf("(%.2f–%.2f)", LCL, UCL)
+        )
+      
+      if (has_p) {
+        ivw_all <- ivw_all %>%
+          dplyr::mutate(
+            qval   = p.adjust(pval, method = "fdr"),
+            P_text = dplyr::case_when(
+              is.na(pval)      ~ NA_character_,
+              pval < 0.001     ~ "<0.001",
+              TRUE             ~ sprintf("%.3f", pval)
+            ),
+            Q_text = dplyr::case_when(
+              is.na(qval)      ~ NA_character_,
+              qval < 0.001     ~ "<0.001",
+              TRUE             ~ sprintf("%.3f", qval)
+            )
+          )
+      }
+      
+      ########################################################################
+      ### 3) ASSIGN Y-POSITIONS: Maternal/Fetal/Paternal STACKED PER OUTCOME
+      ###    AND OUTCOMES ORDERED BY MATERNAL OR DESCENDING
+      ########################################################################
+      
+      offsets <- c(
+        Maternal =  0.60,
+        Fetal    =  0.00,
+        Paternal = -0.60
+      )
+      
+      ivw_all_layout <- ivw_all %>%
+        dplyr::arrange(order_maternal, origin) %>%
+        dplyr::mutate(
+          base_row = dplyr::dense_rank(order_maternal),
+          y_pos    = (dplyr::n_distinct(outcome_full) - base_row + 1) * 2 +
+            offsets[origin]
+        )
+      
+      ########################################################################
+      ### 4) SHOW OUTCOME NAME ONLY ON THE MATERNAL ROW
+      ########################################################################
+      
+      ivw_all_layout <- ivw_all_layout %>%
+        dplyr::mutate(
+          label_outcome = dplyr::if_else(origin == "Maternal", outcome_full, "")
+        )
+      
+      if (nrow(ivw_all_layout) == 0) {
+        message("No rows available for Figure 4.")
+        
+      } else {
+        
+        forest_data <- ivw_all_layout
+        
+        ####################################################################
+        ### 5) AXIS & TEXT COLUMN POSITIONS (COPY OF FIGURE 2 STYLE)    ###
+        ####################################################################
+        
+        x_min   <- 0.5
+        x_max   <- 2.5
+        x_min_t <- log2(x_min)
+        x_max_t <- log2(x_max)
+        
+        text_start_t   <- x_max_t + 0.05
+        text_spacing_t <- 0.25
+        
+        or_pos_t <- text_start_t
+        ci_pos_t <- text_start_t + text_spacing_t
+        
+        if (has_p) {
+          p_pos_t  <- text_start_t + 2 * text_spacing_t
+          q_pos_t  <- text_start_t + 3 * text_spacing_t
+        }
+        
+        header_df <- data.frame(
+          x   = c(
+            x_min_t - 0.15,
+            or_pos_t,
+            ci_pos_t,
+            if (has_p) p_pos_t,
+            if (has_p) q_pos_t
+          ),
+          lab = c(
+            "Outcome",
+            "OR",
+            "95% CI",
+            if (has_p) "P value",
+            if (has_p) "Q value"
+          )
+        )
+        
+        tick_vals   <- c(0.5, 0.75, 1, 1.25, 1.5, 2)
+        tick_df     <- data.frame(x = log2(tick_vals))
+        tick_lab_df <- transform(tick_df, lab = sprintf("%g", 2^x))
+        
+        x_limit_right <- text_start_t +
+          (if (has_p) 3 else 1) * text_spacing_t +
+          0.30
+        
+        y_bottom <- min(forest_data$y_pos) - 0.5
+        y_top    <- max(forest_data$y_pos) + 0.5
+        y_header <- y_top + 1
+        
+        panel_df <- data.frame(
+          xmin = x_min_t, xmax = x_max_t,
+          ymin = y_bottom, ymax = y_top
+        )
+        
+        ref_df <- data.frame(
+          x = 0, xend = 0,
+          y = y_bottom, yend = y_top
+        )
+        
+        ####################################################################
+        ### 6) BUILD THE PLOT (FOLLOWS FIGURE 2 STYLE EXACTLY)         ###
+        ####################################################################
+        
+        p_trios <- ggplot(forest_data, aes(y = y_pos)) +
+          geom_rect(
+            data = panel_df, inherit.aes = FALSE,
+            aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+            fill = "gray98", color = "gray85", alpha = 0.3
+          ) +
+          geom_segment(
+            data = ref_df, inherit.aes = FALSE,
+            aes(x = x, xend = xend, y = y, yend = yend),
+            linetype = "dashed", color = "gray60", linewidth = 0.6
+          ) +
+          geom_pointrange(
+            aes(
+              x    = OR_t,
+              xmin = OR_lower_t,
+              xmax = OR_upper_t,
+              color = origin
+            ),
+            size = 0.8, linewidth = 0.6
+          ) +
+          geom_text(
+            aes(x = x_min_t - 0.15, label = label_outcome),
+            hjust = 1, size = 3.5
+          ) +
+          geom_text(aes(x = or_pos_t, label = OR_text), hjust = 0, size = 3.2) +
+          geom_text(aes(x = ci_pos_t, label = CI_text), hjust = 0, size = 3.2)
+        
+        if (has_p) {
+          p_trios <- p_trios +
+            geom_text(aes(x = p_pos_t, label = P_text), hjust = 0, size = 3.2) +
+            geom_text(aes(x = q_pos_t, label = Q_text), hjust = 0, size = 3.2)
+        }
+        
+        p_trios <- p_trios +
+          geom_text(
+            data = transform(header_df, y = y_header),
+            inherit.aes = FALSE,
+            aes(x = x, y = y, label = lab),
+            fontface = "bold", size = 4,
+            hjust = c(1, rep(0, nrow(header_df) - 1))
+          ) +
+          annotate(
+            "text",
+            x = (x_min_t + x_max_t) / 2, y = min(forest_data$y_pos) - 1,
+            label = "Odds Ratio (log\u2082 scale)",
+            size = 4, fontface = "bold"
+          ) +
+          scale_x_continuous(
+            limits = c(x_min_t - 0.8, x_limit_right),
+            breaks = log2(tick_vals), labels = tick_vals,
+            expand = c(0, 0)
+          ) +
+          scale_color_manual(
+            values = c(
+              "Maternal" = "#1f78b4",
+              "Fetal"    = "#33a02c",
+              "Paternal" = "#e31a1c"
+            ),
+            name = "Genetic effect"
+          ) +
+          theme_void() +
+          theme(
+            legend.position  = "bottom",
+            legend.title     = element_text(size = 10, face = "bold"),
+            legend.text      = element_text(size = 9),
+            plot.background  = element_rect(fill = "white", color = NA),
+            panel.background = element_rect(fill = "white", color = NA),
+            plot.margin      = margin(20, 20, 20, 20),
+            plot.title       = element_text(hjust = 0.5, size = 14, face = "bold"),
+            plot.subtitle    = element_text(hjust = 0.5, size = 11),
+            plot.caption     = element_text(hjust = 0, size = 8, colour = "grey40")
+          ) +
+          labs(
+            title    = "Figure 4. Maternal, fetal, and paternal Mendelian randomisation estimates",
+            subtitle = "Forest plot of odds ratios (OR) with 95% CI on a log\u2082 scale",
+            caption  = "Maternal, fetal and paternal effects estimated using the same genetic instruments.\nQ values are FDR-adjusted P values."
+          )
+        
+        ####################################################################
+        ### 7) SAVE FIGURE 4                                           ###
+        ####################################################################
+        
+        out_png <- file.path(plots_dir, "Fig4_trios_maternal_fetal_paternal_IVWstyle.png")
+        
+        ggsave(
+          out_png, p_trios,
+          width = 16, height = 10 + max(0, (nrow(forest_data) - 30) * 0.15),
+          dpi   = 300, bg = "white"
+        )
+        
+        message("Saved Figure 4 to: ", out_png)
+      }
+    }
+    
+    ##########################################################
+    ## FIGURE 4B – CONTINUOUS OUTCOMES (BETAS)             ##
+    ##########################################################
+    
+    if (nrow(ivw_all_cont) == 0) {
+      message("No continuous outcomes (ga_all / zbw_all) found for beta-based Figure 4B.")
+      
+    } else {
+      
+      message("Creating Figure 4B: trios comparison forest plot for continuous outcomes (betas)...")
+      
+      # Create beta columns from b and se
+      ivw_all_cont <- ivw_all_cont %>%
+        dplyr::mutate(
+          beta      = b,
+          LCL_beta  = b - 1.96 * se,
+          UCL_beta  = b + 1.96 * se,
+          pval_beta = pval,
+          qval_beta = qval
+        )
+      
+      has_beta   <- all(c("beta", "LCL_beta", "UCL_beta") %in% names(ivw_all_cont))
+      has_p_beta <- all(c("pval_beta", "qval_beta") %in% names(ivw_all_cont))
+      
+      if (!has_beta) {
+        warning("Beta columns could not be created – cannot produce Figure 4B.")
+        
+      } else {
+        
+        # Fix origin order
+        ivw_beta <- ivw_all_cont %>%
+          dplyr::mutate(
+            origin = factor(origin, levels = c("Maternal", "Fetal", "Paternal"))
+          )
+        
+        # Order outcomes by absolute maternal beta (largest maternal effect first)
+        maternal_beta <- ivw_beta %>%
+          dplyr::filter(origin == "Maternal") %>%
+          dplyr::arrange(dplyr::desc(abs(beta))) %>%
+          dplyr::mutate(order_maternal = dplyr::row_number()) %>%
+          dplyr::select(outcome_full, order_maternal)
+        
+        ivw_beta <- ivw_beta %>%
+          dplyr::left_join(maternal_beta, by = "outcome_full")
+        
+        # Prepare text and y positions (same stacking logic as Figure 4)
+        offsets_beta <- c(
+          Maternal =  0.60,
+          Fetal    =  0.00,
+          Paternal = -0.60
+        )
+        
+        beta_layout <- ivw_beta %>%
+          dplyr::arrange(order_maternal, origin) %>%
+          dplyr::mutate(
+            base_row = dplyr::dense_rank(order_maternal),
+            y_pos    = (dplyr::n_distinct(outcome_full) - base_row + 1) * 2 +
+              offsets_beta[origin],
+            Beta      = beta,
+            Beta_LCL  = LCL_beta,
+            Beta_UCL  = UCL_beta,
+            Beta_text = sprintf("%.3f", Beta),
+            CI_text   = sprintf("(%.3f–%.3f)", Beta_LCL, Beta_UCL),
+            label_outcome = dplyr::if_else(origin == "Maternal", outcome_full, "")
+          )
+        
+        if (has_p_beta) {
+          beta_layout <- beta_layout %>%
+            dplyr::mutate(
+              P_text = dplyr::case_when(
+                is.na(pval_beta)  ~ NA_character_,
+                pval_beta < 0.001 ~ "<0.001",
+                TRUE              ~ sprintf("%.3f", pval_beta)
+              ),
+              Q_text = dplyr::case_when(
+                is.na(qval_beta)     ~ NA_character_,
+                qval_beta < 0.001    ~ "<0.001",
+                TRUE                 ~ sprintf("%.3f", qval_beta)
+              )
+            )
+        }
+        
+        if (nrow(beta_layout) == 0) {
+          message("No rows available for Figure 4B.")
+          
+        } else {
+          
+          forest_beta <- beta_layout
+          
+          # Axis limits based on beta ranges
+          x_min_beta <- min(forest_beta$Beta_LCL, na.rm = TRUE)
+          x_max_beta <- max(forest_beta$Beta_UCL, na.rm = TRUE)
+          
+          # Slight padding around the beta range
+          pad <- 0.05 * (x_max_beta - x_min_beta)
+          x_min_beta <- x_min_beta - pad
+          x_max_beta <- x_max_beta + pad
+          
+          # Useful range object
+          range_beta <- x_max_beta - x_min_beta
+          
+          # Positions of text columns to the right
+          text_start   <- x_max_beta + 0.05 * range_beta
+          text_spacing <- 0.20 * range_beta
+          
+          beta_pos <- text_start
+          ci_pos   <- text_start + text_spacing
+          
+          if (has_p_beta) {
+            p_pos_b <- text_start + 2 * text_spacing
+            q_pos_b <- text_start + 3 * text_spacing
+          }
+          
+          header_beta <- data.frame(
+            x   = c(
+              x_min_beta - 0.20 * range_beta,  # left header for "Outcome"
+              beta_pos,
+              ci_pos,
+              if (has_p_beta) p_pos_b,
+              if (has_p_beta) q_pos_b
+            ),
+            lab = c(
+              "Outcome",
+              "Beta",
+              "95% CI",
+              if (has_p_beta) "P value",
+              if (has_p_beta) "Q value"
+            )
+          )
+          
+          y_bottom_b <- min(forest_beta$y_pos) - 0.5
+          y_top_b    <- max(forest_beta$y_pos) + 0.5
+          y_header_b <- y_top_b + 1
+          
+          panel_beta <- data.frame(
+            xmin = x_min_beta, xmax = x_max_beta,
+            ymin = y_bottom_b, ymax = y_top_b
+          )
+          
+          ref_beta <- data.frame(
+            x = 0, xend = 0,
+            y = y_bottom_b, yend = y_top_b
+          )
+          
+          # Extra left expansion so labels are not cut off
+          left_expansion <- 0.40 * range_beta
+          
+          p_trios_beta <- ggplot(forest_beta, aes(y = y_pos)) +
+            geom_rect(
+              data = panel_beta, inherit.aes = FALSE,
+              aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+              fill = "gray98", color = "gray85", alpha = 0.3
+            ) +
+            geom_segment(
+              data = ref_beta, inherit.aes = FALSE,
+              aes(x = x, xend = xend, y = y, yend = yend),
+              linetype = "dashed", color = "gray60", linewidth = 0.6
+            ) +
+            geom_pointrange(
+              aes(
+                x    = Beta,
+                xmin = Beta_LCL,
+                xmax = Beta_UCL,
+                color = origin
+              ),
+              size = 0.8, linewidth = 0.6
+            ) +
+            # Outcome labels (shifted to the right so they are not cropped)
+            geom_text(
+              aes(
+                x = x_min_beta - 0.15 * range_beta,
+                label = label_outcome
+              ),
+              hjust = 1, size = 3.5
+            ) +
+            geom_text(aes(x = beta_pos, label = Beta_text), hjust = 0, size = 3.2) +
+            geom_text(aes(x = ci_pos,   label = CI_text),   hjust = 0, size = 3.2)
+          
+          if (has_p_beta) {
+            p_trios_beta <- p_trios_beta +
+              geom_text(aes(x = p_pos_b, label = P_text), hjust = 0, size = 3.2) +
+              geom_text(aes(x = q_pos_b, label = Q_text), hjust = 0, size = 3.2)
+          }
+          
+          p_trios_beta <- p_trios_beta +
+            geom_text(
+              data = transform(header_beta, y = y_header_b),
+              inherit.aes = FALSE,
+              aes(x = x, y = y, label = lab),
+              fontface = "bold", size = 4,
+              hjust = c(1, rep(0, nrow(header_beta) - 1))
+            ) +
+            annotate(
+              "text",
+              x = (x_min_beta + x_max_beta) / 2, y = min(forest_beta$y_pos) - 1,
+              label = "Beta (absolute effect, 95% CI)",
+              size = 4, fontface = "bold"
+            ) +
+            scale_x_continuous(
+              limits = c(
+                x_min_beta - left_expansion,
+                text_start + (if (has_p_beta) 3 else 1) * text_spacing + 0.40
+              ),
+              expand = c(0, 0)
+            ) +
+            scale_color_manual(
+              values = c(
+                "Maternal" = "#1f78b4",
+                "Fetal"    = "#33a02c",
+                "Paternal" = "#e31a1c"
+              ),
+              name = "Genetic effect"
+            ) +
+            theme_void() +
+            theme(
+              legend.position  = "bottom",
+              legend.title     = element_text(size = 10, face = "bold"),
+              legend.text      = element_text(size = 9),
+              plot.background  = element_rect(fill = "white", color = NA),
+              panel.background = element_rect(fill = "white", color = NA),
+              plot.margin      = margin(20, 20, 20, 20),
+              plot.title       = element_text(hjust = 0.5, size = 14, face = "bold"),
+              plot.subtitle    = element_text(hjust = 0.5, size = 11),
+              plot.caption     = element_text(hjust = 0, size = 8, colour = "grey40")
+            ) +
+            labs(
+              title    = "Figure 4B. Maternal, fetal, and paternal MR estimates for continuous outcomes",
+              subtitle = "Gestational age and birthweight Z-score – beta coefficients with 95% CI",
+              caption  = "Maternal, fetal and paternal effects estimated using the same genetic instruments.\nQ values are FDR-adjusted P values (where available)."
+            )
+          
+          out_png_beta <- file.path(plots_dir, "Fig4b_trios_continuous_maternal_fetal_paternal_betas.png")
+          
+          ggsave(
+            out_png_beta, p_trios_beta,
+            width = 16,
+            height = 8 + max(0, (nrow(forest_beta) - 15) * 0.15),
+            dpi   = 300,
+            bg    = "white"
+          )
+          
+          message("Saved Figure 4B (continuous outcomes, betas) to: ", out_png_beta)
+        }
+      }
+    }
+    
+ 
 ### 6) SUMMARY ##################################################################
 
 message("\n=== PLOT GENERATION COMPLETED ===")

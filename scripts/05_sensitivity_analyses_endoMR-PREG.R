@@ -560,4 +560,169 @@ readr::write_csv(
   file.path(results_dir, "cohort_composition.csv")
 )
 
+### 5) MR-PRESSO GLOBAL AND OUTLIER TESTS ######################################
+
+message("=== MR-PRESSO global and outlier tests (29 outcomes) ===")
+
+# Ensure MRPRESSO is available -------------------------------------------------
+if (!requireNamespace("MRPRESSO", quietly = TRUE)) {
+  if (!requireNamespace("devtools", quietly = TRUE)) {
+    install.packages("devtools", repos = "https://cloud.r-project.org")
+  }
+  devtools::install_github("rondolab/MR-PRESSO")
+}
+suppressPackageStartupMessages(library(MRPRESSO))
+
+# We assume `dat` is the harmonised dataset restricted to the 29 outcomes
+# with at least: SNP, outcome, beta.exposure, se.exposure, beta.outcome, se.outcome
+
+# Split by outcome
+dat_list <- split(dat, dat$outcome)
+
+run_mr_presso_for_outcome <- function(df, outcome_id) {
+  n_snps <- length(unique(df$SNP))
+  message("[MR-PRESSO] Outcome: ", outcome_id, " | SNPs: ", n_snps)
+  
+  # Need at least 3 SNPs
+  if (n_snps < 3) {
+    message("[MR-PRESSO] Skipping ", outcome_id, ": <3 SNPs.")
+    return(NULL)
+  }
+  
+  # Prepare data frame in the format expected by mr_presso()
+  presso_dat <- data.frame(
+    SNP          = df$SNP,
+    BetaExposure = df$beta.exposure,
+    BetaOutcome  = df$beta.outcome,
+    SdExposure   = df$se.exposure,
+    SdOutcome    = df$se.outcome,
+    stringsAsFactors = FALSE
+  )
+  
+  # Drop rows with missing / non-finite values
+  presso_dat <- presso_dat[
+    is.finite(presso_dat$BetaExposure) &
+      is.finite(presso_dat$BetaOutcome) &
+      is.finite(presso_dat$SdExposure) &
+      is.finite(presso_dat$SdOutcome),
+  ]
+  
+  if (nrow(presso_dat) < 3) {
+    message("[MR-PRESSO] Skipping ", outcome_id, ": <3 valid SNPs after filtering.")
+    return(NULL)
+  }
+  
+  # Run MR-PRESSO (NbDistribution can be increased later if needed)
+  message("[MR-PRESSO] Running MR-PRESSO for ", outcome_id, " ...")
+  res <- tryCatch(
+    {
+      MRPRESSO::mr_presso(
+        BetaOutcome    = "BetaOutcome",
+        BetaExposure   = "BetaExposure",
+        SdOutcome      = "SdOutcome",
+        SdExposure     = "SdExposure",
+        OUTLIERtest    = TRUE,
+        DISTORTIONtest = TRUE,
+        data           = presso_dat,
+        NbDistribution = 250,      # lighter for development; you can set 1000 later
+        SignifThreshold = 0.05
+      )
+    },
+    error = function(e) {
+      message("[MR-PRESSO] Failed for ", outcome_id, ": ", e$message)
+      return(NULL)
+    }
+  )
+  
+  if (is.null(res)) return(NULL)
+  
+  main_res   <- res[["Main MR results"]]
+  presso_res <- res[["MR-PRESSO results"]]
+  distortion <- res[["Distortion Test"]]
+  
+  global_p     <- NA_real_
+  n_outliers   <- 0L
+  outlier_snps <- NA_character_
+  causal_orig  <- NA_real_
+  causal_corr  <- NA_real_
+  
+  # Global test p-value
+  if (!is.null(presso_res) && !is.null(presso_res[["Global Test"]])) {
+    gt <- presso_res[["Global Test"]]
+    if ("Pvalue" %in% colnames(gt)) {
+      global_p <- gt$Pvalue[1]
+    }
+  }
+  
+  # Outlier test
+  if (!is.null(presso_res) && !is.null(presso_res[["Outlier Test"]])) {
+    ot <- presso_res[["Outlier Test"]]
+    
+    if (length(ot) > 0) {
+      # Some versions return a vector of indices or names
+      if ("Outliers" %in% names(ot)) {
+        outlier_vec <- ot[["Outliers"]]
+      } else {
+        outlier_vec <- ot
+      }
+      
+      # If numeric, treat as row indices
+      if (is.numeric(outlier_vec)) {
+        idx <- unique(outlier_vec)
+        idx <- idx[idx >= 1 & idx <= nrow(presso_dat)]
+        outlier_vec <- presso_dat$SNP[idx]
+      }
+      
+      outlier_vec   <- unique(as.character(outlier_vec))
+      outlier_vec   <- outlier_vec[!is.na(outlier_vec)]
+      n_outliers    <- length(outlier_vec)
+      outlier_snps  <- if (n_outliers > 0) paste(outlier_vec, collapse = ";") else NA_character_
+    }
+  }
+  
+  # Causal estimate from MR-PRESSO main results (original)
+  if (!is.null(main_res) && nrow(main_res) > 0) {
+    if ("Causal Estimate" %in% colnames(main_res)) {
+      causal_orig <- as.numeric(main_res[1, "Causal Estimate"])
+    }
+  }
+  
+  # "Corrected" estimate from distortion test, if present
+  if (!is.null(distortion) && nrow(distortion) > 0) {
+    if ("Distortion Coefficient" %in% colnames(distortion)) {
+      causal_corr <- as.numeric(distortion[1, "Distortion Coefficient"])
+    }
+  }
+  
+  data.frame(
+    outcome_id         = outcome_id,
+    outcome_label      = if (!is.null(outcome_labels[outcome_id])) 
+      unname(outcome_labels[outcome_id]) else outcome_id,
+    n_snps_input       = nrow(presso_dat),
+    global_p           = global_p,
+    n_outliers         = n_outliers,
+    outlier_snps       = outlier_snps,
+    causal_estimate    = causal_orig,
+    corrected_estimate = causal_corr,
+    stringsAsFactors   = FALSE
+  )
+}
+
+# Run MR-PRESSO for each outcome
+mrpresso_summary_list <- mapply(
+  FUN        = run_mr_presso_for_outcome,
+  df         = dat_list,
+  outcome_id = names(dat_list),
+  SIMPLIFY   = FALSE
+)
+
+mrpresso_summary <- dplyr::bind_rows(mrpresso_summary_list)
+
+# Export results
+readr::write_csv(
+  mrpresso_summary,
+  file.path(results_dir, "mr_presso_results.csv")
+)
+
+message("MR-PRESSO analyses complete. Results saved to: ", results_dir)
 message("Sensitivity analyses complete. Results saved to: ", results_dir)
