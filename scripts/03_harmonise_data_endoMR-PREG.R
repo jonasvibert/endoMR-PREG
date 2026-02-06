@@ -141,6 +141,13 @@ if ("outcome" %in% colnames(dat)) {
   print(table(dat$outcome))
 }
 
+if ("mr_keep" %in% colnames(dat)) {
+  message("  - palindromic SNPs suggested for keep  per outcome (after harmonisation):")
+  print(table(dat$mr_keep))
+}
+
+dat <- dat %>% filter(mr_keep==TRUE)
+
 message("Final harmonised dataset: ", nrow(dat), " rows.")
 
 # Optional: inspect first rows (can be commented out in production) ----------
