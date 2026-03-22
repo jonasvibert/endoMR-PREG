@@ -1,0 +1,40 @@
+.RData
+.Rhistory
+.Rproj.user/
+.Rapp.history
+.DS_Store
+*.log
+*.tmp
+*.xlsx
+*.csv
+*.rds
+*.Rproj
+*.zip
+*.gz
+*.raw
+results/
+data/
+plots/
+plink_mac_*/
+*.bed
+*.bim
+*.fam
+
+# Generated outputs (recreated by running scripts)
+results/*.csv
+results/*.tsv
+results/plots/
+results/tables/
+outputs/
+
+# R workspace & history
+.RData
+.RDataTmp*
+.Rapp.history
+.Rhistory
+
+# macOS
+.DS_Store
+
+# Claude
+.claude/
