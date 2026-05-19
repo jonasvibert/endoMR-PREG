@@ -22,7 +22,7 @@ This repository contains the complete analysis code for the study described belo
 
 ## Key Findings
 
-> *Across 30 outcomes, only placenta praevia reached FDR-corrected significance, with a robust and consistent causal signal (IVW OR 1·62, 95% CI 1·33–1·97; q<0·001). Within the placental disorders domain, estimates for premature placental separation and the broader placental disorders phenotype were directionally concordant but imprecise. For premature rupture of membranes, estimates were concordant across three methods, though the association was sensitive to cohort exclusion and did not survive multiple testing correction. By contrast, hypertensive disorders, gestational diabetes, postpartum haemorrhage, stillbirth, and most neonatal outcomes showed estimates consistently close to the null across all methods. Trio-based analyses suggested predominantly maternal genetic pathways for most outcomes; fetal genetic contributions were not significant after correction for multiple testing.*
+> *Across 30 outcomes, only placenta praevia reached FDR-corrected significance, with consistent estimates across four of five sensitivity methods (IVW OR 1·62, 95% CI 1·33–1·97; q<0·001). Within the placental disorders domain, estimates for premature placental separation and the broader placental disorders phenotype were directionally concordant but imprecise. For premature rupture of membranes, estimates were concordant across three methods, though the association was sensitive to cohort exclusion and did not survive multiple testing correction. By contrast, hypertensive disorders, gestational diabetes, postpartum haemorrhage, stillbirth, and most neonatal outcomes showed estimates consistently close to the null across all methods. Trio-based analyses suggested predominantly maternal genetic pathways for most outcomes; fetal genetic contributions were not significant after correction for multiple testing.*
 
 ---
 
@@ -42,7 +42,7 @@ endoMR-PREG/
 │   ├── 04.2_fetal_effect_endoMR-PREG.R          # Trio-based maternal/fetal/paternal analysis
 │   ├── 05_sensitivity_analyses_endoMR-PREG.R    # MR-Egger, WM, WMode, PRESSO, LOO
 │   ├── 06_tables_endoMR-PREG.R                  # Supplementary and main tables
-│   └── 07_plots_endoMR-PREG.R                   # All manuscript figures (Fig 1–3, S1–S15)
+│   └── 07_plots_endoMR-PREG.R                   # All manuscript figures (Fig 2–3, S1–S15)
 └── data/                          # Input GWAS summary statistics (not tracked)
 ```
 
@@ -73,8 +73,8 @@ source("scripts/03_harmonise_data_endoMR-PREG.R")       # harmonise exposure/out
 source("scripts/04_main_analyses_endoMR-PREG.R")        # IVW primary analysis
 source("scripts/04.2_fetal_effect_endoMR-PREG.R")       # trio-based decomposition
 source("scripts/05_sensitivity_analyses_endoMR-PREG.R") # sensitivity & LOO analyses
-source("scripts/06_tables_endoMR-PREG.R")               # Tables 2–3, S1–S5
-source("scripts/07_plots_endoMR-PREG.R")                # Figures 1–3, S1–S15
+source("scripts/06_tables_endoMR-PREG.R")               # Tables 1–3, S1–S5
+source("scripts/07_plots_endoMR-PREG.R")                # Figures 2–3, S1–S15
 ```
 
 ---
@@ -108,7 +108,7 @@ source("scripts/07_plots_endoMR-PREG.R")                # Figures 1–3, S1–S1
 
 ## Interpretation
 
-> *A robust causal signal for placenta praevia alongside directionally consistent estimates across the placental disorders domain suggests that abnormal implantation and placentation may constitute the primary mechanism linking endometriosis liability to adverse pregnancy outcomes. The absence of robust causal signals for hypertensive disorders, gestational diabetes, postpartum haemorrhage, fetal growth restriction, and most other obstetric outcomes suggests that previously reported observational associations for these outcomes may largely reflect confounding, selection, or co-occurring conditions rather than direct biological effects of endometriosis. These findings support targeted attention to placental localisation rather than a generalised intensification of obstetric surveillance, and highlight the need to better characterise biological pathways linking endometriosis to impaired implantation and decidualisation.*
+> *A robust causal signal for placenta praevia alongside directionally consistent estimates across the placental disorders domain suggests that abnormal implantation and placentation may constitute the primary mechanism linking endometriosis liability to adverse pregnancy outcomes. The absence of robust causal signals for hypertensive disorders, gestational diabetes, postpartum haemorrhage, fetal growth restriction, and most other obstetric outcomes suggests that previously reported observational associations for these outcomes may largely reflect confounding or clinical management patterns rather than direct biological effects of endometriosis. These findings support targeted attention to placental localisation rather than a generalised intensification of obstetric surveillance, and highlight the need to better characterise biological pathways linking endometriosis to impaired implantation and decidualisation.*
 
 ---
 
