@@ -15,12 +15,15 @@
 #   Supplementary figures:
 #     S1–S9        — Domain-specific multi-method forest plots (IVW + Egger +
 #                    Weighted Median + Weighted Mode), one per domain
-#     S10          — Birthweight trios (same style as Figure 3, restricted to
-#                    SGA, LGA, LBW, HBW, birthweight z-score)
-#     S11–S16      — SNP-level leave-one-out for nominally significant outcomes:
-#                    S11 Placenta praevia, S12 Premature placental separation,
-#                    S13 PROM, S14 Preterm birth, S15 Very preterm birth,
-#                    S16 Elective caesarean section
+#                    S1 Placental disorders, S2 Bleeding & haemorrhage,
+#                    S3 Pregnancy timing, S4 Labour & delivery,
+#                    S5 Hypertensive disorders, S6 Fetal growth & birthweight,
+#                    S7 Maternal metabolic/haematologic, S8 Maternal mental health,
+#                    S9 Neonatal condition
+#     S10–S15      — SNP-level leave-one-out for nominally significant outcomes:
+#                    S10 Placenta praevia, S11 Premature placental separation,
+#                    S12 PROM, S13 Preterm birth, S14 Very preterm birth,
+#                    S15 Elective caesarean section
 #
 # Inputs:
 #   results/ivw_results.csv
@@ -32,8 +35,7 @@
 #   Figure_2_forest_plot_two_panels.png / .pdf
 #   Figure_3_trios_overview.png         / .pdf
 #   Supplementary_Figure_S{1-9}_*.png  / .pdf
-#   Supplementary_Figure_S10_birthweight_trios.png / .pdf
-#   Supplementary_Figure_S{11-16}_LOO_SNP_*.png / .pdf
+#   Supplementary_Figure_S{10-15}_LOO_SNP_*.png / .pdf
 ###############################################################################
 
 ### 0) SETUP ##################################################################
@@ -226,11 +228,7 @@ compute_domain_bounds <- function(df_panel) {
     summarise(
       y_min    = min(y_pos) - 0.5,
       y_max    = max(y_pos) + 0.5,
-      y_center = {
-        ys <- sort(y_pos, decreasing = TRUE)
-        n  <- length(ys)
-        ys[floor((n - 1) / 2) + 1]
-      },
+      y_center = mean(y_pos),
       .groups = "drop"
     ) %>%
     mutate(band_fill = ifelse(row_number() %% 2 == 0, "grey93", "white"))
@@ -248,7 +246,7 @@ build_forest_panel <- function(df_panel, db_panel,
                                parse_col_header = FALSE,
                                parse_x_title    = FALSE) {
 
-  y_top    <- max(df_panel$y_pos) + 1.8
+  y_top    <- max(df_panel$y_pos) + 2.4
   y_bottom <- min(df_panel$y_pos) - 0.5
 
   ggplot(df_panel, aes(y = y_pos)) +
@@ -275,7 +273,7 @@ build_forest_panel <- function(df_panel, db_panel,
           y      = y_center,
           label  = as.character(domain),
           colour = as.character(domain)),
-      hjust = 0, vjust = 0.5, size = 3.4, fontface = "bold"
+      hjust = 0, vjust = 0.5, size = 4.7, fontface = "bold"
     ) +
 
     # CI lines
@@ -303,37 +301,37 @@ build_forest_panel <- function(df_panel, db_panel,
     # Outcome labels
     geom_text(
       aes(x = x_label, y = y_pos, label = label),
-      hjust = 1, vjust = 0.5, size = 3.1
+      hjust = 1, vjust = 0.5, size = 4.4
     ) +
 
     # Text columns
     geom_text(aes(x = x_or, y = y_pos, label = est_text),
-              hjust = 0.5, vjust = 0.5, size = 2.9) +
+              hjust = 0.5, vjust = 0.5, size = 4.2) +
     geom_text(aes(x = x_ci, y = y_pos, label = ci_text),
-              hjust = 0.5, vjust = 0.5, size = 2.9) +
+              hjust = 0.5, vjust = 0.5, size = 4.2) +
     geom_text(aes(x = x_p,  y = y_pos, label = p_text),
-              hjust = 0.5, vjust = 0.5, size = 2.9) +
+              hjust = 0.5, vjust = 0.5, size = 4.2) +
     geom_text(aes(x = x_q,  y = y_pos, label = q_text),
-              hjust = 0.5, vjust = 0.5, size = 2.9) +
+              hjust = 0.5, vjust = 0.5, size = 4.2) +
     geom_text(aes(x = x_n,  y = y_pos, label = n_text),
-              hjust = 0.5, vjust = 0.5, size = 2.9) +
+              hjust = 0.5, vjust = 0.5, size = 4.2) +
 
     # Column headers
     annotate("text", x = x_label,        y = y_top, label = "Outcome",
-             hjust = 1,   vjust = 0.5, size = 3.4, fontface = "bold") +
+             hjust = 1,   vjust = 0.5, size = 4.7, fontface = "bold") +
     annotate("text", x = x_domain_label, y = y_top, label = "Domain",
-             hjust = 0,   vjust = 0.5, size = 3.4, fontface = "bold") +
+             hjust = 0,   vjust = 0.5, size = 4.7, fontface = "bold") +
     annotate("text", x = x_or,           y = y_top, label = col_header,
-             hjust = 0.5, vjust = 0.5, size = 3.4, fontface = "bold",
+             hjust = 0.5, vjust = 0.5, size = 4.7, fontface = "bold",
              parse = parse_col_header) +
     annotate("text", x = x_ci,           y = y_top, label = "95% CI",
-             hjust = 0.5, vjust = 0.5, size = 3.4, fontface = "bold") +
+             hjust = 0.5, vjust = 0.5, size = 4.7, fontface = "bold") +
     annotate("text", x = x_p,            y = y_top, label = "P value",
-             hjust = 0.5, vjust = 0.5, size = 3.4, fontface = "bold") +
+             hjust = 0.5, vjust = 0.5, size = 4.7, fontface = "bold") +
     annotate("text", x = x_q,            y = y_top, label = "Q value",
-             hjust = 0.5, vjust = 0.5, size = 3.4, fontface = "bold") +
+             hjust = 0.5, vjust = 0.5, size = 4.7, fontface = "bold") +
     annotate("text", x = x_n,            y = y_top, label = "SNPs (no.)",
-             hjust = 0.5, vjust = 0.5, size = 3.4, fontface = "bold") +
+             hjust = 0.5, vjust = 0.5, size = 4.7, fontface = "bold") +
 
     # Manual x-axis baseline
     annotate("segment",
@@ -352,14 +350,14 @@ build_forest_panel <- function(df_panel, db_panel,
              x     = x_breaks,
              y     = y_bottom - 0.75,
              label = x_labels,
-             size  = 2.9, colour = "grey30", hjust = 0.5, vjust = 1) +
+             size  = 3.7, colour = "grey30", hjust = 0.5, vjust = 1) +
 
     # Manual x-axis title
     annotate("text",
              x     = (x_forest_min + x_forest_max) / 2,
-             y     = y_bottom - 1.3,
+             y     = y_bottom - 1.7,
              label = x_axis_title,
-             size  = 3.5, fontface = "bold",
+             size  = 4.7, fontface = "bold",
              parse = parse_x_title) +
 
     # Scales
@@ -369,7 +367,7 @@ build_forest_panel <- function(df_panel, db_panel,
       expand = c(0, 0)
     ) +
     scale_y_continuous(
-      limits = c(y_bottom - 1.8, y_top + 0.5),
+      limits = c(y_bottom - 2.2, y_top + 0.5),
       expand = c(0, 0)
     ) +
 
@@ -431,7 +429,7 @@ p_cont <- build_forest_panel(
   x_forest_max     = x_plot_max_cont,
   x_breaks         = x_axis_breaks_cont,
   x_labels         = x_axis_labels_cont,
-  x_axis_title     = "paste(bold(beta), ' (95% CI)')",
+  x_axis_title     = "bold(beta)~bold('(95% CI)')",
   col_header       = "bold(beta)",
   parse_col_header = TRUE,
   parse_x_title    = TRUE
@@ -520,7 +518,8 @@ build_trios_panel <- function(df_panel,
                               x_label,
                               x_domain_label,
                               is_log = TRUE,
-                              parse_x_title = FALSE) {
+                              parse_x_title = FALSE,
+                              x_margin = 0.05) {
 
   # Transform data to plot coordinates
   if (is_log) {
@@ -558,10 +557,10 @@ build_trios_panel <- function(df_panel,
     ) %>%
     mutate(band_fill = ifelse(row_number() %% 2 == 0, "grey93", "white"))
 
-  y_top    <- max(df_panel$y_pos, na.rm = TRUE) + 1.8
+  y_top    <- max(df_panel$y_pos, na.rm = TRUE) + 2.4
   y_bottom <- min(df_panel$y_pos, na.rm = TRUE) - 0.5
 
-  x_left  <- x_domain_label - 0.05
+  x_left  <- x_domain_label - x_margin
   # Proportional right pad (2% of forest width) so null fraction is the same
   # in any panel that uses the same f_label and a symmetric forest.
   x_right <- x_forest_lim[2] + 0.02 * (x_forest_lim[2] - x_forest_lim[1])
@@ -606,16 +605,16 @@ build_trios_panel <- function(df_panel,
           y      = y_pos + (as.numeric(origin) - (n_orig + 1) / 2) * dodge_w,
           colour = origin,
           shape  = origin),
-      size = 2.2
+      size = 2.8
     ) +
 
     # Column headers
     annotate("text", x = x_domain_label, y = y_top,
              label = "Domain", hjust = 0, vjust = 0.5,
-             size = 3.2, fontface = "bold") +
+             size = 4.6, fontface = "bold") +
     annotate("text", x = x_label, y = y_top,
              label = "Outcome", hjust = 1, vjust = 0.5,
-             size = 3.2, fontface = "bold") +
+             size = 4.6, fontface = "bold") +
 
     # Domain labels (left-aligned, far left)
     annotate("text",
@@ -623,13 +622,13 @@ build_trios_panel <- function(df_panel,
              y      = band$y_center,
              label  = as.character(band$domain),
              colour = domain_colours[as.character(band$domain)],
-             hjust  = 0, vjust = 0.5, size = 2.9, fontface = "bold") +
+             hjust  = 0, vjust = 0.5, size = 4.2, fontface = "bold") +
 
     # Outcome labels (right-aligned, just left of forest)
     geom_text(
       data = df_panel %>% filter(origin == "Maternal (unadj.)"),
       aes(x = x_label, y = y_pos, label = label),
-      hjust = 1, vjust = 0.5, size = 2.8, colour = "grey20"
+      hjust = 1, vjust = 0.5, size = 4.2, colour = "grey20"
     ) +
 
     # Manual x-axis: baseline, ticks, tick labels, title
@@ -644,27 +643,27 @@ build_trios_panel <- function(df_panel,
     annotate("text",
              x = x_breaks_plot, y = y_bottom - 0.75,
              label = x_labels,
-             size = 2.9, colour = "grey30", hjust = 0.5, vjust = 1) +
+             size = 3.7, colour = "grey30", hjust = 0.5, vjust = 1) +
     annotate("text",
              x     = (x_forest_lim[1] + x_forest_lim[2]) / 2,
-             y     = y_bottom - 1.45,
+             y     = y_bottom - 1.85,
              label = x_title,
-             size  = 3.4, fontface = "bold", hjust = 0.5,
+             size  = 4.7, fontface = "bold", hjust = 0.5,
              parse = parse_x_title) +
 
     scale_colour_manual(values = trio_colours, name = "Genetic effect") +
     scale_shape_manual(values  = trio_shapes,  name = "Genetic effect") +
 
     scale_x_continuous(limits = c(x_left, x_right), breaks = NULL, expand = c(0, 0)) +
-    scale_y_continuous(limits = c(y_bottom - 1.8, y_top + 0.5), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(y_bottom - 2.2, y_top + 0.5), expand = c(0, 0)) +
 
     labs(x = NULL) +
 
     theme_void() +
     theme(
       legend.position = "bottom",
-      legend.title    = element_text(size = 10, face = "bold"),
-      legend.text     = element_text(size = 10),
+      legend.title    = element_text(size = 13, face = "bold"),
+      legend.text     = element_text(size = 13),
       plot.background = element_rect(fill = "white", colour = NA),
       panel.background = element_rect(fill = "white", colour = NA),
       plot.margin     = margin(t = 6, r = 15, b = 4, l = 5, unit = "mm")
@@ -687,7 +686,7 @@ trios_cont <- trios_df %>% filter(scale == "continuous")
 #   label_zone / total = f_label
 #   (-A - x_domain + 0.05) / (1.04A - x_domain + 0.05) = f_label
 #   → x_domain = -A * (1 + 1.04*f_label)/(1-f_label) + 0.05
-f_label_trios <- 0.35
+f_label_trios <- 0.44
 x_domain_aligned <- function(A, f = f_label_trios) {
   -A * (1 + 1.04 * f) / (1 - f) + 0.05
 }
@@ -742,7 +741,8 @@ p_t_cont <- build_trios_panel(
   x_label        = trios_x_label_cont,
   x_domain_label = trios_x_domain_cont,
   is_log         = FALSE,
-  parse_x_title  = TRUE
+  parse_x_title  = TRUE,
+  x_margin       = 0.05 * A_cont_fig3 / A_bin_fig3
 )
 
 n_bin_t  <- length(unique(trios_bin$outcome_id))
@@ -759,9 +759,9 @@ p_fig3 <- (p_t_bin / p_t_cont) +
 fig3_h <- max(10, n_bin_t * 0.42 + n_cont_t * 0.9 + 4)
 
 ggsave(file.path(figures_dir, "Figure_3_trios_overview.png"),
-       plot = p_fig3, width = 14, height = fig3_h, dpi = 300, bg = "white")
+       plot = p_fig3, width = 18, height = fig3_h, dpi = 300, bg = "white")
 ggsave(file.path(figures_dir, "Figure_3_trios_overview.pdf"),
-       plot = p_fig3, width = 14, height = fig3_h, bg = "white")
+       plot = p_fig3, width = 18, height = fig3_h, bg = "white")
 
 message("Figure 3 saved.")
 ###############################################################################
@@ -977,15 +977,15 @@ build_domain_figure <- function(df_domain, dom_name, dom_colour) {
 
 # Supplementary figure order (S1–S9) — independent of domain_levels (Figure 2 order)
 supp_domain_order <- c(
-  "Placental disorders",            # S1
-  "Pregnancy timing",               # S2
-  "Labour & delivery",              # S3
-  "Neonatal condition",             # S4
-  "Bleeding & haemorrhage",         # S5
-  "Hypertensive disorders",         # S6
+  "Placental disorders",             # S1
+  "Bleeding & haemorrhage",          # S2
+  "Pregnancy timing",                # S3
+  "Labour & delivery",               # S4
+  "Hypertensive disorders",          # S5
+  "Fetal growth & birthweight",      # S6
   "Maternal metabolic/haematologic", # S7
-  "Maternal mental health",         # S8
-  "Fetal growth & birthweight"      # S9
+  "Maternal mental health",          # S8
+  "Neonatal condition"               # S9
 )
 
 domain_fig_map <- tibble::tibble(
@@ -1020,96 +1020,16 @@ for (i in seq_len(nrow(domain_fig_map))) {
 }
 
 ###############################################################################
-# 11) SUPPLEMENTARY FIGURE S10 — BIRTHWEIGHT TRIOS
-#
-#   Same style as Figure 3 (3 components, binary top / continuous bottom),
-#   restricted to the five birthweight/growth outcomes:
-#   SGA, LGA, LBW, HBW, birthweight z-score.
-###############################################################################
-
-bw_ids <- c("sga", "lga", "lbw_all", "hbw_all", "zbw_all")
-
-# trios_df already has new labels and is filtered to the 3 main components
-trios_bw      <- trios_df %>% filter(outcome_id %in% bw_ids)
-trios_bw_bin  <- trios_bw  %>% filter(scale == "binary")
-trios_bw_cont <- trios_bw  %>% filter(scale == "continuous")
-
-if (nrow(trios_bw) > 0) {
-
-  # Dynamic forest limits for S10 (birthweight subset only)
-  A_bin_s10  <- max(
-    ceiling(max(abs(log(c(trios_bw_bin$LCL,  trios_bw_bin$UCL))),  na.rm = TRUE) / 0.1) * 0.1,
-    log(4)
-  )
-  A_cont_s10 <- ceiling(
-    max(abs(c(trios_bw_cont$LCL, trios_bw_cont$UCL)), na.rm = TRUE) * 1.15 / 0.05
-  ) * 0.05
-
-  x_breaks_cont_s10 <- sort(unique(c(
-    seq(0, -A_cont_s10, by = -0.25), seq(0, A_cont_s10, by = 0.25)
-  )))
-  x_breaks_cont_s10 <- x_breaks_cont_s10[
-    x_breaks_cont_s10 >= -A_cont_s10 & x_breaks_cont_s10 <= A_cont_s10
-  ]
-  x_labels_cont_s10 <- sprintf("%.2f", x_breaks_cont_s10)
-
-  p_s10_bin  <- build_trios_panel(
-    trios_bw_bin,
-    x_null         = 1,
-    x_forest_lim   = c(-A_bin_s10,  A_bin_s10),
-    x_breaks       = c(0.25, 0.50, 1.00, 2.00, 4.00),
-    x_labels       = c("0.25", "0.50", "1.00", "2.00", "4.00"),
-    x_title        = "Odds ratio (95% CI, log scale)",
-    x_label        = -A_bin_s10  - 0.08,
-    x_domain_label = x_domain_aligned(A_bin_s10),
-    is_log         = TRUE
-  )
-
-  p_s10_cont <- build_trios_panel(
-    trios_bw_cont,
-    x_null         = 0,
-    x_forest_lim   = c(-A_cont_s10, A_cont_s10),
-    x_breaks       = x_breaks_cont_s10,
-    x_labels       = x_labels_cont_s10,
-    x_title        = "beta~'(95% CI)'",
-    x_label        = -A_cont_s10 - 0.04,
-    x_domain_label = x_domain_aligned(A_cont_s10),
-    is_log         = FALSE,
-    parse_x_title  = TRUE
-  )
-
-  n_bw_bin  <- length(unique(trios_bw_bin$outcome_id))
-  n_bw_cont <- length(unique(trios_bw_cont$outcome_id))
-  h_bw_bin  <- n_bw_bin  + 4
-  h_bw_cont <- n_bw_cont + 7
-
-  p_s10 <- (p_s10_bin / p_s10_cont) +
-    patchwork::plot_layout(heights = c(h_bw_bin, h_bw_cont), guides = "collect") &
-    theme(legend.position = "bottom")
-
-  s10_h <- max(8, n_bw_bin * 0.55 + n_bw_cont * 0.9 + 4)
-
-  ggsave(file.path(figures_dir, "Supplementary_Figure_S10_birthweight_trios.png"),
-         plot = p_s10, width = 14, height = s10_h, dpi = 300, bg = "white")
-  ggsave(file.path(figures_dir, "Supplementary_Figure_S10_birthweight_trios.pdf"),
-         plot = p_s10, width = 14, height = s10_h, bg = "white")
-
-  message("Supplementary Figure S10 saved.")
-} else {
-  message("No birthweight trios data found — S10 skipped.")
-}
-
-###############################################################################
-# 12) SUPPLEMENTARY FIGURES S11–S16 — SNP-LEVEL LEAVE-ONE-OUT
+# 11) SUPPLEMENTARY FIGURES S10–S15 — SNP-LEVEL LEAVE-ONE-OUT
 #     FOR NOMINALLY SIGNIFICANT OUTCOMES
 #
 #   One figure per outcome. Outcomes:
-#     S11 — Placenta praevia              (finngen_R12_O15_PLAC_PRAEVIA)
-#     S12 — Premature placental separation (finngen_R12_O15_PLAC_PREMAT_SEPAR)
-#     S13 — Premature rupture of membranes (rup_memb)
-#     S14 — Preterm birth <37 weeks        (pretb_all)
-#     S15 — Very preterm birth <34 weeks   (vpretb_all)
-#     S16 — Elective caesarean section     (el_cs)
+#     S10 — Placenta praevia              (finngen_R12_O15_PLAC_PRAEVIA)
+#     S11 — Premature placental separation (finngen_R12_O15_PLAC_PREMAT_SEPAR)
+#     S12 — Premature rupture of membranes (rup_memb)
+#     S13 — Preterm birth <37 weeks        (pretb_all)
+#     S14 — Very preterm birth <34 weeks   (vpretb_all)
+#     S15 — Elective caesarean section     (el_cs)
 ###############################################################################
 
 # Script 05 appends a timestamp: mr_leaveoneout_snp_YYYYMMDD-HHMMSS.csv
@@ -1132,7 +1052,7 @@ loo_outcomes <- tibble::tibble(
     "vpretb_all",
     "el_cs"
   ),
-  supp_num = paste0("S", 11:16)
+  supp_num = paste0("S", 10:15)
 )
 
 for (i in seq_len(nrow(loo_outcomes))) {
