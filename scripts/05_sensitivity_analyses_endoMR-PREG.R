@@ -23,6 +23,18 @@
 #   - leave_one_cohort_results.csv
 #   - cohort_composition.csv
 ################################################################################
+# REVISION LOG
+#   [QC-2026-06] Pre-harmonisation of per-study MR-PREG data (stu_out_dat.txt),
+#                added ahead of the leave-one-cohort-out analysis (Section 8).
+#                Data-quality correction identified by Will Thompson (June 2026):
+#                  (1) duplicate SNP x study x outcome rows were inflating
+#                      weighting in the per-cohort meta-analysis;
+#                  (2) inconsistent allele orientation across studies produced
+#                      wrong meta-betas, causing ALSPAC to appear spuriously
+#                      influential in leave-one-cohort-out results.
+#                Not reviewer-driven; internal QC fix, see project memory
+#                "project_alspac_harmonisation_correction".
+################################################################################
 
 ### 1) SETUP ####################################################################
 
@@ -459,6 +471,54 @@ mr_outcome_raw <- mr_data |>
     outcome_type,
     study
   )
+
+# --- [QC-2026-06] Pre-harmonisation of per-study MR-PREG data (see REVISION LOG) ---
+# Correction identified by Will Thompson (June 2026):
+#   (1) Duplicate SNP×study entries inflate weighting in meta-analysis
+#   (2) Inconsistent allele orientation across studies produces wrong meta-betas
+#       In particular, this caused ALSPAC to appear influential in the
+#       leave-one-cohort-out analysis when using uncorrected data.
+
+# (1) Remove duplicate SNP × study × outcome rows
+n_before <- nrow(mr_outcome_raw)
+mr_outcome_raw <- dplyr::distinct(mr_outcome_raw, SNP, study, id.outcome,
+                                  .keep_all = TRUE)
+message(sprintf("De-duplicated per-study data: removed %d duplicate rows (%d remain).",
+                n_before - nrow(mr_outcome_raw), nrow(mr_outcome_raw)))
+
+# (2) Harmonise allele orientation against the exposure reference allele.
+#     For each study row, if the effect allele matches the exposure OTHER allele,
+#     flip the beta and EAF. Palindromic SNPs (A/T or C/G) are skipped.
+exp_ref <- exposure_df_raw |>
+  dplyr::transmute(
+    SNP,
+    EA_exp = toupper(effect_allele.exposure),
+    OA_exp = toupper(other_allele.exposure)
+  ) |>
+  dplyr::distinct(SNP, .keep_all = TRUE)
+
+mr_outcome_raw <- mr_outcome_raw |>
+  dplyr::left_join(exp_ref, by = "SNP") |>
+  dplyr::mutate(
+    EA             = toupper(effect_allele.outcome),
+    OA             = toupper(other_allele.outcome),
+    is_palindromic = (EA == "A" & OA == "T") | (EA == "T" & OA == "A") |
+                     (EA == "C" & OA == "G") | (EA == "G" & OA == "C"),
+    needs_flip     = !is.na(EA_exp) & EA == OA_exp & OA == EA_exp & !is_palindromic
+  )
+
+n_flipped <- sum(mr_outcome_raw$needs_flip, na.rm = TRUE)
+message(sprintf("Allele harmonisation: flipped %d per-study rows to match exposure reference.",
+                n_flipped))
+
+mr_outcome_raw <- mr_outcome_raw |>
+  dplyr::mutate(
+    beta.outcome          = dplyr::if_else(needs_flip, -beta.outcome,          beta.outcome),
+    eaf.outcome           = dplyr::if_else(needs_flip,  1 - eaf.outcome,       eaf.outcome),
+    effect_allele.outcome = dplyr::if_else(needs_flip,  EA_exp, effect_allele.outcome),
+    other_allele.outcome  = dplyr::if_else(needs_flip,  OA_exp, other_allele.outcome)
+  ) |>
+  dplyr::select(-EA_exp, -OA_exp, -EA, -OA, -is_palindromic, -needs_flip)
 
 outcomes_list <- split(mr_outcome_raw, mr_outcome_raw$id.outcome)
 

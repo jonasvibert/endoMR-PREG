@@ -6,6 +6,32 @@
 # Generate main and supplementary tables for:
 #   Genetic liability to endometriosis → pregnancy outcomes (endoMR-PREG)
 ###############################################################################
+# REVISION LOG
+#   [R3.2] Trio-based MR de-emphasis (Reviewer #3, "Trio-based analysis and
+#          title framing"). Supplementary Table S4 ("trio-based MR estimates":
+#          maternal/fetal/paternal DONUTS estimates) has been REMOVED from the
+#          exported tables and replaced by two new tables built from the main
+#          (non-trio) harmonised dataset:
+#            - Table S4: heterogeneity statistics (Cochran's Q, IVW only)
+#            - Table S5: MR-Egger intercept (directional pleiotropy)
+#          Confirmed rationale: the trio table simply duplicated the content
+#          of Figure 3 ("Trios overview", script 07) — removed as redundant,
+#          not solely to reduce prominence per the reviewer's wording.
+#   [STYLE] US spelling applied throughout outcome labels (haemorrhage ->
+#          hemorrhage, anaemia -> anemia). Confirmed: author preference, for
+#          consistency with the rest of the manuscript (not a journal
+#          requirement).
+#   [FIX]  McBride et al. (MR-PREG) publication year corrected 2026 -> 2025 in
+#          Table 1 (table1_gwas).
+#   [REVERTED] domain_meta: order_within swap for ga_all/rup_memb within the
+#          "Pregnancy timing" domain was unintentional — reverted to original
+#          order (ga_all before rup_memb).
+#   [EDIT] Table numbering/naming reworked across the board (e.g. Supp_Table_S1
+#          -> Supp_Table_1A/B/C, new Table_S1_harmonised_summary, Supp_Table_S2
+#          -> Supplementary_Table_2_Endometriosis_Instruments, Supp_Table_S3
+#          -> Table_S3_all_MR_methods) to align with final manuscript table
+#          numbering.
+###############################################################################
 
 suppressPackageStartupMessages({
   library(dplyr)
@@ -92,11 +118,12 @@ vars_keep <- c(
   "em_cs"
 )
 
+# --- [STYLE] US spelling applied to outcome labels (see REVISION LOG) ---
 outcome_labels <- c(
     # Bleeding (4)
     Antepartum_bleeding                       = "Antepartum bleeding",
-    Postpartum_hemorrhage                     = "Postpartum haemorrhage (any)",
-    Postpartum_hemorrhage_due_to_atony        = "PPH due to uterine atony",
+    Postpartum_hemorrhage                     = "Postpartum hemorrhage (any)",
+    Postpartum_hemorrhage_due_to_atony        = "PPH due to atony",
     Postpartum_hemorrhage_due_to_retained_placenta = "PPH due to retained placenta",
     
     # Placenta (3)
@@ -127,7 +154,7 @@ outcome_labels <- c(
     sb_subsamp                                = "Stillbirth",
 
     # Maternal complications (6)
-    anaemia_preg_all                          = "Pregnancy anaemia",
+    anaemia_preg_all                          = "Pregnancy anemia",
     gdm_subsamp                               = "Gestational diabetes",
     gh_subsamp                                = "Gestational hypertension",
     hdp_subsamp                               = "Hypertensive disorders of pregnancy",
@@ -277,11 +304,12 @@ type_df <- tibble::tibble(
 
 log_info("Creating Table 1: description of GWAS datasets...")
 
+# --- [FIX] McBride et al. (MR-PREG) year corrected 2026 -> 2025 (see REVISION LOG) ---
 table1_gwas <- tibble::tribble(
   ~Study,                      ~Year, ~Dataset_or_consortium,                                            ~Phenotype_group,                                                      ~Ancestry,                                             ~Sample_size,                                             ~Sex,           ~Main_adjustments,                                                   ~Notes_or_accession,
   "Rahmioglu et al.",          2023,  "International Endometriosis Genetics Consortium + UK Biobank",    "Endometriosis (overall and subtypes)",                              "Predominantly European (~98%) + Japanese (~2%)",     "60,674 cases; 701,926 controls",                       "Female/mixed", "Age, batch, principal components, study-specific covariates", "Primary exposure GWAS; clumped instruments used in endoMR-PREG",
   "FinnGen R12",               2024,  "FinnGen (release 12)",                                            "Pregnancy and fertility ICD-10 phenotypes",                          "Finnish (European)",                                 "Varies by phenotype",                                   "Female",       "Age, batch, principal components",                       "Used for placental phenotypes (O43–O45) and related outcomes",
-  "McBride et al. (MR-PREG)",  2026,  "MR-PREG collaboration (ALSPAC, BiB, MoBa, UKB, FinnGen + GWAS)",  "Adverse pregnancy and perinatal outcomes (binary and continuous)",   "Predominantly European",                              "Up to 678,001 women (outcome-specific)",               "Female",       "Age, study/centre, principal components",              "Core source for hypertensive disorders, GDM, PTB, SGA/LGA, CS, PROM, stillbirth, Apgar, NICU",
+  "McBride et al. (MR-PREG)",  2025,  "MR-PREG collaboration (ALSPAC, BiB, MoBa, UKB, FinnGen + GWAS)",  "Adverse pregnancy and perinatal outcomes (binary and continuous)",   "Predominantly European",                              "Up to 678,001 women (outcome-specific)",               "Female",       "Age, study/centre, principal components",              "Core source for hypertensive disorders, GDM, PTB, SGA/LGA, CS, PROM, stillbirth, Apgar, NICU",
   "Westergaard et al.",        2024,  "Nordic registry-based GWAS (6 cohorts)",                           "Bleeding in pregnancy and postpartum haemorrhage (overall, subtypes)", "Northern European (registry-based)",               "Up to 331,792 women; outcome-specific case counts",     "Female",       "Age, parity, calendar year, cohort",                   "Provides GWAS for antepartum bleeding and PPH subtypes used in endoMR-PREG"
 )
 
@@ -419,6 +447,7 @@ domain_levels_t3 <- c(
   "Neonatal condition"
 )
 
+# --- [REVERTED] "Pregnancy timing" order restored to original (ga_all before rup_memb) ---
 domain_meta <- tibble::tribble(
   ~outcome,                                          ~domain,                           ~order_within,
   "finngen_R12_O15_PLAC_PRAEVIA",                    "Placental disorders",             1,
@@ -1009,143 +1038,86 @@ message("Supplementary Table S3 done.")
 s3_file <- file.path(tables_dir, "Supplementary_Table_S3_sensitivity_analyses.csv")
 
 ###############################################################################
-# 10) SUPPLEMENTARY TABLE S4 — TRIO-BASED MR ESTIMATES
+# 10) TABLE S4 — HETEROGENEITY STATISTICS (COCHRAN'S Q, IVW ONLY)
 #
-#   Maternal, fetal, and paternal genetic effects of endometriosis liability
-#   on pregnancy outcomes (DONUTS mutually adjusted estimates from MR-PREG).
-#   Source: results/trios_adj_mr_results_by_outcome_long.csv (script 04.2).
-#   Ordered by domain (same as Table 3 / Figure 2).
+# --- [R3.2] Replaces the former "Supplementary Table S4 — trio-based MR
+#     estimates" (maternal/fetal/paternal DONUTS estimates), removed as it
+#     duplicated Figure 3 ("Trios overview", script 07). See REVISION LOG. ---
 ###############################################################################
 
-log_info("Creating Supplementary Table S4: trio-based MR estimates...")
+log_info("Creating Table S4: heterogeneity statistics (IVW only)...")
 
-trios_long_path <- file.path(results_dir, "trios_adj_mr_results_by_outcome_long.csv")
+dat_het <- data.table::fread(harm_file)
+dat_het <- dat_het[dat_het$outcome %in% vars_keep, , drop = FALSE]
 
-if (!file.exists(trios_long_path)) {
-  warning("trios_adj_mr_results_by_outcome_long.csv not found — skipping Table S4.")
-} else {
+het_res <- TwoSampleMR::mr_heterogeneity(dat_het)
 
-  trios_long <- readr::read_csv(trios_long_path, show_col_types = FALSE)
+Table_S4 <- het_res %>%
+  dplyr::filter(
+    outcome %in% vars_keep,
+    method %in% c("Inverse variance weighted", "IVW")
+  ) %>%
+  dplyr::mutate(
+    Outcome  = dplyr::recode(outcome, !!!outcome_labels, .default = outcome),
+    group    = label_group(outcome, Outcome),
+    exposure = "Genetic liability to endometriosis",
+    type     = dplyr::if_else(outcome %in% continuous_outcomes,
+                              "continuous", "binary"),
+    priority = "primary"
+  ) %>%
+  dplyr::select(
+    group,
+    exposure,
+    Outcome,
+    Q,
+    Q_df,
+    Q_pval,
+    type,
+    priority
+  ) %>%
+  dplyr::arrange(group, Outcome)
 
-  # Origin display labels (all four components for the supplementary table)
-  origin_levels <- c(
-    "Maternal (unadj.)",
-    "Maternal (adj. fetal)",
-    "Fetal (adj. maternal)",
-    "Paternal (adj.)"
-  )
+s4_file <- file.path(tables_dir, "Table_S4_heterogeneity_IVW.csv")
+write.csv(Table_S4, s4_file, row.names = FALSE)
+log_info("Table S4 (heterogeneity, IVW) saved: ", s4_file)
 
-  fmt_trios_est <- function(or, lcl, ucl, b, b_lci, b_uci, sc) {
-    dplyr::if_else(
-      sc == "binary",
-      sprintf("%.2f (%.2f–%.2f)", or, lcl, ucl),
-      sprintf("%.3f (%.3f–%.3f)", b, b_lci, b_uci)
-    )
-  }
+###############################################################################
+# 11) TABLE S5 — MR-EGGER INTERCEPT (HORIZONTAL PLEIOTROPY)
+###############################################################################
 
-  Table_S4_trios <- trios_long %>%
-    dplyr::filter(
-      origin %in% origin_levels,
-      outcome_id %in% vars_keep
-    ) %>%
-    dplyr::left_join(
-      domain_meta %>% dplyr::select(outcome = outcome, domain, order_within),
-      by = c("outcome_id" = "outcome")
-    ) %>%
-    dplyr::mutate(
-      Outcome  = dplyr::recode(outcome_id, !!!outcome_labels, .default = outcome_id),
-      Domain   = factor(domain, levels = domain_levels_t3),
-      Origin   = factor(origin, levels = origin_levels),
-      Scale    = dplyr::if_else(scale == "binary", "OR", "β"),
-      b_est    = log(OR),
-      b_lci_v  = log(LCL),
-      b_uci_v  = log(UCL),
-      `Effect (95% CI)` = dplyr::if_else(
-        scale == "binary",
-        sprintf("%.2f (%.2f–%.2f)", OR, LCL, UCL),
-        sprintf("%.3f (%.3f–%.3f)", OR, LCL, UCL)
-      ),
-      `P value` = dplyr::case_when(
-        pval < 0.001 ~ formatC(pval, format = "e", digits = 1),
-        TRUE         ~ sprintf("%.3f", pval)
-      ),
-      `q (FDR)` = dplyr::case_when(
-        !is.na(qval) & qval < 0.001 ~ formatC(qval, format = "e", digits = 1),
-        !is.na(qval)                ~ sprintf("%.3f", qval),
-        TRUE                        ~ NA_character_
-      )
-    ) %>%
-    dplyr::arrange(Domain, order_within, Origin) %>%
-    dplyr::select(
-      Domain,
-      Outcome,
-      `Genetic effect` = Origin,
-      Scale,
-      `Effect (95% CI)`,
-      `P value`,
-      `q (FDR)`
-    )
+log_info("Creating Table S5: MR-Egger intercept (pleiotropy)...")
 
-  # CSV
-  readr::write_csv(
-    Table_S4_trios,
-    file.path(tables_dir, "Supplementary_Table_S4_trio_based_MR.csv")
-  )
-  log_info("Supplementary Table S4 (trio-based MR, CSV) saved.")
+pleio_dat <- data.table::fread(harm_file)
+pleio_dat <- pleio_dat[pleio_dat$outcome %in% vars_keep, , drop = FALSE]
 
-  # Excel
-  if (requireNamespace("openxlsx", quietly = TRUE)) {
-    wb_s4 <- openxlsx::createWorkbook()
-    openxlsx::addWorksheet(wb_s4, "S4 Trio-based MR")
+egger_res <- TwoSampleMR::mr_pleiotropy_test(pleio_dat)
 
-    caption_s4 <- paste0(
-      "Supplementary Table S4. Trio-based Mendelian randomization estimates of ",
-      "maternal, fetal, and paternal genetic effects of endometriosis liability on ",
-      "pregnancy outcomes. Estimates are derived from mutually adjusted (DONUTS) ",
-      "models using the MR-PREG trio-based GWAS. OR = odds ratio for binary outcomes; ",
-      "β = beta coefficient for continuous outcomes (gestational age, birthweight z-score). ",
-      "FDR q-values are provided where available."
-    )
-    openxlsx::writeData(wb_s4, "S4 Trio-based MR",
-                        x = caption_s4, startRow = 1, startCol = 1)
-    openxlsx::addStyle(wb_s4, "S4 Trio-based MR",
-                       style = openxlsx::createStyle(
-                         fontName = "Arial", fontSize = 10,
-                         textDecoration = "bold", wrapText = TRUE
-                       ),
-                       rows = 1, cols = 1)
+Table_S5 <- egger_res %>%
+  dplyr::filter(outcome %in% vars_keep) %>%
+  dplyr::mutate(
+    outcome_code = outcome,
+    Outcome      = dplyr::recode(outcome_code, !!!outcome_labels, .default = outcome_code),
+    group        = label_group(outcome_code, Outcome),
+    exposure     = "Genetic liability to endometriosis",
+    type         = dplyr::if_else(outcome_code %in% continuous_outcomes,
+                                  "continuous", "binary"),
+    priority     = "primary"
+  ) %>%
+  dplyr::select(
+    group,
+    exposure,
+    Outcome,
+    egger_intercept,
+    se,
+    pval,
+    type,
+    priority
+  ) %>%
+  dplyr::arrange(group, Outcome)
 
-    openxlsx::writeDataTable(
-      wb_s4, "S4 Trio-based MR",
-      x          = Table_S4_trios,
-      startRow   = 3, startCol = 1,
-      tableStyle = "TableStyleLight9",
-      withFilter = TRUE
-    )
-
-    openxlsx::setColWidths(wb_s4, "S4 Trio-based MR",
-                           cols   = seq_len(ncol(Table_S4_trios)),
-                           widths = c(28, 32, 24, 8, 22, 12, 12))
-
-    openxlsx::addStyle(wb_s4, "S4 Trio-based MR",
-                       style = openxlsx::createStyle(
-                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
-                         fgFill = "#D9E1F2", border = "Bottom", borderColour = "#4472C4",
-                         wrapText = TRUE
-                       ),
-                       rows = 3, cols = seq_len(ncol(Table_S4_trios)),
-                       gridExpand = TRUE)
-
-    openxlsx::saveWorkbook(
-      wb_s4,
-      file.path(tables_dir, "Supplementary_Table_S4_trio_based_MR.xlsx"),
-      overwrite = TRUE
-    )
-    log_info("Supplementary Table S4 (trio-based MR, Excel) saved.")
-  }
-
-  message("Supplementary Table S4 (trio-based MR) done.")
-}
+s5_file <- file.path(tables_dir, "Table_S5_egger_intercept.csv")
+write.csv(Table_S5, s5_file, row.names = FALSE)
+log_info("Table S5 (MR-Egger intercept) saved: ", s5_file)
 
 log_info("=== Table generation for endoMR-PREG completed successfully ===")
 
@@ -1160,45 +1132,54 @@ suppressPackageStartupMessages(library(gt))
 html_dir <- file.path(tables_dir, "html")
 dir.create(html_dir, showWarnings = FALSE, recursive = TRUE)
 
+# --- [EDIT] Table names/numbering reworked to match final manuscript numbering (see REVISION LOG) ---
 tables_to_export <- list(
   Table1_GWAS_sources                      = table1_gwas,
   Table2_pregnancy_sample_sizes            = table1_preg,
   Table3_IVW_FDR_main_results              = table3_main,
-  Supp_Table_S1_phenotype_definitions_A    = Supp_1A,
-  Supp_Table_S1_phenotype_definitions_B    = Supp_1B,
-  Supp_Table_S1_phenotype_definitions_C    = Supp_1C,
-  Supp_Table_S2_instruments                = supp_table2,
-  Supp_Table_S3_sensitivity_analyses       = Table_S3_csv,
-  Supp_Table_S4_trio_based_MR             = if (exists("Table_S4_trios")) Table_S4_trios else NULL
+  Supp_Table_1A_primary_perinatal_def      = Supp_1A,
+  Supp_Table_1B_secondary_binary_perinatal = Supp_1B,
+  Supp_Table_1C_continuous_perinatal       = Supp_1C,
+  Table_S1_harmonised_summary              = Table_S1,
+  Supplementary_Table_2_Endometriosis_Instruments = supp_table2,
+  Table_S3_all_MR_methods                  = Table_S3_csv,
+  Table_S4_heterogeneity_IVW               = Table_S4,
+  Table_S5_egger_intercept                 = Table_S5
 )
 
 table_titles <- list(
   Table1_GWAS_sources =
     "Table 1. Overview of GWAS datasets for endometriosis and pregnancy outcomes in the endoMR-PREG study",
-
+  
   Table2_pregnancy_sample_sizes =
-    "Table 2. Outcome definitions, sample sizes, case/control counts, and SNP availability per outcome",
-
+    "Table 2. Pregnancy outcomes and sample sizes in MR-PREG and related cohorts",
+  
   Table3_IVW_FDR_main_results =
-    "Table 3. Primary IVW MR results across 30 outcomes (with FDR q-values)",
-
-  Supp_Table_S1_phenotype_definitions_A =
-    "Supplementary Table S1A. Detailed phenotype definitions and contributing cohorts — primary binary outcomes",
-
-  Supp_Table_S1_phenotype_definitions_B =
-    "Supplementary Table S1B. Detailed phenotype definitions and contributing cohorts — secondary binary outcomes",
-
-  Supp_Table_S1_phenotype_definitions_C =
-    "Supplementary Table S1C. Detailed phenotype definitions and contributing cohorts — continuous outcomes",
-
-  Supp_Table_S2_instruments =
-    "Supplementary Table S2. Endometriosis instrument SNP list and characteristics (post-clumping)",
-
-  Supp_Table_S3_sensitivity_analyses =
-    "Supplementary Table S3. Sensitivity analyses including MR-Egger, weighted median, and weighted mode estimates, heterogeneity (Cochran's Q), pleiotropy (Egger intercept), and MR-PRESSO results",
-
-  Supp_Table_S4_trio_based_MR =
-    "Supplementary Table S4. Trio-based MR estimates by maternal, fetal, and paternal genetic effects"
+    "Table 3. Main inverse-variance weighted Mendelian randomisation results with FDR correction",
+  
+  Supp_Table_1A_primary_perinatal_def =
+    "Supplementary Table 1A. Definitions and sources of primary perinatal outcomes",
+  
+  Supp_Table_1B_secondary_binary_perinatal =
+    "Supplementary Table 1B. Definitions and sources of secondary binary perinatal outcomes",
+  
+  Supp_Table_1C_continuous_perinatal =
+    "Supplementary Table 1C. Definitions and sources of continuous perinatal outcomes",
+  
+  Table_S1_harmonised_summary =
+    "Table S1. Summary of harmonised exposure–outcome datasets used in MR analyses",
+  
+  Supplementary_Table_2_Endometriosis_Instruments =
+    "Supplementary Table 2. Genetic instruments for endometriosis liability (Rahmioglu et al.)",
+  
+  Table_S3_all_MR_methods =
+    "Supplementary Table S3. Sensitivity analyses across all MR methods (IVW, MR-Egger, Weighted Median, Weighted Mode, MR-PRESSO) for genetic liability to endometriosis on pregnancy outcomes",
+  
+  Table_S4_heterogeneity_IVW =
+    "Table S4. Heterogeneity statistics for inverse-variance weighted MR models",
+  
+  Table_S5_egger_intercept =
+    "Table S5. MR-Egger intercept estimates for directional pleiotropy assessment"
 )
 
 for (nm in names(tables_to_export)) {
