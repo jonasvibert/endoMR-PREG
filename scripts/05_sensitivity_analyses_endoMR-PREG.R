@@ -34,18 +34,35 @@
 #                      influential in leave-one-cohort-out results.
 #                Not reviewer-driven; internal QC fix, see project memory
 #                "project_alspac_harmonisation_correction".
+#   [R4.6] Added MR-RAPS (Robust Adjusted Profile Score) to the sensitivity
+#          panel (Section 3b), in response to Reviewer #4's winner's-curse
+#          comment (discovery instrument R² = 5.6%, flagged as likely
+#          overestimated). Run across all 30 outcomes for consistency with
+#          the other sensitivity methods; the placenta praevia estimate is
+#          the one quoted in the response letter (OR = 1.63, 95% CI
+#          1.33-2.01, p = 3.0e-6 vs. main IVW OR = 1.62, 95% CI 1.33-1.97,
+#          p = 1.5e-6 - consistent, arguing against winner's-curse inflation).
 ################################################################################
 
 ### 1) SETUP ####################################################################
 
 required_pkgs <- c(
   "TwoSampleMR", "dplyr", "ggplot2", "here", "readr",
-  "data.table", "stringr", "tidyr", "purrr"
+  "data.table", "stringr", "tidyr", "purrr",
+  "mr.raps"  # [R4.6] winner's-curse-robust estimator
 )
 
 safe_install <- function(pkg) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
-    install.packages(pkg, repos = "https://cloud.r-project.org")
+    if (pkg == "mr.raps") {
+      # Not on CRAN — install from the MRC IEU r-universe
+      install.packages(
+        "mr.raps",
+        repos = c("https://mrcieu.r-universe.dev", "https://cloud.r-project.org")
+      )
+    } else {
+      install.packages(pkg, repos = "https://cloud.r-project.org")
+    }
   }
   suppressPackageStartupMessages(
     library(pkg, character.only = TRUE)
@@ -241,6 +258,34 @@ export_csv(het_res,     "mr_heterogeneity")
 export_csv(plt_res,     "mr_pleiotropy")
 export_csv(single_res,  "mr_single_snp")
 export_csv(loo_snp_res, "mr_leaveoneout_snp")
+
+### 3b) MR-RAPS — WINNER'S-CURSE-ROBUST ESTIMATOR ##############################
+# --- [R4.6] Reviewer #4: the discovery instrument (R² = 5.6%) was flagged as
+#     likely inflated by winner's curse. MR-RAPS down-weights outlying
+#     instrument effects and gives a winner's-curse-robust estimate. Run
+#     across all 30 outcomes for consistency with the other sensitivity
+#     methods above; the placenta praevia row is the one quoted in the
+#     response letter. ---
+
+message("=== MR-RAPS sensitivity analysis (winner's-curse-robust) ===")
+
+raps_res <- mr(dat, method_list = "mr_raps") |>
+  dplyr::mutate(
+    OR  = exp(b),
+    LCL = exp(b - 1.96 * se),
+    UCL = exp(b + 1.96 * se)
+  )
+
+export_csv(raps_res, "mr_raps")
+
+praevia_raps <- raps_res |>
+  dplyr::filter(outcome == "finngen_R12_O15_PLAC_PRAEVIA")
+
+message(sprintf(
+  "MR-RAPS, placenta praevia: OR = %.2f (95%% CI %.2f-%.2f), p = %.2e, nsnp = %d",
+  praevia_raps$OR, praevia_raps$LCL, praevia_raps$UCL,
+  praevia_raps$pval, praevia_raps$nsnp
+))
 
 ### 4) LEAVE-ONE-COHORT-OUT MR (MR-PREG) #######################################
 
@@ -478,17 +523,20 @@ mr_outcome_raw <- mr_data |>
 #   (2) Inconsistent allele orientation across studies produces wrong meta-betas
 #       In particular, this caused ALSPAC to appear influential in the
 #       leave-one-cohort-out analysis when using uncorrected data.
+#
+# Order revised 2026-07-08 per Tuck Seng's review: align alleles FIRST, then
+# de-duplicate LAST with a consistency check — not the reverse. Blindly
+# de-duplicating before alignment risks silently keeping the wrong row if two
+# "duplicate" rows actually disagree on beta/eaf/se (dplyr::distinct() just
+# keeps the first). Empirically checked for the current stu_out_dat.txt: all
+# 170 duplicate groups agree exactly on beta/eaf/se/alleles, so this
+# reordering does not change results here, but is the safer default for any
+# future update to stu_out_dat.txt.
 
-# (1) Remove duplicate SNP × study × outcome rows
-n_before <- nrow(mr_outcome_raw)
-mr_outcome_raw <- dplyr::distinct(mr_outcome_raw, SNP, study, id.outcome,
-                                  .keep_all = TRUE)
-message(sprintf("De-duplicated per-study data: removed %d duplicate rows (%d remain).",
-                n_before - nrow(mr_outcome_raw), nrow(mr_outcome_raw)))
-
-# (2) Harmonise allele orientation against the exposure reference allele.
-#     For each study row, if the effect allele matches the exposure OTHER allele,
-#     flip the beta and EAF. Palindromic SNPs (A/T or C/G) are skipped.
+# (1) Harmonise allele orientation against the exposure reference allele,
+#     for ALL rows, before any de-duplication. If the effect allele matches
+#     the exposure OTHER allele, flip the beta and EAF. Palindromic SNPs
+#     (A/T or C/G) are skipped.
 exp_ref <- exposure_df_raw |>
   dplyr::transmute(
     SNP,
@@ -511,6 +559,19 @@ n_flipped <- sum(mr_outcome_raw$needs_flip, na.rm = TRUE)
 message(sprintf("Allele harmonisation: flipped %d per-study rows to match exposure reference.",
                 n_flipped))
 
+# QC check (Tuck Seng): confirm beta/eaf actually change where flipped, and
+# stay the same where not flipped.
+qc_flip_check <- mr_outcome_raw |>
+  dplyr::mutate(
+    beta_after_flip = dplyr::if_else(needs_flip, -beta.outcome,    beta.outcome),
+    eaf_after_flip  = dplyr::if_else(needs_flip,  1 - eaf.outcome, eaf.outcome),
+    beta_changed    = beta_after_flip != beta.outcome,
+    eaf_changed     = eaf_after_flip  != eaf.outcome
+  ) |>
+  dplyr::count(needs_flip, beta_changed, eaf_changed)
+message("QC check: allele-flip consistency (needs_flip x beta_changed x eaf_changed):")
+print(qc_flip_check)
+
 mr_outcome_raw <- mr_outcome_raw |>
   dplyr::mutate(
     beta.outcome          = dplyr::if_else(needs_flip, -beta.outcome,          beta.outcome),
@@ -519,6 +580,54 @@ mr_outcome_raw <- mr_outcome_raw |>
     other_allele.outcome  = dplyr::if_else(needs_flip,  OA_exp, other_allele.outcome)
   ) |>
   dplyr::select(-EA_exp, -OA_exp, -EA, -OA, -is_palindromic, -needs_flip)
+
+# (2) De-duplicate LAST, using a marker that also encodes the (sorted)
+#     allele pair — not just SNP x study x outcome — and verify that
+#     duplicate rows actually agree on beta/eaf/se after alignment before
+#     collapsing them. (chr:pos is not carried into mr_outcome_raw here since
+#     these are already curated, uniquely-rsID'd instrument SNPs — not a
+#     multi-allelic full-GWAS merge — so SNP is an adequate substitute for
+#     chr:pos in this specific, pre-curated context.)
+mr_outcome_raw <- mr_outcome_raw |>
+  dplyr::mutate(
+    .allele_key = purrr::map2_chr(
+      toupper(effect_allele.outcome), toupper(other_allele.outcome),
+      ~ paste(sort(c(.x, .y)), collapse = "_")
+    ),
+    .marker = paste(SNP, study, id.outcome, .allele_key, sep = "|")
+  )
+
+dup_consistency <- mr_outcome_raw |>
+  dplyr::group_by(.marker) |>
+  dplyr::summarise(
+    n               = dplyr::n(),
+    n_distinct_beta = dplyr::n_distinct(round(beta.outcome, 8)),
+    n_distinct_eaf  = dplyr::n_distinct(round(eaf.outcome, 8)),
+    n_distinct_se   = dplyr::n_distinct(round(se.outcome, 8)),
+    .groups = "drop"
+  ) |>
+  dplyr::filter(n > 1)
+
+n_inconsistent <- sum(dup_consistency$n_distinct_beta > 1 |
+                      dup_consistency$n_distinct_eaf  > 1 |
+                      dup_consistency$n_distinct_se   > 1)
+if (n_inconsistent > 0) {
+  warning(n_inconsistent, " duplicate marker groups have INCONSISTENT beta/eaf/se ",
+          "after alignment - inspect dup_consistency before trusting the ",
+          "de-duplicated result.")
+} else {
+  message(sprintf(
+    "QC check: all %d duplicate marker groups agree on beta/eaf/se after alignment.",
+    nrow(dup_consistency)
+  ))
+}
+
+n_before <- nrow(mr_outcome_raw)
+mr_outcome_raw <- mr_outcome_raw |>
+  dplyr::distinct(.marker, .keep_all = TRUE) |>
+  dplyr::select(-.marker, -.allele_key)
+message(sprintf("De-duplicated per-study data: removed %d duplicate rows (%d remain).",
+                n_before - nrow(mr_outcome_raw), nrow(mr_outcome_raw)))
 
 outcomes_list <- split(mr_outcome_raw, mr_outcome_raw$id.outcome)
 

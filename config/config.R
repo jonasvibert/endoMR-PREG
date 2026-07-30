@@ -65,6 +65,14 @@ for (dir in REQUIRED_DIRS) {
 
 # Data file paths
 EXPOSURE_FILE <- file.path(DATA_DIR, "EXPOSURE_RAHMIGLU", "NIHMS1873427-Supplementary_Materials.xlsx")
+
+# Full genome-wide Rahmioglu et al. 2023 sumstats (GCST90205183, GRCh37).
+# Not redistributed with this repo (too large, external license). Set the
+# RAHMIOGLU_GW_FILE env var to override, or edit the default below.
+RAHMIOGLU_GW_FILE <- Sys.getenv(
+  "RAHMIOGLU_GW_FILE",
+  unset = "/Volumes/My Passport/GWAS/endometriosis_Rahmioglu_2023/GCST90205183_buildGRCh37.tsv"
+)
 SNP_LIST_FILE <- file.path(RESULTS_DIR, "endometriosis_clumped_snps.tsv")
 HARMONISED_FILE <- file.path(RESULTS_DIR, "harmonised_rahmioglu_bpo.csv")
 
@@ -298,7 +306,7 @@ OUTCOME_LABELS <- list(
   
   bf_ini = "Breastfeeding initiation",
   bf_est = "Exclusive breastfeeding",
-  bf_dur_4c = "Breastfeeding ≥4 months", 
+  bf_dur_4c = "Breastfeeding >=4 months", 
   bf_sus = "Breastfeeding duration"
 )
 

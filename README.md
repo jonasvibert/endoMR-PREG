@@ -30,23 +30,35 @@ This repository contains the complete analysis code for the study described belo
 
 ```
 endoMR-PREG/
-├── config/                        # Configuration files
+├── config/                            # Configuration files
 │   ├── config.R
 │   └── utils.R
-├── scripts/                       # Analysis pipeline (scripts 01–07)
-│   ├── 01_select_instruments_endoMR-PREG.R      # SNP selection & LD clumping
-│   ├── 02_prepare_outcomes_endoMR-PREG.R        # Outcome data preparation
-│   ├── 03_harmonise_data_endoMR-PREG.R          # Harmonisation (main)
-│   ├── 03b_harmonise_with_proxies_endoMR-PREG.R # Harmonisation with proxies
-│   ├── 04_main_analyses_endoMR-PREG.R           # IVW primary analysis
-│   ├── 04.2_fetal_effect_endoMR-PREG.R          # Trio-based maternal/fetal/paternal analysis
-│   ├── 05_sensitivity_analyses_endoMR-PREG.R    # MR-Egger, WM, WMode, PRESSO, LOO
-│   ├── 06_tables_endoMR-PREG.R                  # Supplementary and main tables
-│   └── 07_plots_endoMR-PREG.R                   # All manuscript figures (Fig 2–3, S1–S15)
-└── data/                          # Input GWAS summary statistics (not tracked)
+├── scripts/                           # Analysis pipeline (15 scripts)
+│   ├── 01_select_instruments_endoMR-PREG.R          # SNP selection & LD clumping
+│   ├── 02_prepare_outcomes_endoMR-PREG.R            # Outcome data preparation
+│   ├── 03_harmonise_data_endoMR-PREG.R              # Harmonisation (main)
+│   ├── 03.1_harmonise_with_proxies_endoMR-PREG.R    # Harmonisation with proxies
+│   ├── 04_main_analyses_endoMR-PREG.R               # IVW primary analysis
+│   ├── 04.2_fetal_effect_endoMR-PREG.R              # Trio-based maternal/fetal/paternal analysis
+│   ├── 05_sensitivity_analyses_endoMR-PREG.R        # MR-Egger, WM, WMode, PRESSO, LOO
+│   ├── 05.1_koller_sensitivity_endoMR-PREG.R        # Alternative instrument (Koller et al. 2026)
+│   ├── 05.2_effective_tests_endoMR-PREG.R           # Effective number of independent tests
+│   ├── 05.3_coloc_endo_praevia_endoMR-PREG.R        # Locus-level colocalisation
+│   ├── 05.4_ldsc_genetic_correlation_endoMR-PREG.R  # Cross-trait LDSC, 4 outcomes
+│   ├── 05.5_mrlap_praevia_endoMR-PREG.R             # MRlap overlap-corrected MR
+│   ├── 05.6_ldsc_targeted_endo_praevia_endoMR-PREG.R # Cross-trait LDSC, endo-praevia (audited)
+│   ├── 06_tables_endoMR-PREG.R                      # Main and supplementary tables
+│   └── 07_plots_endoMR-PREG.R                       # All manuscript figures (Fig 2-3, S1-S15)
+└── data/                               # Input GWAS summary statistics (not tracked)
 ```
 
-Generated outputs (`results/`) are not tracked in git and are recreated by running the pipeline.
+`data/`, `results/`, and `plots/` are gitignored. This repository contains analysis
+code only; no input data, generated tables, or figures are redistributed here. See
+[Data Access](#data-access) for how to obtain each GWAS. Scripts 05.3-05.6 read a
+local copy of the full genome-wide Rahmioglu et al. 2023 sumstats
+(GCST90205183_buildGRCh37.tsv) at a path set by `RAHMIOGLU_GW_FILE` in
+`config/config.R` (overridable via the `RAHMIOGLU_GW_FILE` environment variable) -
+update it to your own copy before running those scripts.
 
 ---
 
@@ -67,14 +79,21 @@ devtools::install_github("rondolab/MR-PRESSO")
 ### Running the Pipeline
 
 ```r
-source("scripts/01_select_instruments_endoMR-PREG.R")   # 41 endometriosis SNPs
-source("scripts/02_prepare_outcomes_endoMR-PREG.R")     # 30 outcome GWAS
-source("scripts/03_harmonise_data_endoMR-PREG.R")       # harmonise exposure/outcomes
-source("scripts/04_main_analyses_endoMR-PREG.R")        # IVW primary analysis
-source("scripts/04.2_fetal_effect_endoMR-PREG.R")       # trio-based decomposition
-source("scripts/05_sensitivity_analyses_endoMR-PREG.R") # sensitivity & LOO analyses
-source("scripts/06_tables_endoMR-PREG.R")               # Tables 1–3, S1–S5
-source("scripts/07_plots_endoMR-PREG.R")                # Figures 2–3, S1–S15
+source("scripts/01_select_instruments_endoMR-PREG.R")            # 41 endometriosis SNPs
+source("scripts/02_prepare_outcomes_endoMR-PREG.R")               # 30 outcome GWAS
+source("scripts/03_harmonise_data_endoMR-PREG.R")                 # harmonise exposure/outcomes
+source("scripts/03.1_harmonise_with_proxies_endoMR-PREG.R")       # harmonisation with LD proxies
+source("scripts/04_main_analyses_endoMR-PREG.R")                  # IVW primary analysis
+source("scripts/04.2_fetal_effect_endoMR-PREG.R")                 # trio-based decomposition
+source("scripts/05_sensitivity_analyses_endoMR-PREG.R")           # sensitivity & LOO analyses
+source("scripts/05.1_koller_sensitivity_endoMR-PREG.R")           # alternative instrument (Koller et al. 2026)
+source("scripts/05.2_effective_tests_endoMR-PREG.R")              # effective number of independent tests
+source("scripts/05.3_coloc_endo_praevia_endoMR-PREG.R")           # locus-level colocalisation
+source("scripts/05.4_ldsc_genetic_correlation_endoMR-PREG.R")     # cross-trait LDSC, 4 outcomes
+source("scripts/05.5_mrlap_praevia_endoMR-PREG.R")                # MRlap overlap-corrected MR
+source("scripts/05.6_ldsc_targeted_endo_praevia_endoMR-PREG.R")   # cross-trait LDSC, endo-praevia
+source("scripts/06_tables_endoMR-PREG.R")                         # Tables 1-3, S1-S11
+source("scripts/07_plots_endoMR-PREG.R")                          # Figures 2-3, S1-S15
 ```
 
 ---

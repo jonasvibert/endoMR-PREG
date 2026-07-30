@@ -375,7 +375,7 @@ format_publication_table <- function(data, include_metadata = TRUE) {
     data$OR <- exp(data$b)
     data$OR_LCL <- exp(data$b - 1.96 * data$se)
     data$OR_UCL <- exp(data$b + 1.96 * data$se)
-    data$OR_CI <- sprintf("%.2f (%.2f–%.2f)", data$OR, data$OR_LCL, data$OR_UCL)
+    data$OR_CI <- sprintf("%.2f (%.2f-%.2f)", data$OR, data$OR_LCL, data$OR_UCL)
   }
   
   # Format p-values
@@ -826,10 +826,10 @@ process_mr_preg_outcomes <- function(snps) {
 .to_beta <- function(effect_vec, outcome_name = "") {
   med <- suppressWarnings(median(effect_vec, na.rm = TRUE))
   if (is.finite(med) && med > 0.5 && med < 1.5) {
-    log_info("  {outcome_name}: Auto-detected OR format (median = {sprintf('%.3f', med)}) → converting to log OR")
-    log(effect_vec)  # OR → beta
+    log_info("  {outcome_name}: Auto-detected OR format (median = {sprintf('%.3f', med)}) -> converting to log OR")
+    log(effect_vec)  # OR -> beta
   } else {
-    log_info("  {outcome_name}: Auto-detected beta format (median = {sprintf('%.3f', med)}) → using as-is")
+    log_info("  {outcome_name}: Auto-detected beta format (median = {sprintf('%.3f', med)}) -> using as-is")
     effect_vec      # already beta
   }
 }

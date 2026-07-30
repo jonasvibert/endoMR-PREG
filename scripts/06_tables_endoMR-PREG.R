@@ -15,7 +15,7 @@
 #            - Table S4: heterogeneity statistics (Cochran's Q, IVW only)
 #            - Table S5: MR-Egger intercept (directional pleiotropy)
 #          Confirmed rationale: the trio table simply duplicated the content
-#          of Figure 3 ("Trios overview", script 07) — removed as redundant,
+#          of Figure 3 ("Trios overview", script 07) - removed as redundant,
 #          not solely to reduce prominence per the reviewer's wording.
 #   [STYLE] US spelling applied throughout outcome labels (haemorrhage ->
 #          hemorrhage, anaemia -> anemia). Confirmed: author preference, for
@@ -24,13 +24,24 @@
 #   [FIX]  McBride et al. (MR-PREG) publication year corrected 2026 -> 2025 in
 #          Table 1 (table1_gwas).
 #   [REVERTED] domain_meta: order_within swap for ga_all/rup_memb within the
-#          "Pregnancy timing" domain was unintentional — reverted to original
+#          "Pregnancy timing" domain was unintentional - reverted to original
 #          order (ga_all before rup_memb).
 #   [EDIT] Table numbering/naming reworked across the board (e.g. Supp_Table_S1
 #          -> Supp_Table_1A/B/C, new Table_S1_harmonised_summary, Supp_Table_S2
 #          -> Supplementary_Table_2_Endometriosis_Instruments, Supp_Table_S3
 #          -> Table_S3_all_MR_methods) to align with final manuscript table
 #          numbering.
+#   [R2.1] Reviewer #2, comment 1 (colocalisation): added Supplementary Table
+#          S6, the locus-by-locus coloc.abf results (41 loci) referenced in
+#          the response letter, from results/coloc_endo_praevia_by_locus.csv
+#          (script 05.3). Previously computed but not exported as a table.
+#   [R2.5] Reviewer #2, comment 5 (adenomyosis misclassification): added
+#          Supplementary Table S7, the exploratory adenomyosis -> placenta
+#          praevia MR (IVW/MR-Egger/Weighted median, Cochran's Q, Egger
+#          intercept), from results/koller_adenomyosis_*.csv (script 05.1).
+#          Includes an explicit sample-overlap caveat, since (unlike the
+#          primary endometriosis analysis) no MRlap/LDSC overlap check was
+#          run for the Koller adenomyosis GWAS vs. FinnGen R12.
 ###############################################################################
 
 suppressPackageStartupMessages({
@@ -299,18 +310,31 @@ type_df <- tibble::tibble(
 )
 
 ###############################################################################
-# 3) MAIN TABLE 1 — DESCRIPTION OF GWAS DATASETS
+# 3) MAIN TABLE 1 - DESCRIPTION OF GWAS DATASETS
 ###############################################################################
 
 log_info("Creating Table 1: description of GWAS datasets...")
 
 # --- [FIX] McBride et al. (MR-PREG) year corrected 2026 -> 2025 (see REVISION LOG) ---
+# --- [R3.3] Koller et al. (2026) row added - sensitivity exposure GWAS used
+#     in 05.1_koller_sensitivity_endoMR-PREG.R. Ancestry/sample size sourced
+#     from the Koller collaboration study plan (multi-ancestry GWAS: 80
+#     genome-wide significant loci, 1,388,600 women, 105,869 cases, across 6
+#     ancestries); our own instrument uses the EUR-ancestry subset released
+#     to us (data/EXPOSURE_KOLLER/Koller2026_endometriosis_EUR.tsv.gz), whose
+#     per-SNP effective N ranges 73,563-198,158 (median 135,078) - smaller
+#     than the full multi-ancestry total, as expected for an ancestry subset
+#     of a meta-analysis with variable per-SNP cohort coverage. ---
+# --- [EDIT] Table 1 simplified to 7 columns (Study, Year, Dataset/consortium,
+#     Phenotype Group, Ancestry, Sample size, Main adjustments); Sex and
+#     Notes/accession columns dropped per author request. ---
 table1_gwas <- tibble::tribble(
-  ~Study,                      ~Year, ~Dataset_or_consortium,                                            ~Phenotype_group,                                                      ~Ancestry,                                             ~Sample_size,                                             ~Sex,           ~Main_adjustments,                                                   ~Notes_or_accession,
-  "Rahmioglu et al.",          2023,  "International Endometriosis Genetics Consortium + UK Biobank",    "Endometriosis (overall and subtypes)",                              "Predominantly European (~98%) + Japanese (~2%)",     "60,674 cases; 701,926 controls",                       "Female/mixed", "Age, batch, principal components, study-specific covariates", "Primary exposure GWAS; clumped instruments used in endoMR-PREG",
-  "FinnGen R12",               2024,  "FinnGen (release 12)",                                            "Pregnancy and fertility ICD-10 phenotypes",                          "Finnish (European)",                                 "Varies by phenotype",                                   "Female",       "Age, batch, principal components",                       "Used for placental phenotypes (O43–O45) and related outcomes",
-  "McBride et al. (MR-PREG)",  2025,  "MR-PREG collaboration (ALSPAC, BiB, MoBa, UKB, FinnGen + GWAS)",  "Adverse pregnancy and perinatal outcomes (binary and continuous)",   "Predominantly European",                              "Up to 678,001 women (outcome-specific)",               "Female",       "Age, study/centre, principal components",              "Core source for hypertensive disorders, GDM, PTB, SGA/LGA, CS, PROM, stillbirth, Apgar, NICU",
-  "Westergaard et al.",        2024,  "Nordic registry-based GWAS (6 cohorts)",                           "Bleeding in pregnancy and postpartum haemorrhage (overall, subtypes)", "Northern European (registry-based)",               "Up to 331,792 women; outcome-specific case counts",     "Female",       "Age, parity, calendar year, cohort",                   "Provides GWAS for antepartum bleeding and PPH subtypes used in endoMR-PREG"
+  ~Study,                      ~Year, ~Dataset_or_consortium,                                           ~Phenotype_Group,                                    ~Ancestry,                                                                                                          ~Sample_size,                                                                                                                                          ~Main_adjustments,
+  "Rahmioglu et al.",          2023,  "International Endometriosis Genetics Consortium + UK Biobank",   "Endometriosis (exposure)",                          "Predominantly European (~98%) + Japanese (~2%)",                                                                 "60,674 cases; 701,926 controls",                                                                                                                     "Age, batch, principal components, study-specific covariates",
+  "McBride et al. (MR-PREG)",  2025,  "MR-PREG collaboration (ALSPAC, BiB, MoBa, UKB, FinnGen + GWAS)", "Adverse pregnancy and perinatal outcomes",          "Predominantly European genetic ancestry; separate South Asian ancestry analyses available for some Born in Bradford outcomes", "Up to 678,001 women",                                                                                                                                "Age, study/centre, principal components",
+  "FinnGen R12",               2024,  "FinnGen (release 12)",                                           "Placental phenotypes",                              "Predominantly Finnish/European genetic ancestry",                                                                 "Up to 223,001 women",                                                                                                                                "Age, batch, principal components",
+  "Westergaard et al.",        2024,  "Nordic registry-based GWAS (6 cohorts)",                          "Bleeding in pregnancy and postpartum haemorrhage",  "Northern European (registry-based)",                                                                              "Up to 331,792 women",                                                                                                                                "Age, parity, calendar year, cohort",
+  "Koller et al.",             2026,  "Multi-ancestry endometriosis GWAS",                              "Endometriosis, sensitivity exposure",               "European (EUR-ancestry subset used here; full GWAS spans 6 ancestries)",                                          "105,869 cases; 1,282,731 controls (1,388,600 women; full multi-ancestry GWAS); EUR subset used for instrument derivation, per-SNP effective N up to 198,158", "Study-specific covariates"
 )
 
 table1_file <- file.path(tables_dir, "Table1_GWAS_sources.csv")
@@ -320,18 +344,16 @@ log_info("Table 1 (GWAS sources) saved: ", table1_file)
 table1_gwas_gt <- table1_gwas %>%
   gt::gt() %>%
   gt::tab_header(
-    title = gt::md("**Table 1. Description of exposure and outcome GWAS datasets used in endoMR-PREG**")
+    title = gt::md("**Table 1. Exposure and outcome GWAS datasets included in the MR analyses**")
   ) %>%
   gt::cols_label(
-    Study                = "Study",
-    Year                 = "Year",
-    Dataset_or_consortium = "Dataset / Consortium",
-    Phenotype_group      = "Phenotype group",
-    Ancestry             = "Ancestry",
-    Sample_size          = "Sample size",
-    Sex                  = "Sex",
-    Main_adjustments     = "Main covariate adjustments",
-    Notes_or_accession   = "Notes / accession"
+    Study                 = "Study",
+    Year                  = "Year",
+    Dataset_or_consortium = "Dataset or consortium",
+    Phenotype_Group       = "Phenotype Group",
+    Ancestry              = "Ancestry",
+    Sample_size           = "Sample size",
+    Main_adjustments      = "Main adjustments"
   ) %>%
   gt::tab_options(
     table.font.size = 11,
@@ -341,7 +363,7 @@ table1_gwas_gt <- table1_gwas %>%
 table1_gwas_gt
 
 ###############################################################################
-# 4) MAIN TABLE 2 — SUMMARY OF 30 OUTCOMES & SAMPLE SIZES
+# 4) MAIN TABLE 2 - SUMMARY OF 30 OUTCOMES & SAMPLE SIZES
 ###############################################################################
 
 log_info("Creating Table 2: pregnancy outcome sample sizes and SNP counts...")
@@ -387,7 +409,7 @@ table1_preg <- preg_summary %>%
 # Manual sizes (kept as in original code; only rows that match an Outcome will be used)
 manual_sizes <- tibble::tribble(
   ~Source,             ~Outcome,                             ~`N total`, ~Cases,  ~Controls,
-  # FinnGen R12 — sample sizes from FinnGen R12 phenotype manifest
+  # FinnGen R12 - sample sizes from FinnGen R12 phenotype manifest
   "FinnGen R12",       "Placenta praevia",                    223001L,     1815L,   221186L,
   "FinnGen R12",       "Placental disorders",                 221519L,      333L,   221186L,
   "FinnGen R12",       "Premature placental separation",      222061L,      875L,   221186L,
@@ -428,13 +450,13 @@ if (requireNamespace("knitr", quietly = TRUE)) {
 }
 
 ###############################################################################
-# 5) MAIN TABLE 3 — PRIMARY IVW MR ESTIMATES (FDR-CORRECTED)
+# 5) MAIN TABLE 3 - PRIMARY IVW MR ESTIMATES (FDR-CORRECTED)
 #    Ordered by domain (same order as Figure 2)
 ###############################################################################
 
 log_info("Creating Table 3: primary IVW MR estimates with FDR correction...")
 
-# Domain ordering — mirrors outcome_meta in script 07
+# Domain ordering - mirrors outcome_meta in script 07
 domain_levels_t3 <- c(
   "Placental disorders",
   "Bleeding & haemorrhage",
@@ -498,7 +520,7 @@ ivw_res <- load_mr_results("ivw_results") %>%
 
 table3_main <- ivw_res %>%
   dplyr::mutate(
-    Effect_scale = if_else(Type == "Binary", "OR", "β"),
+    Effect_scale = if_else(Type == "Binary", "OR", "beta"),
     Estimate_val = if_else(Type == "Binary", exp(b), b),
     CI_low_val   = if_else(Type == "Binary", exp(b - 1.96 * se), b - 1.96 * se),
     CI_high_val  = if_else(Type == "Binary", exp(b + 1.96 * se), b + 1.96 * se),
@@ -509,8 +531,8 @@ table3_main <- ivw_res %>%
     ),
     `95% CI`     = if_else(
       Type == "Binary",
-      sprintf("(%.2f–%.2f)", CI_low_val, CI_high_val),
-      sprintf("(%.3f–%.3f)", CI_low_val, CI_high_val)
+      sprintf("(%.2f-%.2f)", CI_low_val, CI_high_val),
+      sprintf("(%.3f-%.3f)", CI_low_val, CI_high_val)
     ),
     `P-value` = fmt_p(pval),
     `q (FDR)` = sprintf("%.3f", q_fdr)
@@ -542,16 +564,16 @@ if (requireNamespace("knitr", quietly = TRUE)) {
 }
 
 ###############################################################################
-# 6) SUPPLEMENTARY TABLES 1A–C — DEFINITIONS OF PERINATAL OUTCOMES
+# 6) SUPPLEMENTARY TABLES 1A-C - DEFINITIONS OF PERINATAL OUTCOMES
 ###############################################################################
 
-log_info("Creating Supplementary Tables 1A–C (definitions of perinatal outcomes)...")
+log_info("Creating Supplementary Tables 1A-C (definitions of perinatal outcomes)...")
 
 Supp_1A <- tibble::tribble(
   ~`Binary outcomes`,                ~`Case definition`,                                                ~`Control definition`,                                        ~`Exclusion criteria`,                                                                                         ~`Contributing studies`,
   "Pregnancy loss outcomes",         NA_character_,                                                    NA_character_,                                                NA_character_,                                                                                                 NA_character_,
-  "Miscarriage",                     "≥1 pregnancy loss before 20 gestational weeks",                  "No pregnancy loss",                                          "Multiple births",                                                                                             "ALSPAC, MoBa, UKB, FinnGen",
-  "Stillbirth",                      "≥1 pregnancy loss at or after 20 gestational weeks",             "No pregnancy loss",                                          "Multiple births",                                                                                             "ALSPAC, BiB, MoBa, UKB",
+  "Miscarriage",                     ">=1 pregnancy loss before 20 gestational weeks",                  "No pregnancy loss",                                          "Multiple births",                                                                                             "ALSPAC, MoBa, UKB, FinnGen",
+  "Stillbirth",                      ">=1 pregnancy loss at or after 20 gestational weeks",             "No pregnancy loss",                                          "Multiple births",                                                                                             "ALSPAC, BiB, MoBa, UKB",
   "Maternal morbidity outcomes",     NA_character_,                                                    NA_character_,                                                NA_character_,                                                                                                 NA_character_,
   "GDM",                             "Diabetes mellitus diagnosed in pregnancy",                       "No GDM or pre-existing diabetes mellitus",                   "Pre-existing diabetes, multiple births, non-live births",                                                     "BiB, MoBa, UKB, GenDIP",
   "Perinatal depression",            "Maternal depression during pregnancy and up to one year after birth", "No maternal depression",                               "Pre-existing depression, multiple births, non-live births",                                                   "ALSPAC, MoBa, UKB, PGC",
@@ -560,14 +582,14 @@ Supp_1A <- tibble::tribble(
   "Prelabour rupture of membranes",  "Rupture of the amniotic sac before 37 gestational weeks",       "No rupture of the amniotic sac before 37 gestational weeks","Multiple births, non-live births",                                                                           "ALSPAC, MoBa, FinnGen",
   "Caesarean section",               "Delivery by caesarean section",                                 "No delivery by caesarean section",                          "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB, FinnGen",
   "Offspring birth outcomes",        NA_character_,                                                    NA_character_,                                                NA_character_,                                                                                                 NA_character_,
-  "LBW",                             "<2,500 g",                                                       "≥2,500 to 4,500 g",                                          "Multiple births, non-live births, PTBs (GA <37 weeks)",                                                      "ALSPAC, MoBa, UKB",
-  "HBW",                             ">4,500 g",                                                       "≥2,500 to 4,500 g",                                          "Multiple births, non-live births, PTBs (GA <37 weeks)",                                                      "ALSPAC, MoBa, UKB",
-  "Pre-term birth",                  "GA <37 weeks",                                                   "GA ≥37 to <42 weeks",                                       "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB, FinnGen, EGG",
-  "Post-term birth",                 "GA ≥42 weeks",                                                   "GA ≥37 to <42 weeks",                                       "Multiple births, non-live births, elective caesarean section, physician-induced labour",                      "ALSPAC, BiB, MoBa, UKB, FinnGen, EGG",
-  "SGA",                             "Birth weight <10th percentile for GA",                          "Birth weight ≥10th percentile for GA",                      "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
-  "LGA",                             "Birth weight >90th percentile for GA",                          "Birth weight ≤90th percentile for GA",                      "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
-  "Low Apgar score at 1 minute",     "<7 points",                                                      "≥7 points",                                                  "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa",
-  "Low Apgar score at 5 minutes",    "<7 points",                                                      "≥7 points",                                                  "Multiple births, non-live births",                                                                           "ALSPAC, MoBa",
+  "LBW",                             "<2,500 g",                                                       ">=2,500 to 4,500 g",                                          "Multiple births, non-live births, PTBs (GA <37 weeks)",                                                      "ALSPAC, MoBa, UKB",
+  "HBW",                             ">4,500 g",                                                       ">=2,500 to 4,500 g",                                          "Multiple births, non-live births, PTBs (GA <37 weeks)",                                                      "ALSPAC, MoBa, UKB",
+  "Pre-term birth",                  "GA <37 weeks",                                                   "GA >=37 to <42 weeks",                                       "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB, FinnGen, EGG",
+  "Post-term birth",                 "GA >=42 weeks",                                                   "GA >=37 to <42 weeks",                                       "Multiple births, non-live births, elective caesarean section, physician-induced labour",                      "ALSPAC, BiB, MoBa, UKB, FinnGen, EGG",
+  "SGA",                             "Birth weight <10th percentile for GA",                          "Birth weight >=10th percentile for GA",                      "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
+  "LGA",                             "Birth weight >90th percentile for GA",                          "Birth weight <=90th percentile for GA",                      "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
+  "Low Apgar score at 1 minute",     "<7 points",                                                      ">=7 points",                                                  "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa",
+  "Low Apgar score at 5 minutes",    "<7 points",                                                      ">=7 points",                                                  "Multiple births, non-live births",                                                                           "ALSPAC, MoBa",
   "NICU admission",                  "Offspring admitted to the NICU",                                "Offspring not admitted to the NICU",                        "Multiple births, non-live births",                                                                           "ALSPAC, MoBa"
 )
 
@@ -578,14 +600,14 @@ log_info("Supplementary Table 1A saved: ", s1A_file)
 Supp_1B <- tibble::tribble(
   ~`Binary outcomes`,          ~`Case definition`,                                      ~`Control definition`,                   ~`Exclusion criteria`,                                                                                         ~`Contributing studies`,
   "Pregnancy loss outcomes",   NA_character_,                                          NA_character_,                          NA_character_,                                                                                                 NA_character_,
-  "Sporadic miscarriage",      "1–2 pregnancy loss before 20 gestational weeks",       "No pregnancy loss",                    "Age at menarche <9 or >17, underlying conditions leading to miscarriage (see supplement), multiple births",   "ALSPAC, MoBa, UKB",
-  "Recurrent miscarriage",     "≥3 pregnancy loss before 20 gestational weeks",        "No pregnancy loss",                    "Age at menarche <9 or >17, underlying conditions leading to miscarriage (see supplement), multiple births",   "ALSPAC, MoBa, UKB, FinnGen",
+  "Sporadic miscarriage",      "1-2 pregnancy loss before 20 gestational weeks",       "No pregnancy loss",                    "Age at menarche <9 or >17, underlying conditions leading to miscarriage (see supplement), multiple births",   "ALSPAC, MoBa, UKB",
+  "Recurrent miscarriage",     ">=3 pregnancy loss before 20 gestational weeks",        "No pregnancy loss",                    "Age at menarche <9 or >17, underlying conditions leading to miscarriage (see supplement), multiple births",   "ALSPAC, MoBa, UKB, FinnGen",
   "Labour outcomes",           NA_character_,                                          NA_character_,                          NA_character_,                                                                                                 NA_character_,
   "Emergency caesarean section","Delivery by emergency caesarean section",            "No delivery by caesarean section",     "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
   "Elective caesarean section","Delivery by elective caesarean section",               "No delivery by caesarean section",     "Multiple births, non-live births",                                                                           "ALSPAC, BiB, MoBa, UKB",
   "Offspring birth outcomes",  NA_character_,                                          NA_character_,                          NA_character_,                                                                                                 NA_character_,
-  "Very PTB",                  "GA <34 weeks",                                         "GA ≥37 to <42 weeks",                  "Multiple births, non-live births, elective caesarean section, physician-induced labour",                      "ALSPAC, BiB, MoBa, UKB",
-  "Spontaneous PTB",           "GA <37 weeks",                                         "GA ≥37 to <42 weeks",                  "Multiple births, non-live births, elective caesarean section, physician-induced labour",                      "ALSPAC, BiB, MoBa, UKB"
+  "Very PTB",                  "GA <34 weeks",                                         "GA >=37 to <42 weeks",                  "Multiple births, non-live births, elective caesarean section, physician-induced labour",                      "ALSPAC, BiB, MoBa, UKB",
+  "Spontaneous PTB",           "GA <37 weeks",                                         "GA >=37 to <42 weeks",                  "Multiple births, non-live births, elective caesarean section, physician-induced labour",                      "ALSPAC, BiB, MoBa, UKB"
 )
 
 s1B_file <- file.path(tables_dir, "Supp_Table_1B_secondary_binary_perinatal_definitions.csv")
@@ -604,7 +626,7 @@ write.csv(Supp_1C, s1C_file, row.names = FALSE)
 log_info("Supplementary Table 1C saved: ", s1C_file)
 
 ###############################################################################
-# 7) TABLE S1 — HARMONISED DATASET SUMMARY (SNPs PER OUTCOME)
+# 7) TABLE S1 - HARMONISED DATASET SUMMARY (SNPs PER OUTCOME)
 ###############################################################################
 
 log_info("Creating Table S1: harmonised dataset summary...")
@@ -643,7 +665,7 @@ write.csv(Table_S1, s1_file, row.names = FALSE)
 log_info("Table S1 (harmonised summary) saved: ", s1_file)
 
 ###############################################################################
-# 8) SUPPLEMENTARY TABLE 2 — GENETIC INSTRUMENTS FOR ENDOMETRIOSIS
+# 8) SUPPLEMENTARY TABLE 2 - GENETIC INSTRUMENTS FOR ENDOMETRIOSIS
 ###############################################################################
 
 log_info("Creating Supplementary Table 2: endometriosis instruments...")
@@ -712,13 +734,13 @@ openxlsx::write.xlsx(
 log_info("Supplementary Table 2 saved: ", supp2_file)
 
 ###############################################################################
-# 9) SUPPLEMENTARY TABLE S3 — SENSITIVITY ANALYSES (WIDE FORMAT, eBioMedicine)
+# 9) SUPPLEMENTARY TABLE S3 - SENSITIVITY ANALYSES (WIDE FORMAT, eBioMedicine)
 #
 #   One row per outcome, ordered by the 9 clinical domains (same as Figure 2 /
-#   Table 3). Columns: Domain, Scale (OR / β), IVW, MR-Egger, Weighted Median,
+#   Table 3). Columns: Domain, Scale (OR / beta), IVW, MR-Egger, Weighted Median,
 #   Weighted Mode effect estimates, Egger intercept, Cochran's Q p-value, and
 #   MR-PRESSO as a diagnostic block.
-#   Effect estimates are ORs for binary outcomes and β for continuous outcomes;
+#   Effect estimates are ORs for binary outcomes and beta for continuous outcomes;
 #   all column headers use "effect (95% CI)" to avoid misleading OR labelling
 #   for continuous outcomes.
 ###############################################################################
@@ -727,7 +749,7 @@ log_info("Creating Table S3: wide-format sensitivity analyses (eBioMedicine)..."
 
 # ── Helper functions ──────────────────────────────────────────────────────────
 
-# Scalar: returns "X.XX (X.XX–X.XX)" for OR (binary) or "X.XXX (X.XXX–X.XXX)" for β
+# Scalar: returns "X.XX (X.XX-X.XX)" for OR (binary) or "X.XXX (X.XXX-X.XXX)" for beta
 fmt_est_ci <- function(b, se, type) {
   if (is.na(b) || is.na(se)) return(NA_character_)
   if (type == "binary") {
@@ -773,7 +795,7 @@ s3_wide <- all_res_s3 %>%
   ) %>%
   dplyr::rowwise() %>%
   dplyr::mutate(
-    # "effect (95% CI)" headers — generic label covers both OR and β
+    # "effect (95% CI)" headers - generic label covers both OR and beta
     `IVW effect (95% CI)`             = fmt_est_ci(IVW_b,   IVW_se,   type),
     `IVW p-value`                     = fmt_p_s3(IVW_pval),
     IVW_p_raw                         = IVW_pval,   # kept for Excel bold logic
@@ -786,8 +808,8 @@ s3_wide <- all_res_s3 %>%
   dplyr::ungroup()
 
 # ── Egger intercept ───────────────────────────────────────────────────────────
-# Format: "β = X.XXX (p = X.XXX)" — explicit β symbol clarifies it is always
-# a regression intercept on the log-OR / β scale, regardless of outcome type.
+# Format: "beta = X.XXX (p = X.XXX)" - explicit beta symbol clarifies it is always
+# a regression intercept on the log-OR / beta scale, regardless of outcome type.
 pleio_file <- file.path(results_dir, "mr_pleiotropy.csv")
 if (file.exists(pleio_file)) {
   pleio_raw <- readr::read_csv(pleio_file, show_col_types = FALSE) %>%
@@ -805,7 +827,7 @@ if (file.exists(pleio_file)) {
     outcome                           = character(),
     `Egger intercept (beta), p-value` = character()
   )
-  log_warn("mr_pleiotropy.csv not found — Egger intercept column will be NA.")
+  log_warn("mr_pleiotropy.csv not found - Egger intercept column will be NA.")
 }
 
 # ── Cochran's Q (IVW heterogeneity) ──────────────────────────────────────────
@@ -824,7 +846,7 @@ if (file.exists(het_file)) {
     dplyr::filter(method == "Inverse variance weighted") %>%
     dplyr::mutate(`Cochran's Q p-value` = fmt_p_s3(Q_pval)) %>%
     dplyr::select(outcome, `Cochran's Q p-value`)
-  log_warn("mr_heterogeneity.csv not found — computed on the fly.")
+  log_warn("mr_heterogeneity.csv not found - computed on the fly.")
 }
 
 # ── MR-PRESSO (diagnostic columns) ───────────────────────────────────────────
@@ -863,7 +885,7 @@ if (file.exists(presso_file)) {
     `MR-PRESSO corrected effect (95% CI)`  = character(),
     `MR-PRESSO distortion p-value`         = character()
   )
-  log_warn("mr_presso_results.csv not found — PRESSO columns will be NA.")
+  log_warn("mr_presso_results.csv not found - PRESSO columns will be NA.")
 }
 
 # ── Join all components + domain ordering ─────────────────────────────────────
@@ -893,7 +915,7 @@ Table_S3_wide <- s3_wide %>%
   dplyr::select(
     Domain,
     Outcome,
-    Scale,                                  # OR or β — clarifies metric per row
+    Scale,                                  # OR or beta - clarifies metric per row
     `IVW effect (95% CI)`,
     `IVW p-value`,
     `MR-Egger effect (95% CI)`,
@@ -1038,9 +1060,9 @@ message("Supplementary Table S3 done.")
 s3_file <- file.path(tables_dir, "Supplementary_Table_S3_sensitivity_analyses.csv")
 
 ###############################################################################
-# 10) TABLE S4 — HETEROGENEITY STATISTICS (COCHRAN'S Q, IVW ONLY)
+# 10) TABLE S4 - HETEROGENEITY STATISTICS (COCHRAN'S Q, IVW ONLY)
 #
-# --- [R3.2] Replaces the former "Supplementary Table S4 — trio-based MR
+# --- [R3.2] Replaces the former "Supplementary Table S4 - trio-based MR
 #     estimates" (maternal/fetal/paternal DONUTS estimates), removed as it
 #     duplicated Figure 3 ("Trios overview", script 07). See REVISION LOG. ---
 ###############################################################################
@@ -1082,7 +1104,7 @@ write.csv(Table_S4, s4_file, row.names = FALSE)
 log_info("Table S4 (heterogeneity, IVW) saved: ", s4_file)
 
 ###############################################################################
-# 11) TABLE S5 — MR-EGGER INTERCEPT (HORIZONTAL PLEIOTROPY)
+# 11) TABLE S5 - MR-EGGER INTERCEPT (HORIZONTAL PLEIOTROPY)
 ###############################################################################
 
 log_info("Creating Table S5: MR-Egger intercept (pleiotropy)...")
@@ -1149,7 +1171,7 @@ tables_to_export <- list(
 
 table_titles <- list(
   Table1_GWAS_sources =
-    "Table 1. Overview of GWAS datasets for endometriosis and pregnancy outcomes in the endoMR-PREG study",
+    "Table 1. Exposure and outcome GWAS datasets included in the MR analyses",
   
   Table2_pregnancy_sample_sizes =
     "Table 2. Pregnancy outcomes and sample sizes in MR-PREG and related cohorts",
@@ -1167,7 +1189,7 @@ table_titles <- list(
     "Supplementary Table 1C. Definitions and sources of continuous perinatal outcomes",
   
   Table_S1_harmonised_summary =
-    "Table S1. Summary of harmonised exposure–outcome datasets used in MR analyses",
+    "Table S1. Summary of harmonised exposure-outcome datasets used in MR analyses",
   
   Supplementary_Table_2_Endometriosis_Instruments =
     "Supplementary Table 2. Genetic instruments for endometriosis liability (Rahmioglu et al.)",
@@ -1207,7 +1229,7 @@ for (nm in names(tables_to_export)) {
 }
 
 ###############################################################################
-# SUPPLEMENTARY TABLE S5 — LEAVE-ONE-COHORT SENSITIVITY ANALYSIS
+# SUPPLEMENTARY TABLE S5 - LEAVE-ONE-COHORT SENSITIVITY ANALYSIS
 #
 #   IVW estimates across all outcomes with each contributing study
 #   sequentially excluded (leave-one-cohort-out design).
@@ -1218,7 +1240,7 @@ for (nm in names(tables_to_export)) {
 loc_path <- file.path(results_dir, "leave_one_cohort_results.csv")
 
 if (!file.exists(loc_path)) {
-  warning("leave_one_cohort_results.csv not found — skipping Table S5.")
+  warning("leave_one_cohort_results.csv not found - skipping Table S5.")
 } else {
 
   loc_raw <- readr::read_csv(loc_path, show_col_types = FALSE)
@@ -1334,3 +1356,932 @@ if (!file.exists(loc_path)) {
 
   message("Supplementary Table S5 (leave-one-cohort) done.")
 }
+
+###############################################################################
+# SUPPLEMENTARY TABLE S6 - LOCUS-LEVEL COLOCALISATION (ENDOMETRIOSIS x
+#                           PLACENTA PRAEVIA)
+#
+#   [R2.1] Reviewer #2, comment 1: coloc.abf results at each of the 41
+#   independent loci contributing to the endometriosis instrument, testing
+#   for a shared causal variant with placenta praevia (FinnGen R12).
+#   Source: results/coloc_endo_praevia_by_locus.csv (script 05.3).
+#   Ordered by descending PP.H4 (posterior probability of colocalisation).
+###############################################################################
+
+coloc_path <- file.path(results_dir, "coloc_endo_praevia_by_locus.csv")
+
+if (!file.exists(coloc_path)) {
+  warning("coloc_endo_praevia_by_locus.csv not found - skipping Table S6.")
+} else {
+
+  coloc_raw <- readr::read_csv(coloc_path, show_col_types = FALSE)
+
+  # Same window as script 05.3 (coloc.abf regional extraction)
+  WINDOW_BP <- 500000L
+
+  hyp_labels <- c(
+    PP.H0 = "H0 (no association)",
+    PP.H1 = "H1 (endometriosis only)",
+    PP.H2 = "H2 (placenta praevia only)",
+    PP.H3 = "H3 (distinct causal variants)",
+    PP.H4 = "H4 (shared causal variant)"
+  )
+
+  coloc_fmt <- coloc_raw %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(
+      `Predominant hypothesis` = hyp_labels[[
+        c("PP.H0", "PP.H1", "PP.H2", "PP.H3", "PP.H4")[
+          which.max(c(PP.H0, PP.H1, PP.H2, PP.H3, PP.H4))
+        ]
+      ]]
+    ) %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(dplyr::desc(PP.H4)) %>%
+    dplyr::mutate(
+      `Region start` = pos - WINDOW_BP,
+      `Region end`   = pos + WINDOW_BP,
+      PP.H0 = round(PP.H0, 3),
+      PP.H1 = round(PP.H1, 3),
+      PP.H2 = round(PP.H2, 3),
+      PP.H3 = round(PP.H3, 3),
+      PP.H4 = round(PP.H4, 3)
+    ) %>%
+    dplyr::select(
+      `Index SNP`                    = SNP,
+      Chromosome                     = chr,
+      `Index position`               = pos,
+      `Region start`,
+      `Region end`,
+      `Number of overlapping SNPs`   = n_snps,
+      PP.H0, PP.H1, PP.H2, PP.H3, PP.H4,
+      `Predominant hypothesis`
+    )
+
+  # ── CSV ──────────────────────────────────────────────────────────────────────
+  readr::write_csv(
+    coloc_fmt,
+    file.path(tables_dir, "Supplementary_Table_S6_colocalisation_endo_praevia.csv")
+  )
+  log_info("Supplementary Table S6 (CSV) saved.")
+
+  # ── Excel ────────────────────────────────────────────────────────────────────
+  if (requireNamespace("openxlsx", quietly = TRUE)) {
+
+    wb_s6 <- openxlsx::createWorkbook()
+    openxlsx::addWorksheet(wb_s6, "S6 Colocalisation")
+
+    caption_text_s6 <- paste0(
+      "Supplementary Table S6. Locus-level colocalisation analyses of endometriosis and placenta ",
+      "praevia. Colocalisation (coloc.abf, Giambartolomei et al. 2014) between genetic liability ",
+      "to endometriosis (Rahmioglu et al. 2023) and placenta praevia (FinnGen R12) at each of the ",
+      "41 independent loci contributing to the endometriosis instrument. Loci are ordered by ",
+      "descending PP.H4 (posterior probability of a shared causal variant)."
+    )
+    openxlsx::writeData(wb_s6, "S6 Colocalisation",
+                        x = caption_text_s6, startRow = 1, startCol = 1)
+    openxlsx::addStyle(wb_s6, "S6 Colocalisation",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         wrapText = TRUE
+                       ),
+                       rows = 1, cols = 1)
+    openxlsx::mergeCells(wb_s6, "S6 Colocalisation", cols = 1:ncol(coloc_fmt), rows = 1)
+
+    openxlsx::writeDataTable(
+      wb_s6, "S6 Colocalisation",
+      x          = coloc_fmt,
+      startRow   = 3, startCol = 1,
+      tableStyle = "TableStyleLight9",
+      withFilter = TRUE
+    )
+
+    openxlsx::addStyle(wb_s6, "S6 Colocalisation",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         fgFill = "#D9E1F2", border = "Bottom", borderColour = "#4472C4",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = 3, cols = seq_len(ncol(coloc_fmt)),
+                       gridExpand = TRUE)
+
+    # Highlight the top locus (max PP.H4) for readability - informational only,
+    # it does not reach the PP.H4 > 0.8 threshold.
+    top_row_s6 <- which.max(coloc_fmt$`PP.H4`) + 3
+    openxlsx::addStyle(wb_s6, "S6 Colocalisation",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 9, textDecoration = "bold",
+                         fgFill = "#FFF2CC"
+                       ),
+                       rows = top_row_s6, cols = seq_len(ncol(coloc_fmt)),
+                       gridExpand = TRUE)
+
+    openxlsx::setColWidths(
+      wb_s6, "S6 Colocalisation",
+      cols   = seq_len(ncol(coloc_fmt)),
+      widths = c(14, 12, 16, 14, 14, 14, 9, 9, 9, 9, 9, 28)
+    )
+
+    footnote_row_s6 <- nrow(coloc_fmt) + 5
+    footnote_text_s6 <- paste0(
+      "Region start/end define the +/-500kb window around the index SNP used for each locus-level ",
+      "colocalisation test. PP.H0, no association with either trait at this locus; PP.H1, association ",
+      "with endometriosis only; PP.H2, association with placenta praevia only; PP.H3, both traits ",
+      "associated but with distinct causal variants; PP.H4, both traits associated with a shared causal ",
+      "variant. Predominant hypothesis is the posterior category with the highest probability at each ",
+      "locus. PP.H4 > 0.8 is the threshold conventionally used to indicate strong support for ",
+      "colocalisation; no locus reached this threshold (maximum PP.H4 = 0.33, at the locus tagged by ",
+      "rs66683298, highlighted), consistent with a polygenic mechanism distributed across multiple loci ",
+      "of modest individual effect and not contradicting the overall Mendelian randomisation estimate ",
+      "for genetic liability to endometriosis on placenta praevia."
+    )
+    openxlsx::writeData(wb_s6, "S6 Colocalisation",
+                        x = footnote_text_s6, startRow = footnote_row_s6, startCol = 1)
+    openxlsx::addStyle(wb_s6, "S6 Colocalisation",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 8, fontColour = "#595959",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = footnote_row_s6, cols = 1)
+    openxlsx::setRowHeights(wb_s6, "S6 Colocalisation",
+                            rows = footnote_row_s6, heights = 90)
+    openxlsx::mergeCells(wb_s6, "S6 Colocalisation",
+                         cols = 1:ncol(coloc_fmt), rows = footnote_row_s6)
+
+    openxlsx::saveWorkbook(
+      wb_s6,
+      file.path(tables_dir, "Supplementary_Table_S6_colocalisation_endo_praevia.xlsx"),
+      overwrite = TRUE
+    )
+    log_info("Supplementary Table S6 (Excel) saved.")
+  }
+
+  message("Supplementary Table S6 (colocalisation) done.")
+}
+
+###############################################################################
+# SUPPLEMENTARY TABLE S7 - KOLLER SENSITIVITY MR ACROSS 30 OUTCOMES
+#
+#   [R3.3] Reviewer #3 ("similarities or discrepancies... with the one used
+#   in their own analysis"): IVW sensitivity analysis using the Koller et al.
+#   (2026) endometriosis instrument (54 independent SNPs) across all 30 main
+#   outcomes, with direction of effect compared against the primary
+#   Rahmioglu et al. (2023) analysis (originally 7/30, extended once the
+#   MR-PREG collaboration re-extracted the remaining 23 outcomes at the
+#   Koller SNPs).
+#   Sources: results/koller_ivw_results.csv (script 05.1),
+#            results/ivw_results.csv (script 04, direction comparison only).
+###############################################################################
+
+koller_ivw_path_s7 <- file.path(results_dir, "koller_ivw_results.csv")
+rahm_ivw_path_s7   <- file.path(results_dir, "ivw_results.csv")
+
+if (!file.exists(koller_ivw_path_s7) || !file.exists(rahm_ivw_path_s7)) {
+  warning("koller_ivw_results.csv or ivw_results.csv not found - skipping Table S7.")
+} else {
+
+  koller_ivw_s7 <- readr::read_csv(koller_ivw_path_s7, show_col_types = FALSE) %>%
+    dplyr::filter(outcome %in% vars_keep, method == "Inverse variance weighted")
+
+  rahm_ivw_s7 <- readr::read_csv(rahm_ivw_path_s7, show_col_types = FALSE) %>%
+    dplyr::filter(outcome %in% vars_keep, method == "Inverse variance weighted") %>%
+    dplyr::select(outcome, b_rahmioglu = b)
+
+  Table_S7 <- koller_ivw_s7 %>%
+    dplyr::left_join(rahm_ivw_s7, by = "outcome") %>%
+    dplyr::left_join(
+      domain_meta %>% dplyr::mutate(outcome_id = outcome),
+      by = c("outcome" = "outcome_id")
+    ) %>%
+    dplyr::mutate(
+      Outcome = dplyr::recode(outcome, !!!outcome_labels, .default = outcome),
+      Domain  = factor(domain, levels = domain_levels_t3),
+      Source  = label_source(outcome),
+      type    = dplyr::if_else(outcome %in% continuous_outcomes, "continuous", "binary"),
+      `IVW OR or beta` = dplyr::if_else(
+        type == "binary",
+        sprintf("%.2f", exp(b)),
+        sprintf("%.3f", b)
+      ),
+      `95% CI` = dplyr::if_else(
+        type == "binary",
+        sprintf("%.2f-%.2f", exp(b - 1.96 * se), exp(b + 1.96 * se)),
+        sprintf("%.3f-%.3f", b - 1.96 * se, b + 1.96 * se)
+      ),
+      `P-value`     = fmt_p_s3(pval),
+      `FDR q-value` = sprintf("%.3f", qval),
+      `Direction compared with the primary Rahmioglu analysis` = dplyr::case_when(
+        is.na(b_rahmioglu)          ~ NA_character_,
+        sign(b) == sign(b_rahmioglu) ~ "Concordant",
+        TRUE                         ~ "Discordant"
+      )
+    ) %>%
+    dplyr::arrange(Domain, order_within) %>%
+    dplyr::select(
+      Outcome,
+      Source,
+      `Number of SNPs` = nsnp,
+      `IVW OR or beta`,
+      `95% CI`,
+      `P-value`,
+      `FDR q-value`,
+      `Direction compared with the primary Rahmioglu analysis`
+    )
+
+  # ── CSV ──────────────────────────────────────────────────────────────────────
+  readr::write_csv(
+    Table_S7,
+    file.path(tables_dir, "Supplementary_Table_S7_koller_sensitivity_30_outcomes.csv")
+  )
+  log_info("Supplementary Table S7 (CSV) saved.")
+
+  # ── Excel ────────────────────────────────────────────────────────────────────
+  if (requireNamespace("openxlsx", quietly = TRUE)) {
+
+    wb_s7 <- openxlsx::createWorkbook()
+    openxlsx::addWorksheet(wb_s7, "S7 Koller sensitivity")
+
+    caption_text_s7 <- paste0(
+      "Supplementary Table S7. Sensitivity Mendelian randomization analyses using the Koller et al. ",
+      "(2026) endometriosis instrument across 30 pregnancy and perinatal outcomes."
+    )
+    openxlsx::writeData(wb_s7, "S7 Koller sensitivity",
+                        x = caption_text_s7, startRow = 1, startCol = 1)
+    openxlsx::addStyle(wb_s7, "S7 Koller sensitivity",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         wrapText = TRUE
+                       ),
+                       rows = 1, cols = 1)
+    openxlsx::mergeCells(wb_s7, "S7 Koller sensitivity", cols = 1:ncol(Table_S7), rows = 1)
+
+    openxlsx::writeDataTable(
+      wb_s7, "S7 Koller sensitivity",
+      x          = Table_S7,
+      startRow   = 3, startCol = 1,
+      tableStyle = "TableStyleLight9",
+      withFilter = TRUE
+    )
+
+    openxlsx::addStyle(wb_s7, "S7 Koller sensitivity",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         fgFill = "#D9E1F2", border = "Bottom", borderColour = "#4472C4",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = 3, cols = seq_len(ncol(Table_S7)),
+                       gridExpand = TRUE)
+
+    # Highlight rows surviving FDR correction (q < 0.05)
+    q_s7 <- suppressWarnings(as.numeric(Table_S7$`FDR q-value`))
+    sig_rows_s7 <- which(!is.na(q_s7) & q_s7 < 0.05) + 3
+    if (length(sig_rows_s7) > 0) {
+      openxlsx::addStyle(wb_s7, "S7 Koller sensitivity",
+                         style = openxlsx::createStyle(
+                           fontName = "Arial", fontSize = 9, textDecoration = "bold",
+                           fgFill = "#FFF2CC"
+                         ),
+                         rows = sig_rows_s7, cols = seq_len(ncol(Table_S7)),
+                         gridExpand = TRUE)
+    }
+
+    openxlsx::setColWidths(
+      wb_s7, "S7 Koller sensitivity",
+      cols   = seq_len(ncol(Table_S7)),
+      widths = c(34, 16, 14, 12, 14, 12, 12, 30)
+    )
+
+    footnote_row_s7 <- nrow(Table_S7) + 5
+    footnote_text_s7 <- paste0(
+      "IVW estimates only. Koller instrument: 54 independent SNPs (Koller et al. 2026); SNP coverage ",
+      "per outcome ranged 39-50/54 depending on data source and harmonisation. Effect scale is OR for ",
+      "binary outcomes and beta for continuous outcomes (gestational age, birthweight z-score). FDR ",
+      "q-value is the Benjamini-Hochberg-adjusted p-value within this instrument's own set of 30 ",
+      "outcomes; rows are shaded where q < 0.05. Placenta praevia is the only outcome surviving FDR ",
+      "correction. NICU admission is nominally significant (p = 0.003) but does not survive FDR ",
+      "correction (q = 0.050) and is reported as hypothesis-generating only. Direction compared with ",
+      "the primary Rahmioglu analysis indicates whether the Koller-instrument point estimate falls on ",
+      "the same side of the null (Concordant) or the opposite side (Discordant) as the corresponding ",
+      "primary IVW estimate using the Rahmioglu et al. (2023) instrument; occasional discordance is ",
+      "confined to outcomes that are non-significant and imprecise under both instruments and should ",
+      "not be interpreted as a true conflict between the two analyses."
+    )
+    openxlsx::writeData(wb_s7, "S7 Koller sensitivity",
+                        x = footnote_text_s7, startRow = footnote_row_s7, startCol = 1)
+    openxlsx::addStyle(wb_s7, "S7 Koller sensitivity",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 8, fontColour = "#595959",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = footnote_row_s7, cols = 1)
+    openxlsx::setRowHeights(wb_s7, "S7 Koller sensitivity",
+                            rows = footnote_row_s7, heights = 130)
+    openxlsx::mergeCells(wb_s7, "S7 Koller sensitivity",
+                         cols = 1:ncol(Table_S7), rows = footnote_row_s7)
+
+    openxlsx::saveWorkbook(
+      wb_s7,
+      file.path(tables_dir, "Supplementary_Table_S7_koller_sensitivity_30_outcomes.xlsx"),
+      overwrite = TRUE
+    )
+    log_info("Supplementary Table S7 (Excel) saved.")
+  }
+
+  message("Supplementary Table S7 (Koller sensitivity, 30 outcomes) done.")
+}
+# SUPPLEMENTARY TABLE S8 - ADENOMYOSIS -> PLACENTA PRAEVIA (EXPLORATORY MR)
+#
+#   [R2.5] Reviewer #2, comment 5 (adenomyosis misclassification): exploratory
+#   MR of genetic liability to adenomyosis (Koller et al. 2026) on placenta
+#   praevia (FinnGen R12), to inform (not replace) discussion of possible
+#   endometriosis/adenomyosis misclassification.
+#   Sources: results/koller_adenomyosis_placenta_praevia_mr.csv,
+#            results/koller_adenomyosis_heterogeneity.csv,
+#            results/koller_adenomyosis_pleiotropy.csv (script 05.1).
+###############################################################################
+
+adeno_mr_path   <- file.path(results_dir, "koller_adenomyosis_placenta_praevia_mr.csv")
+adeno_het_path  <- file.path(results_dir, "koller_adenomyosis_heterogeneity.csv")
+adeno_plt_path  <- file.path(results_dir, "koller_adenomyosis_pleiotropy.csv")
+
+if (!file.exists(adeno_mr_path)) {
+  warning("koller_adenomyosis_placenta_praevia_mr.csv not found - skipping Table S8.")
+} else {
+
+  adeno_mr_raw <- readr::read_csv(adeno_mr_path, show_col_types = FALSE)
+
+  method_labels_s8 <- c(
+    "Inverse variance weighted" = "IVW",
+    "MR Egger"                  = "MR-Egger",
+    "Weighted median"           = "Weighted median"
+  )
+
+  # Cochran's Q (available for IVW and MR-Egger, not Weighted median)
+  adeno_q <- if (file.exists(adeno_het_path)) {
+    readr::read_csv(adeno_het_path, show_col_types = FALSE) %>%
+      dplyr::mutate(`Cochran's Q p-value` = fmt_p_s3(Q_pval)) %>%
+      dplyr::select(method, `Cochran's Q p-value`)
+  } else {
+    tibble::tibble(method = character(), `Cochran's Q p-value` = character())
+  }
+
+  # Egger intercept (a single diagnostic value, attached to the MR-Egger row)
+  adeno_intercept_txt <- if (file.exists(adeno_plt_path)) {
+    plt_s8 <- readr::read_csv(adeno_plt_path, show_col_types = FALSE)
+    if (nrow(plt_s8) > 0) {
+      sprintf("beta = %.3f (p = %s)",
+              plt_s8$egger_intercept[1], fmt_p_s3(plt_s8$pval[1]))
+    } else {
+      NA_character_
+    }
+  } else {
+    NA_character_
+  }
+
+  Table_S8 <- adeno_mr_raw %>%
+    dplyr::left_join(adeno_q, by = "method") %>%
+    dplyr::mutate(
+      Method   = dplyr::recode(method, !!!method_labels_s8, .default = method),
+      OR       = sprintf("%.2f", exp(b)),
+      `95% CI` = sprintf("(%.2f-%.2f)", exp(b - 1.96 * se), exp(b + 1.96 * se)),
+      `P-value` = fmt_p_s3(pval),
+      `Cochran's Q p-value` = dplyr::coalesce(`Cochran's Q p-value`, "-"),
+      `Egger intercept (beta), p-value` = dplyr::if_else(
+        Method == "MR-Egger" & !is.na(adeno_intercept_txt),
+        adeno_intercept_txt,
+        "-"
+      )
+    ) %>%
+    dplyr::select(
+      `No. SNPs` = nsnp,
+      Method,
+      OR,
+      `95% CI`,
+      `P-value`,
+      `Cochran's Q p-value`,
+      `Egger intercept (beta), p-value`
+    )
+
+  # ── CSV ──────────────────────────────────────────────────────────────────────
+  readr::write_csv(
+    Table_S8,
+    file.path(tables_dir, "Supplementary_Table_S8_adenomyosis_praevia_MR.csv")
+  )
+  log_info("Supplementary Table S8 (CSV) saved.")
+
+  # ── Excel ────────────────────────────────────────────────────────────────────
+  if (requireNamespace("openxlsx", quietly = TRUE)) {
+
+    wb_s8 <- openxlsx::createWorkbook()
+    openxlsx::addWorksheet(wb_s8, "S8 Adenomyosis-praevia")
+
+    caption_text_s8 <- paste0(
+      "Supplementary Table S8. Exploratory Mendelian randomization analysis of genetic liability ",
+      "to adenomyosis and placenta praevia."
+    )
+    openxlsx::writeData(wb_s8, "S8 Adenomyosis-praevia",
+                        x = caption_text_s8, startRow = 1, startCol = 1)
+    openxlsx::addStyle(wb_s8, "S8 Adenomyosis-praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         wrapText = TRUE
+                       ),
+                       rows = 1, cols = 1)
+    openxlsx::mergeCells(wb_s8, "S8 Adenomyosis-praevia", cols = 1:ncol(Table_S8), rows = 1)
+
+    openxlsx::writeDataTable(
+      wb_s8, "S8 Adenomyosis-praevia",
+      x          = Table_S8,
+      startRow   = 3, startCol = 1,
+      tableStyle = "TableStyleLight9",
+      withFilter = TRUE
+    )
+
+    openxlsx::addStyle(wb_s8, "S8 Adenomyosis-praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         fgFill = "#D9E1F2", border = "Bottom", borderColour = "#4472C4",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = 3, cols = seq_len(ncol(Table_S8)),
+                       gridExpand = TRUE)
+
+    openxlsx::setColWidths(
+      wb_s8, "S8 Adenomyosis-praevia",
+      cols   = seq_len(ncol(Table_S8)),
+      widths = c(9, 16, 8, 14, 12, 16, 26)
+    )
+
+    footnote_row_s8 <- nrow(Table_S8) + 5
+    footnote_text_s8 <- paste0(
+      "Exploratory analysis performed to inform (not replace) discussion of possible endometriosis/",
+      "adenomyosis misclassification (Reviewer #2, comment 5); it does not use the manuscript's primary ",
+      "endometriosis instrument or outcome data. Genetic instrument: 6 independent, genome-wide ",
+      "significant SNPs for adenomyosis (Koller et al. 2026, EUR meta-analysis), clumped and harmonised ",
+      "against FinnGen R12 placenta praevia. Given the small number of instrument SNPs, this analysis is ",
+      "clearly underpowered and should be interpreted as hypothesis-generating only, not as evidence for ",
+      "or against a causal effect of adenomyosis liability on placenta praevia. ",
+      "[!] Sample overlap: unlike the primary endometriosis-placenta praevia analysis, for which a ",
+      "targeted MRlap/cross-trait LD score regression analysis found no evidence of sample overlap with ",
+      "FinnGen R12 (intercept = 0.001, SE = 0.005; see response to Reviewer #4), no equivalent overlap ",
+      "assessment was performed for the Koller et al. 2026 adenomyosis GWAS. As a large multi-biobank ",
+      "European meta-analysis, this GWAS may include FinnGen among its contributing cohorts; if so, ",
+      "FinnGen would then contribute to both the exposure and outcome samples here, which could bias ",
+      "this estimate (e.g. toward the confounded/observational association) in a way not captured by ",
+      "standard two-sample MR standard errors. This estimate should therefore be interpreted with ",
+      "additional caution beyond the sample-size limitation alone. ",
+      "Cochran's Q p-value tests heterogeneity of SNP-specific causal estimates (available for IVW and ",
+      "MR-Egger only). The Egger intercept tests for directional horizontal pleiotropy and is reported ",
+      "once, attached to the MR-Egger row; - indicates not applicable/not computed for that row."
+    )
+    openxlsx::writeData(wb_s8, "S8 Adenomyosis-praevia",
+                        x = footnote_text_s8, startRow = footnote_row_s8, startCol = 1)
+    openxlsx::addStyle(wb_s8, "S8 Adenomyosis-praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 8, fontColour = "#595959",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = footnote_row_s8, cols = 1)
+    openxlsx::setRowHeights(wb_s8, "S8 Adenomyosis-praevia",
+                            rows = footnote_row_s8, heights = 150)
+    openxlsx::mergeCells(wb_s8, "S8 Adenomyosis-praevia",
+                         cols = 1:ncol(Table_S8), rows = footnote_row_s8)
+
+    openxlsx::saveWorkbook(
+      wb_s8,
+      file.path(tables_dir, "Supplementary_Table_S8_adenomyosis_praevia_MR.xlsx"),
+      overwrite = TRUE
+    )
+    log_info("Supplementary Table S8 (Excel) saved.")
+  }
+
+  message("Supplementary Table S8 (adenomyosis exploratory MR) done.")
+}
+
+###############################################################################
+# SUPPLEMENTARY TABLE S9 - ADENOMYOSIS -> ALL 30 OUTCOMES (IVW SCREEN)
+#
+#   [R2.5] Exploratory screen of the adenomyosis instrument (Koller et al.
+#   2026) across all 30 main outcomes. IVW only (see Table S8 for the
+#   pleiotropy-robust methods run on placenta praevia specifically).
+#   Source: results/koller_adenomyosis_all_outcomes_ivw.csv (script 05.1).
+###############################################################################
+
+adeno_ivw30_path <- file.path(results_dir, "koller_adenomyosis_all_outcomes_ivw.csv")
+
+if (!file.exists(adeno_ivw30_path)) {
+  warning("koller_adenomyosis_all_outcomes_ivw.csv not found - skipping Table S9.")
+} else {
+
+  adeno_ivw30_raw <- readr::read_csv(adeno_ivw30_path, show_col_types = FALSE)
+
+  Table_S9 <- adeno_ivw30_raw %>%
+    dplyr::mutate(
+      Outcome_label = dplyr::recode(outcome, !!!outcome_labels, .default = outcome),
+      type          = dplyr::if_else(outcome %in% continuous_outcomes, "continuous", "binary")
+    ) %>%
+    dplyr::arrange(pval) %>%
+    dplyr::transmute(
+      Outcome      = Outcome_label,
+      `No. SNPs`   = nsnp,
+      `OR or beta` = dplyr::if_else(
+        type == "binary",
+        sprintf("%.2f", exp(b)),
+        sprintf("%.3f", b)
+      ),
+      `95% CI`     = dplyr::if_else(
+        type == "binary",
+        sprintf("(%.2f-%.2f)", exp(b - 1.96 * se), exp(b + 1.96 * se)),
+        sprintf("(%.3f to %.3f)", b - 1.96 * se, b + 1.96 * se)
+      ),
+      `P-value`  = fmt_p_s3(pval),
+      `q (FDR)`  = sprintf("%.3f", qval)
+    )
+
+  # ── CSV ──────────────────────────────────────────────────────────────────────
+  readr::write_csv(
+    Table_S9,
+    file.path(tables_dir, "Supplementary_Table_S9_adenomyosis_30_outcomes.csv")
+  )
+  log_info("Supplementary Table S9 (CSV) saved.")
+
+  # ── Excel ────────────────────────────────────────────────────────────────────
+  if (requireNamespace("openxlsx", quietly = TRUE)) {
+
+    wb_s9 <- openxlsx::createWorkbook()
+    openxlsx::addWorksheet(wb_s9, "S9 Adenomyosis 30 outcomes")
+
+    caption_text_s9 <- paste0(
+      "Supplementary Table S9. Exploratory IVW screen of genetic liability to adenomyosis across ",
+      "all 30 main outcomes."
+    )
+    openxlsx::writeData(wb_s9, "S9 Adenomyosis 30 outcomes",
+                        x = caption_text_s9, startRow = 1, startCol = 1)
+    openxlsx::addStyle(wb_s9, "S9 Adenomyosis 30 outcomes",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         wrapText = TRUE
+                       ),
+                       rows = 1, cols = 1)
+    openxlsx::mergeCells(wb_s9, "S9 Adenomyosis 30 outcomes", cols = 1:ncol(Table_S9), rows = 1)
+
+    openxlsx::writeDataTable(
+      wb_s9, "S9 Adenomyosis 30 outcomes",
+      x          = Table_S9,
+      startRow   = 3, startCol = 1,
+      tableStyle = "TableStyleLight9",
+      withFilter = TRUE
+    )
+
+    openxlsx::addStyle(wb_s9, "S9 Adenomyosis 30 outcomes",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         fgFill = "#D9E1F2", border = "Bottom", borderColour = "#4472C4",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = 3, cols = seq_len(ncol(Table_S9)),
+                       gridExpand = TRUE)
+
+    openxlsx::setColWidths(
+      wb_s9, "S9 Adenomyosis 30 outcomes",
+      cols   = seq_len(ncol(Table_S9)),
+      widths = c(30, 9, 8, 14, 12, 10)
+    )
+
+    footnote_row_s9 <- nrow(Table_S9) + 5
+    footnote_text_s9 <- paste0(
+      "Exploratory screen using the same 6-SNP adenomyosis instrument as Table S8, harmonised against ",
+      "all 30 main outcomes. Only the inverse-variance weighted method was calculated, given the ",
+      "limited number of instruments and the exploratory nature of this analysis; pleiotropy-robust ",
+      "methods were reserved for placenta praevia specifically (Table S8), the outcome of primary ",
+      "interest for this misclassification check. No outcome survived Benjamini-Hochberg FDR ",
+      "correction (q>0.6 throughout). As for Table S8, sample overlap between the Koller et al. 2026 ",
+      "adenomyosis GWAS and the outcome GWAS could not be excluded and was not formally assessed."
+    )
+    openxlsx::writeData(wb_s9, "S9 Adenomyosis 30 outcomes",
+                        x = footnote_text_s9, startRow = footnote_row_s9, startCol = 1)
+    openxlsx::addStyle(wb_s9, "S9 Adenomyosis 30 outcomes",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 8, fontColour = "#595959",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = footnote_row_s9, cols = 1)
+    openxlsx::setRowHeights(wb_s9, "S9 Adenomyosis 30 outcomes",
+                            rows = footnote_row_s9, heights = 120)
+    openxlsx::mergeCells(wb_s9, "S9 Adenomyosis 30 outcomes",
+                         cols = 1:ncol(Table_S9), rows = footnote_row_s9)
+
+    openxlsx::saveWorkbook(
+      wb_s9,
+      file.path(tables_dir, "Supplementary_Table_S9_adenomyosis_30_outcomes.xlsx"),
+      overwrite = TRUE
+    )
+    log_info("Supplementary Table S9 (Excel) saved.")
+  }
+
+  message("Supplementary Table S9 (adenomyosis 30-outcome IVW screen) done.")
+}
+
+###############################################################################
+# SUPPLEMENTARY TABLE S10 - MRLAP OVERLAP-AWARE SENSITIVITY ANALYSIS
+#                           (ENDOMETRIOSIS x PLACENTA PRAEVIA)
+#
+#   [R4.2] Reviewer #4 ("Report the overlapping fraction per outcome and
+#   overlap-aware estimates (MRlap); the bivariate LDSC intercept gives this
+#   as a by-product of point 5."): targeted MRlap sensitivity analysis for
+#   the study's single positive finding (endometriosis -> placenta praevia).
+#   Source: results/mrlap_praevia_results.csv (script 05.5).
+#   NOTE: observed/corrected effects are on MRlap's internal Z/sqrt(N)-
+#   standardised scale, NOT log-odds - not directly comparable to the
+#   primary IVW OR, which is shown alongside for reference only.
+###############################################################################
+
+mrlap_path <- file.path(results_dir, "mrlap_praevia_results.csv")
+
+if (!file.exists(mrlap_path)) {
+  warning("mrlap_praevia_results.csv not found - skipping Table S10.")
+} else {
+
+  mrlap_raw <- readr::read_csv(mrlap_path, show_col_types = FALSE)
+  mv <- setNames(as.character(mrlap_raw$value), mrlap_raw$metric)
+  num <- function(x) as.numeric(mv[[x]])
+
+  # Primary IVW estimate for placenta praevia, for reference only (not on
+  # the same scale as the MRlap observed/corrected effects above).
+  praevia_ivw <- readr::read_csv(file.path(results_dir, "ivw_results.csv"), show_col_types = FALSE) %>%
+    dplyr::filter(outcome == "finngen_R12_O15_PLAC_PRAEVIA", method == "Inverse variance weighted")
+
+  Table_S10 <- tibble::tribble(
+    ~Metric,                                                  ~Value,
+    "MRlap package version",                                  mv[["mrlap_package_version"]],
+    "Exposure GWAS (accession, total N)",                     "Rahmioglu et al. 2023, GCST90205183 (475,160)",
+    "Outcome GWAS (total N)",                                 "FinnGen R12 placenta praevia (223,001)",
+    "Number of independent instruments",                      mv[["n_instruments_used"]],
+    "Cross-trait LDSC intercept (SE)",                        sprintf("%.1e (SE %.1e)", num("crosstrait_intercept"), num("crosstrait_intercept_se")),
+    "h2 exposure (SE)",                                  sprintf("%.4f (SE %.4f)", num("h2_exposure"), num("h2_exposure_se")),
+    "h2 outcome (SE)",                                   sprintf("%.5f (SE %.5f)", num("h2_outcome"), num("h2_outcome_se")),
+    "Genetic correlation (rg), exposure-outcome",             sprintf("%.3f", num("rg_exposure_outcome")),
+    "Observed effect, standardised scale (SE), P",            sprintf("beta = %.3f (SE %.3f), P = %.1e", num("observed_effect_std"), num("observed_effect_se_std"), num("observed_effect_pval")),
+    "Corrected effect, standardised scale (SE), P",           sprintf("beta = %.3f (SE %.3f), P = %.1e", num("corrected_effect_std"), num("corrected_effect_se_std"), num("corrected_effect_pval")),
+    "P for difference (observed vs. corrected)",              sprintf("%.1e", num("p_difference")),
+    "MR-Egger intercept P (directional pleiotropy)",          sprintf("%.3f", num("egger_intercept_pval")),
+    "Warnings raised during MRlap run",                       sprintf("%s (all R package-loading namespace conflicts, e.g. 'replacing previous import ... when loading GenomicSEM'; none relate to model convergence, instrument strength, or data validity - verified individually, see results/mrlap_praevia_warnings.txt and Methods)", mv[["n_warnings"]]),
+    "Primary IVW estimate, for reference (not the same scale)", sprintf(
+      "OR = %.2f (95%% CI %.2f-%.2f), P = %.1e",
+      exp(praevia_ivw$b), exp(praevia_ivw$b - 1.96 * praevia_ivw$se),
+      exp(praevia_ivw$b + 1.96 * praevia_ivw$se), praevia_ivw$pval
+    )
+  )
+
+  # ── CSV ──────────────────────────────────────────────────────────────────────
+  readr::write_csv(
+    Table_S10,
+    file.path(tables_dir, "Supplementary_Table_S10_mrlap_praevia.csv")
+  )
+  log_info("Supplementary Table S10 (CSV) saved.")
+
+  # ── Excel ────────────────────────────────────────────────────────────────────
+  if (requireNamespace("openxlsx", quietly = TRUE)) {
+
+    wb_s10 <- openxlsx::createWorkbook()
+    openxlsx::addWorksheet(wb_s10, "S10 MRlap praevia")
+
+    caption_text_s10 <- paste0(
+      "Supplementary Table S10. MRlap overlap-aware sensitivity analysis for genetic liability to ",
+      "endometriosis and placenta praevia."
+    )
+    openxlsx::writeData(wb_s10, "S10 MRlap praevia",
+                        x = caption_text_s10, startRow = 1, startCol = 1)
+    openxlsx::addStyle(wb_s10, "S10 MRlap praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         wrapText = TRUE
+                       ),
+                       rows = 1, cols = 1)
+    openxlsx::mergeCells(wb_s10, "S10 MRlap praevia", cols = 1:ncol(Table_S10), rows = 1)
+
+    openxlsx::writeDataTable(
+      wb_s10, "S10 MRlap praevia",
+      x          = Table_S10,
+      startRow   = 3, startCol = 1,
+      tableStyle = "TableStyleLight9",
+      withFilter = FALSE
+    )
+
+    openxlsx::addStyle(wb_s10, "S10 MRlap praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         fgFill = "#D9E1F2", border = "Bottom", borderColour = "#4472C4",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = 3, cols = seq_len(ncol(Table_S10)),
+                       gridExpand = TRUE)
+
+    # Highlight the observed/corrected effect + P-difference rows (core result)
+    core_rows <- which(Table_S10$Metric %in% c(
+      "Observed effect, standardised scale (SE), P",
+      "Corrected effect, standardised scale (SE), P",
+      "P for difference (observed vs. corrected)"
+    )) + 3
+    openxlsx::addStyle(wb_s10, "S10 MRlap praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 9, textDecoration = "bold",
+                         fgFill = "#FFF2CC"
+                       ),
+                       rows = core_rows, cols = seq_len(ncol(Table_S10)),
+                       gridExpand = TRUE)
+
+    openxlsx::setColWidths(
+      wb_s10, "S10 MRlap praevia",
+      cols   = seq_len(ncol(Table_S10)),
+      widths = c(44, 46)
+    )
+
+    footnote_row_s10 <- nrow(Table_S10) + 5
+    footnote_text_s10 <- paste0(
+      "Both GWAS were supplied to MRlap with their total (not per-SNP effective) sample size, as ",
+      "required for case-control data. The observed and corrected effects are expressed on MRlap's ",
+      "internal Z/sqrt(N)-standardised effect-size scale (see Mounier & Kutalik, 2023), not on the ",
+      "raw log-odds scale, and must not be exponentiated or otherwise compared numerically to the ",
+      "primary IVW odds ratio shown for reference only. The cross-trait LDSC intercept estimates the ",
+      "genetic covariance attributable to sample overlap specifically; the observed-vs-corrected ",
+      "comparison jointly reflects sample overlap, weak-instrument bias, and winner's-curse-related ",
+      "bias and cannot isolate overlap alone. A significant P for difference indicates that the ",
+      "corrected estimate should be considered more reliable than the observed estimate, per MRlap's ",
+      "own recommended interpretation. The 23 warnings are R package-loading namespace conflicts ",
+      "(MRlap calls GenomicSEM internally), not convergence or data-validity warnings. Table S11 uses ",
+      "the same software and exposure N (475,160); its h2(exposure)=0.0163 and r_g=0.374 corroborate ",
+      "the h2=0.0163 and r_g=0.385 reported here."
+    )
+    openxlsx::writeData(wb_s10, "S10 MRlap praevia",
+                        x = footnote_text_s10, startRow = footnote_row_s10, startCol = 1)
+    openxlsx::addStyle(wb_s10, "S10 MRlap praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 8, fontColour = "#595959",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = footnote_row_s10, cols = 1)
+    openxlsx::setRowHeights(wb_s10, "S10 MRlap praevia",
+                            rows = footnote_row_s10, heights = 190)
+    openxlsx::mergeCells(wb_s10, "S10 MRlap praevia",
+                         cols = 1:ncol(Table_S10), rows = footnote_row_s10)
+
+    openxlsx::saveWorkbook(
+      wb_s10,
+      file.path(tables_dir, "Supplementary_Table_S10_mrlap_praevia.xlsx"),
+      overwrite = TRUE
+    )
+    log_info("Supplementary Table S10 (Excel) saved.")
+  }
+
+  message("Supplementary Table S10 (MRlap praevia) done.")
+}
+
+###############################################################################
+# SUPPLEMENTARY TABLE S11 - TARGETED CROSS-TRAIT LDSC (r_g) ANALYSIS
+#                            (ENDOMETRIOSIS x PLACENTA PRAEVIA)
+#
+#   [R2.2]/[R4.5] Genetic correlation between endometriosis and placenta
+#   praevia via LDSC. Source: script 05.6's "primary" variant (corrected N,
+#   QC-filtered); other variants summarised as a min-max range here, full
+#   detail in bivariate_rg.csv. r_g is non-directional and complementary to
+#   the MR estimate - not a validation of it - and distinct from the
+#   cross-trait intercept (sample-overlap diagnostic, reported in Table S10).
+###############################################################################
+
+# [SYNC] This dated folder name is also hardcoded in
+# scripts/05.6_ldsc_targeted_endo_praevia_endoMR-PREG.R (variable `out_dir`).
+# If script 05.6 is ever re-run on a different date, update BOTH places -
+# this block will otherwise keep silently reading the stale 2026-07-28
+# folder without any error, since it only checks file.exists(), not recency.
+ldsc_dir <- file.path(results_dir, "ldsc_endometriosis_placenta_praevia_20260728")
+univar_path <- file.path(ldsc_dir, "univariate_heritability.csv")
+bivar_path  <- file.path(ldsc_dir, "bivariate_rg.csv")
+
+if (!file.exists(univar_path) || !file.exists(bivar_path)) {
+  warning("LDSC endo-praevia results not found - skipping Table S11.")
+} else {
+
+  univar_raw <- readr::read_csv(univar_path, show_col_types = FALSE)
+  bivar_raw  <- readr::read_csv(bivar_path, show_col_types = FALSE)
+
+  primary_label <- "primary (N=475,160 + ambig/MHC/indel/dup filter)"
+  u_endo   <- dplyr::filter(univar_raw, variant == primary_label, trait == "endometriosis")
+  u_praev  <- dplyr::filter(univar_raw, variant == primary_label, trait == "placenta_praevia")
+  b_primary <- dplyr::filter(bivar_raw, variant == primary_label)
+
+  # Sensitivity rg range across all three variants (original / n_corrected / primary)
+  rg_range <- range(bivar_raw$rg)
+
+  Table_S11 <- tibble::tribble(
+    ~Metric,                                              ~Value,
+    "LDSC implementation",                                "GenomicSEM v0.0.5 (R reimplementation of Bulik-Sullivan et al. 2015)",
+    "Exposure GWAS (accession, total N)",                 "Rahmioglu et al. 2023 endometriosis, GCST90205183 (N=475,160)",
+    "Outcome GWAS (accession, total N)",                  "FinnGen R12 O15_PLAC_PRAEVIA (N=223,001)",
+    "LD reference",                                       "1000 Genomes European (eur_w_ld_chr), HapMap3 SNPs",
+    "N SNPs, endometriosis (post-QC)",                    format(u_endo$n_snps, big.mark = ","),
+    "N SNPs, placenta praevia (post-QC)",                 format(u_praev$n_snps, big.mark = ","),
+    "N SNPs, cross-trait overlap",                        format(b_primary$n_snps_overlap, big.mark = ","),
+    "SNP-h2 endometriosis, observed scale (SE), Z, P",    sprintf("%.4f (SE %.4f), Z=%.1f, P=%.1e", u_endo$h2_obs, u_endo$h2_obs_se, u_endo$h2_z, u_endo$h2_p),
+    "SNP-h2 placenta praevia, observed scale (SE), Z, P", sprintf("%.4f (SE %.4f), Z=%.2f, P=%.2f", u_praev$h2_obs, u_praev$h2_obs_se, u_praev$h2_z, u_praev$h2_p),
+    "Cross-trait LDSC intercept (SE)",                    sprintf("%.4f (SE %.3f)", b_primary$crosstrait_intercept, b_primary$crosstrait_intercept_se),
+    "Genetic correlation (r_g), endo-praevia (SE), P",    sprintf("%.3f (SE %.3f), P=%.3f", b_primary$rg, b_primary$rg_se, b_primary$rg_p),
+    "Sensitivity: r_g range across N/QC specifications",  sprintf("%.3f - %.3f across 3 analytic specifications (see Methods)", rg_range[1], rg_range[2])
+  )
+
+  # ── CSV ──────────────────────────────────────────────────────────────────────
+  readr::write_csv(
+    Table_S11,
+    file.path(tables_dir, "Supplementary_Table_S11_ldsc_endo_praevia.csv")
+  )
+  log_info("Supplementary Table S11 (CSV) saved.")
+
+  # ── Excel ────────────────────────────────────────────────────────────────────
+  if (requireNamespace("openxlsx", quietly = TRUE)) {
+
+    wb_s11 <- openxlsx::createWorkbook()
+    openxlsx::addWorksheet(wb_s11, "S11 LDSC endo praevia")
+
+    caption_text_s11 <- paste0(
+      "Supplementary Table S11. Targeted cross-trait LD Score Regression analysis of the genome-wide ",
+      "genetic correlation between endometriosis and placenta praevia."
+    )
+    openxlsx::writeData(wb_s11, "S11 LDSC endo praevia",
+                        x = caption_text_s11, startRow = 1, startCol = 1)
+    openxlsx::addStyle(wb_s11, "S11 LDSC endo praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         wrapText = TRUE
+                       ),
+                       rows = 1, cols = 1)
+    openxlsx::mergeCells(wb_s11, "S11 LDSC endo praevia", cols = 1:ncol(Table_S11), rows = 1)
+
+    openxlsx::writeDataTable(
+      wb_s11, "S11 LDSC endo praevia",
+      x          = Table_S11,
+      startRow   = 3, startCol = 1,
+      tableStyle = "TableStyleLight9",
+      withFilter = FALSE
+    )
+
+    openxlsx::addStyle(wb_s11, "S11 LDSC endo praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         fgFill = "#D9E1F2", border = "Bottom", borderColour = "#4472C4",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = 3, cols = seq_len(ncol(Table_S11)),
+                       gridExpand = TRUE)
+
+    # Highlight the core rg/intercept result rows
+    core_rows_s11 <- which(Table_S11$Metric %in% c(
+      "Cross-trait LDSC intercept (SE)",
+      "Genetic correlation (r_g), endo-praevia (SE), P"
+    )) + 3
+    openxlsx::addStyle(wb_s11, "S11 LDSC endo praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 9, textDecoration = "bold",
+                         fgFill = "#FFF2CC", wrapText = TRUE, valign = "top"
+                       ),
+                       rows = core_rows_s11, cols = seq_len(ncol(Table_S11)),
+                       gridExpand = TRUE)
+
+    openxlsx::setColWidths(
+      wb_s11, "S11 LDSC endo praevia",
+      cols   = seq_len(ncol(Table_S11)),
+      widths = c(44, 58)
+    )
+
+    footnote_row_s11 <- nrow(Table_S11) + 5
+    footnote_text_s11 <- paste0(
+      "HapMap3 SNPs, European 1000 Genomes LD scores. Exposure N=475,160 is GCST90205183 (the file ",
+      "used here), not the 762,600 figure from GCST90258638 used in the primary MR analysis. rg is ",
+      "stable across N/QC specifications (0.372-0.374); placenta praevia h2 is imprecisely estimated ",
+      "given its case count, which limits precision but not validity. The cross-trait intercept is a ",
+      "sample-overlap diagnostic, not rg. Table S10 (MRlap) uses the same N and software and gives a ",
+      "corroborating h2=0.0163, rg=0.385."
+    )
+    openxlsx::writeData(wb_s11, "S11 LDSC endo praevia",
+                        x = footnote_text_s11, startRow = footnote_row_s11, startCol = 1)
+    openxlsx::addStyle(wb_s11, "S11 LDSC endo praevia",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 8, fontColour = "#595959",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = footnote_row_s11, cols = 1)
+    openxlsx::setRowHeights(wb_s11, "S11 LDSC endo praevia",
+                            rows = footnote_row_s11, heights = 150)
+    openxlsx::mergeCells(wb_s11, "S11 LDSC endo praevia",
+                         cols = 1:ncol(Table_S11), rows = footnote_row_s11)
+
+    openxlsx::saveWorkbook(
+      wb_s11,
+      file.path(tables_dir, "Supplementary_Table_S11_ldsc_endo_praevia.xlsx"),
+      overwrite = TRUE
+    )
+    log_info("Supplementary Table S11 (Excel) saved.")
+  }
+
+  message("Supplementary Table S11 (LDSC endo-praevia) done.")
+}
+

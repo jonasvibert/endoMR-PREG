@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 ################################################################################
-# Script: 03b_harmonise_with_proxies_endoMR-PREG.R
+# Script: 03.1_harmonise_with_proxies_endoMR-PREG.R
 # Project: endoMR-PREG
 #
 # Purpose:
@@ -83,7 +83,7 @@ if (!file.exists(paste0(bfile_root, ".bim"))) {
 dir.create(results_dir, recursive = TRUE, showWarnings = FALSE)
 
 message("=================================================================")
-message(" endoMR-PREG: Proxy-aware harmonisation (script 03b)")
+message(" endoMR-PREG: Proxy-aware harmonisation (script 03.1)")
 message(" Parameters: r² ≥ ", PROXY_R2_MIN,
         " | pop = EUR (1000G local) | window = ±", PROXY_WINDOW_KB, " kb")
 message("=================================================================\n")
