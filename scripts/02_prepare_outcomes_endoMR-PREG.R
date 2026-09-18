@@ -448,7 +448,7 @@ count_snps <- function(res_list, label) {
 counts_all <- dplyr::bind_rows(
   if (exists("res_pph")) count_snps(res_pph, "PPH")      else NULL,
   if (exists("res_fg"))  count_snps(res_fg,  "FinnGen")  else NULL
-  # MR-PREG has all SNPs, not subset per outcome via res-list, donc pas ici
+  # MR-PREG has all SNPs, not subset per outcome via res-list, so not included here
 ) %>%
   dplyr::arrange(source, dplyr::desc(nsnp))
 

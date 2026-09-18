@@ -70,10 +70,16 @@ R 4.3.2+ with:
 
 ```r
 pkgs <- c("TwoSampleMR", "MRPRESSO", "dplyr", "ggplot2", "patchwork",
-          "here", "readr", "data.table", "openxlsx", "readxl")
+          "here", "readr", "data.table", "openxlsx", "readxl", "devtools",
+          "coloc", "GenomicSEM", "MRlap", "mr.raps",
+          "tidyr", "purrr", "gt", "knitr", "tibble", "stringr",
+          "forcats", "scales", "metafor", "forestplot", "progress",
+          "MRInstruments")
 install.packages(pkgs)
 devtools::install_github("MRCIEU/TwoSampleMR")
 devtools::install_github("rondolab/MR-PRESSO")
+devtools::install_github("GenomicSEM/GenomicSEM")
+devtools::install_github("n-mounier/MRlap")
 ```
 
 ### Running the Pipeline
@@ -92,7 +98,7 @@ source("scripts/05.3_coloc_endo_praevia_endoMR-PREG.R")           # locus-level 
 source("scripts/05.4_ldsc_genetic_correlation_endoMR-PREG.R")     # cross-trait LDSC, 4 outcomes
 source("scripts/05.5_mrlap_praevia_endoMR-PREG.R")                # MRlap overlap-corrected MR
 source("scripts/05.6_ldsc_targeted_endo_praevia_endoMR-PREG.R")   # cross-trait LDSC, endo-praevia
-source("scripts/06_tables_endoMR-PREG.R")                         # Tables 1-3, S1-S11
+source("scripts/06_tables_endoMR-PREG.R")                         # Tables 1-3, S1-S12
 source("scripts/07_plots_endoMR-PREG.R")                          # Figures 2-3, S1-S15
 ```
 

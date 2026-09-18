@@ -535,9 +535,10 @@ p_trios <- ggplot(
   ) +
   scale_colour_manual(
     values = c(
-      "Maternal (adj.)" = "#1f78b4",
-      "Fetal (adj.)"    = "#33a02c",
-      "Paternal (adj.)" = "#e31a1c"
+      "Maternal (unadj.)"     = "#a6cee3",
+      "Maternal (adj. fetal)" = "#1f78b4",
+      "Fetal (adj.)"          = "#33a02c",
+      "Paternal (adj.)"       = "#e31a1c"
     ),
     name = "Genetic effect"
   ) +
