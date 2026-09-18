@@ -17,6 +17,36 @@
 #   discussion of possible endometriosis/adenomyosis misclassification.
 #
 # REVISION LOG
+#   [R3.3 — MR-PREG RE-EXTRACTION UPDATE, 2026-09-16] Section 4b now reads
+#   data/EXPOSURE_KOLLER_TABLES4/Updated_Koller_2026_SNP_list/, re-extracted
+#   against the 86-SNP Table 4 instrument.
+#
+#   [R3.3 — INSTRUMENT UPDATE, 2026-09-03] Switched the ENDOMETRIOSIS
+#   instrument (adenomyosis instrument below is UNCHANGED) from a
+#   self-clumped set derived from the METAL-style genome-wide file
+#   (SE = 1/sqrt(2pq N), Beta = Z*SE, N treated as effective N) to Koller et
+#   al.'s own published Supplementary Table 4: 86 genome-wide significant
+#   loci (p<5e-8), of which the paper's own cross-ancestry combined-endo
+#   analysis reports n=80 as LD-independent (r2<0.1, 1000G EUR panel); the
+#   remaining 6 rows are loci significant only in the EUR clinical/
+#   self-reported sub-analyses, included in the same table (Type column:
+#   "Clinical/Self-reported endometriosis, novel/previously reported").
+#   Uses the table's real, directly-reported EUR "Endometriosis combined
+#   definition" Beta/SE/P/EAF columns instead of back-calculating from Z+N —
+#   more accurate and directly citable against the source table (all 86
+#   rows have a non-NA EUR combined-endometriosis effect, checked
+#   2026-09-03). No re-clumping performed: the paper's own loci are already
+#   LD-independent, so TwoSampleMR::clump_data() / PLINK are no longer used
+#   for this instrument. Genome build for the table's Chromosome/Position
+#   columns is NOT stated anywhere in the paper's Methods, Data
+#   Availability statement, or the associated Zenodo deposit README
+#   (10.5281/zenodo.18983492) — checked directly, 2026-09-03 — so merging
+#   against outcome data still uses rsID only (as already done for every
+#   other outcome source in this script); Chromosome/Position/nearest gene
+#   are carried through for reference/QC only, never as a join key. Source:
+#   Koller D et al., Nat Genet 2026;58(5):1051–1061, Supplementary Table 4;
+#   local copy data/EXPOSURE_KOLLER/Koller2026_SupplementaryTable4_significant_loci.xlsx.
+#
 #   [R3.3/R2.5 — SCOPE] The 3 outcome sources behind the 30 main outcomes do
 #   NOT have equal SNP coverage:
 #     - MR-PREG (data/OUTCOME_MR-PREG/ma_out_dat.txt) contains only 43 SNPs
@@ -43,9 +73,15 @@
 #   the response letter. See project memory
 #   "project_reviewer_response_round1".
 #
-# Data source (METAL-style GWAS output, no beta/SE columns):
-#   data/EXPOSURE_KOLLER/Koller2026_endometriosis_EUR.tsv.gz
-#   data/EXPOSURE_KOLLER/Koller2026_adenomyosis_EUR.tsv.gz
+# Data source:
+#   ENDOMETRIOSIS instrument (as of the 2026-09-03 update, see REVISION LOG):
+#     data/EXPOSURE_KOLLER/Koller2026_SupplementaryTable4_significant_loci.xlsx
+#     Sheet "Supplementary Table 4", data from row 6. Columns used: Lead SNP,
+#     Chromosome, Position, Effect allele, Other allele, Nearest gene, Type,
+#     and the EUR "Endometriosis combined definition" Beta/SE/P-value/EAF
+#     block. Real published effect estimates — no derivation needed.
+#   ADENOMYOSIS instrument (unchanged): METAL-style GWAS output, no beta/SE
+#   columns — data/EXPOSURE_KOLLER/Koller2026_adenomyosis_EUR.tsv.gz
 #   Columns: SNP, Allele1, Allele2, Freq1, N, Z, P.value, Direction, HetPVal
 #   Beta/SE derived as:
 #     SE   = 1 / sqrt(2 * Freq1 * (1 - Freq1) * N)
@@ -54,20 +90,20 @@
 #   choice).
 #
 # Inputs:
-#   - data/EXPOSURE_KOLLER/Koller2026_endometriosis_EUR.tsv.gz
+#   - data/EXPOSURE_KOLLER/Koller2026_SupplementaryTable4_significant_loci.xlsx
 #   - data/EXPOSURE_KOLLER/Koller2026_adenomyosis_EUR.tsv.gz
 #   - data/OUTCOME_FINNGEN/finngen_R12_O15_PLAC_{PRAEVIA,DISORD,PREMAT_SEPAR}
 #   - data/OUTCOME_PPH/{Antepartum_bleeding,Postpartum_hemorrhage,
 #     Postpartum_hemorrhage_due_to_atony,
 #     Postpartum_hemorrhage_due_to_retained_placenta}.txt
-#   - data/OUTCOME_MR-PREG/RE__Revision__Request_for_MR-PREG_data_for_Koller_et_al._2026_instruments__endometriosis_and_adenomyosis (1)/
+#   - data/EXPOSURE_KOLLER_TABLES4/Updated_Koller_2026_SNP_list/
 #     tmp_Metanalysis_metanalyses-R3.mum.*.txt.gz (23 MoBa outcomes; see SCOPE
 #     UPDATE below)
 #   - results/ivw_results.csv (script 04; used for the Rahmioglu comparison)
 #   - plink_mac_20241022/ (PLINK binary + 1000G EUR reference, script 01)
 #
 # Outputs (saved under results/):
-#   - Koller_Endometriosis_clumped_snps.tsv / Koller_Adenomyosis_clumped_snps.tsv
+#   - Koller_Endometriosis_Table4_EUR_snps.tsv / Koller_Adenomyosis_clumped_snps.tsv
 #   - harmonised_koller_endometriosis_bpo.csv
 #   - koller_ivw_results.csv / koller_egger_results.csv /
 #     koller_weighted_median_results.csv / koller_all_mr_methods.csv
@@ -82,7 +118,7 @@
 
 ### 1) SETUP ####################################################################
 
-required_pkgs <- c("TwoSampleMR", "dplyr", "data.table", "here", "readr")
+required_pkgs <- c("TwoSampleMR", "dplyr", "data.table", "here", "readr", "openxlsx")
 
 for (pkg in required_pkgs) {
   if (!requireNamespace(pkg, quietly = TRUE)) {
@@ -97,16 +133,16 @@ data_dir    <- here::here("data")
 results_dir <- here::here("results")
 dir.create(results_dir, showWarnings = FALSE, recursive = TRUE)
 
-koller_dir  <- file.path(data_dir, "EXPOSURE_KOLLER")
-endo_file   <- file.path(koller_dir, "Koller2026_endometriosis_EUR.tsv.gz")
-adeno_file  <- file.path(koller_dir, "Koller2026_adenomyosis_EUR.tsv.gz")
+koller_dir      <- file.path(data_dir, "EXPOSURE_KOLLER")
+endo_table4_file <- file.path(koller_dir, "Koller2026_SupplementaryTable4_significant_loci.xlsx")
+adeno_file      <- file.path(koller_dir, "Koller2026_adenomyosis_EUR.tsv.gz")
 
 plink_dir  <- here::here("plink_mac_20241022")
 plink_bin  <- file.path(plink_dir, "plink")
 bfile_root <- file.path(plink_dir, "24088632", "1000G.EUR.QC")
 
-if (!file.exists(endo_file))  stop("Missing file: ", endo_file)
-if (!file.exists(adeno_file)) stop("Missing file: ", adeno_file)
+if (!file.exists(endo_table4_file)) stop("Missing file: ", endo_table4_file)
+if (!file.exists(adeno_file))       stop("Missing file: ", adeno_file)
 
 ### 2) HELPER: LOAD + DERIVE BETA/SE + FORMAT + CLUMP A KOLLER GWAS ############
 
@@ -158,13 +194,69 @@ prepare_koller_instrument <- function(path, phenotype_label, pval_threshold = 5e
 }
 
 ### 3) DERIVE BOTH INSTRUMENTS (ENDOMETRIOSIS + ADENOMYOSIS) ###################
+# --- [R3.3 — INSTRUMENT UPDATE, 2026-09-03] Endometriosis instrument now
+#     loaded directly from Koller et al.'s published Table 4 (see REVISION
+#     LOG / Data source above) instead of self-clumped from the raw
+#     genome-wide file. Adenomyosis instrument below is UNCHANGED. ---
 
-koller_endo_clumped <- prepare_koller_instrument(
-  endo_file, "Endometriosis (Koller 2026)"
+message("\n=== Loading Koller et al. 2026 Table 4 (published EUR endometriosis loci) ===")
+
+table4_raw <- openxlsx::read.xlsx(
+  endo_table4_file,
+  sheet    = "Supplementary Table 4",
+  startRow = 6,
+  colNames = FALSE
 )
+
+# Column positions (1-indexed) confirmed against the sheet's 3-row header
+# block: X1=Lead SNP, X2=Chromosome, X3=Position, X4=Effect allele,
+# X5=Other allele, X6=Nearest gene, X7=Type, X28-31=EUR "Endometriosis
+# combined definition" Beta/SE/P-value/EAF.
+table4_endo_eur <- table4_raw |>
+  dplyr::filter(grepl("^rs", X1)) |>
+  dplyr::transmute(
+    SNP           = X1,
+    chr           = X2,
+    position      = X3,
+    effect_allele = toupper(X4),
+    other_allele  = toupper(X5),
+    nearest_gene  = X6,
+    locus_type    = X7,
+    beta          = as.numeric(X28),
+    se            = as.numeric(X29),
+    pval          = as.numeric(X30),
+    eaf           = as.numeric(X31),
+    phenotype     = "Endometriosis (Koller 2026, Table 4 EUR)"
+  )
+
+message("Koller Table 4 rows read: ", nrow(table4_raw),
+        " | rs-identified loci: ", nrow(table4_endo_eur),
+        " | with non-NA EUR combined-endometriosis effect: ",
+        sum(!is.na(table4_endo_eur$beta)))
+
+table4_endo_eur <- table4_endo_eur[!is.na(table4_endo_eur$beta), ]
+
+koller_endo_clumped <- TwoSampleMR::format_data(
+  as.data.frame(table4_endo_eur),
+  type              = "exposure",
+  snp_col           = "SNP",
+  beta_col          = "beta",
+  se_col            = "se",
+  eaf_col           = "eaf",
+  effect_allele_col = "effect_allele",
+  other_allele_col  = "other_allele",
+  pval_col          = "pval",
+  phenotype_col     = "phenotype"
+)
+
+message("Endometriosis (Koller 2026, Table 4 EUR) instrument: ",
+        nrow(koller_endo_clumped),
+        " SNPs — published, already LD-independent (paper's own r2<0.1 ",
+        "clumping against 1000G EUR); not re-clumped here.")
+
 data.table::fwrite(
   koller_endo_clumped,
-  file.path(results_dir, "Koller_Endometriosis_clumped_snps.tsv"),
+  file.path(results_dir, "Koller_Endometriosis_Table4_EUR_snps.tsv"),
   sep = "\t"
 )
 
@@ -330,8 +422,7 @@ pph_koller_outcomes <- dplyr::bind_rows(lapply(file_list_pph, process_pph_koller
 message("\n=== Loading MR-PREG (Koller-matched) outcome data for the 23 MoBa outcomes ===")
 
 mrpreg_koller_dir <- file.path(
-  data_dir, "OUTCOME_MR-PREG",
-  "RE__Revision__Request_for_MR-PREG_data_for_Koller_et_al._2026_instruments__endometriosis_and_adenomyosis (1)"
+  data_dir, "EXPOSURE_KOLLER_TABLES4", "Updated_Koller_2026_SNP_list"
 )
 
 file_list_mrpreg <- c(
@@ -405,7 +496,7 @@ koller_harm <- TwoSampleMR::harmonise_data(
 koller_harm <- koller_harm[koller_harm$mr_keep == TRUE, ]
 
 message("Harmonised Koller dataset: ", nrow(koller_harm), " rows across ",
-        dplyr::n_distinct(koller_harm$outcome), " outcomes (of 7 attempted).")
+        dplyr::n_distinct(koller_harm$outcome), " outcomes (of ", length(vars_keep_koller), " attempted).")
 print(table(koller_harm$outcome))
 
 write.csv(

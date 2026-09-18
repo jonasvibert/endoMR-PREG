@@ -317,14 +317,9 @@ log_info("Creating Table 1: description of GWAS datasets...")
 
 # --- [FIX] McBride et al. (MR-PREG) year corrected 2026 -> 2025 (see REVISION LOG) ---
 # --- [R3.3] Koller et al. (2026) row added - sensitivity exposure GWAS used
-#     in 05.1_koller_sensitivity_endoMR-PREG.R. Ancestry/sample size sourced
-#     from the Koller collaboration study plan (multi-ancestry GWAS: 80
-#     genome-wide significant loci, 1,388,600 women, 105,869 cases, across 6
-#     ancestries); our own instrument uses the EUR-ancestry subset released
-#     to us (data/EXPOSURE_KOLLER/Koller2026_endometriosis_EUR.tsv.gz), whose
-#     per-SNP effective N ranges 73,563-198,158 (median 135,078) - smaller
-#     than the full multi-ancestry total, as expected for an ancestry subset
-#     of a meta-analysis with variable per-SNP cohort coverage. ---
+#     in 05.1_koller_sensitivity_endoMR-PREG.R. Instrument is the 86 EUR loci
+#     of the paper's own Supplementary Table 4 (published beta/SE, not
+#     re-derived); EUR sample size per the paper's Supplementary Table 1. ---
 # --- [EDIT] Table 1 simplified to 7 columns (Study, Year, Dataset/consortium,
 #     Phenotype Group, Ancestry, Sample size, Main adjustments); Sex and
 #     Notes/accession columns dropped per author request. ---
@@ -334,7 +329,7 @@ table1_gwas <- tibble::tribble(
   "McBride et al. (MR-PREG)",  2025,  "MR-PREG collaboration (ALSPAC, BiB, MoBa, UKB, FinnGen + GWAS)", "Adverse pregnancy and perinatal outcomes",          "Predominantly European genetic ancestry; separate South Asian ancestry analyses available for some Born in Bradford outcomes", "Up to 678,001 women",                                                                                                                                "Age, study/centre, principal components",
   "FinnGen R12",               2024,  "FinnGen (release 12)",                                           "Placental phenotypes",                              "Predominantly Finnish/European genetic ancestry",                                                                 "Up to 223,001 women",                                                                                                                                "Age, batch, principal components",
   "Westergaard et al.",        2024,  "Nordic registry-based GWAS (6 cohorts)",                          "Bleeding in pregnancy and postpartum haemorrhage",  "Northern European (registry-based)",                                                                              "Up to 331,792 women",                                                                                                                                "Age, parity, calendar year, cohort",
-  "Koller et al.",             2026,  "Multi-ancestry endometriosis GWAS",                              "Endometriosis, sensitivity exposure",               "European (EUR-ancestry subset used here; full GWAS spans 6 ancestries)",                                          "105,869 cases; 1,282,731 controls (1,388,600 women; full multi-ancestry GWAS); EUR subset used for instrument derivation, per-SNP effective N up to 198,158", "Study-specific covariates"
+  "Koller et al.",             2026,  "Multi-ancestry endometriosis GWAS",                              "Endometriosis, sensitivity exposure",               "European (EUR-specific effect estimates, Supplementary Table 4; full GWAS spans 6 ancestries)",                  "99,407 cases; 1,093,534 controls (EUR); 1,388,600 women in the full multi-ancestry GWAS", "Study-specific covariates"
 )
 
 table1_file <- file.path(tables_dir, "Table1_GWAS_sources.csv")
@@ -830,6 +825,32 @@ if (file.exists(pleio_file)) {
   log_warn("mr_pleiotropy.csv not found - Egger intercept column will be NA.")
 }
 
+# ── MR-RAPS (winner's-curse-robust estimator) ────────────────────────────────
+# --- [R4.6] Added as an extra column rather than a standalone table, since it
+#     was run across all 30 outcomes exactly like the other sensitivity
+#     estimators already in this table. Source: results/mr_raps.csv (script
+#     05, section 3b). ---
+raps_file <- file.path(results_dir, "mr_raps.csv")
+if (file.exists(raps_file)) {
+  raps_raw <- readr::read_csv(raps_file, show_col_types = FALSE) %>%
+    dplyr::filter(outcome %in% vars_keep) %>%
+    dplyr::mutate(
+      type_raps = dplyr::if_else(outcome %in% continuous_outcomes, "continuous", "binary"),
+      `MR-RAPS effect (95% CI)` = purrr::pmap_chr(
+        list(b, se, type_raps), ~ fmt_est_ci(..1, ..2, ..3)
+      ),
+      `MR-RAPS p-value` = fmt_p_s3(as.numeric(pval))
+    ) %>%
+    dplyr::select(outcome, `MR-RAPS effect (95% CI)`, `MR-RAPS p-value`)
+} else {
+  raps_raw <- tibble::tibble(
+    outcome                    = character(),
+    `MR-RAPS effect (95% CI)`  = character(),
+    `MR-RAPS p-value`          = character()
+  )
+  log_warn("mr_raps.csv not found - MR-RAPS columns will be NA.")
+}
+
 # ── Cochran's Q (IVW heterogeneity) ──────────────────────────────────────────
 het_file <- file.path(results_dir, "mr_heterogeneity.csv")
 if (file.exists(het_file)) {
@@ -891,6 +912,7 @@ if (file.exists(presso_file)) {
 # ── Join all components + domain ordering ─────────────────────────────────────
 Table_S3_wide <- s3_wide %>%
   dplyr::left_join(pleio_raw,     by = "outcome") %>%
+  dplyr::left_join(raps_raw,      by = "outcome") %>%
   dplyr::left_join(het_raw,       by = "outcome") %>%
   dplyr::left_join(presso_raw_s3, by = "outcome") %>%
   dplyr::left_join(
@@ -922,6 +944,8 @@ Table_S3_wide <- s3_wide %>%
     `Egger intercept (beta), p-value`,
     `Weighted median effect (95% CI)`,
     `Weighted mode effect (95% CI)`,
+    `MR-RAPS effect (95% CI)`,
+    `MR-RAPS p-value`,
     `Cochran's Q p-value`,
     `MR-PRESSO outliers (n)`,
     `MR-PRESSO corrected effect (95% CI)`,
@@ -982,12 +1006,12 @@ if (requireNamespace("openxlsx", quietly = TRUE)) {
   }
 
   # Column widths: Domain, Outcome, Scale, IVW eff, IVW p, Egger eff,
-  #                Egger intercept, WM eff, WMode eff, Q p, PRESSO n,
-  #                PRESSO corr, PRESSO distort
+  #                Egger intercept, WM eff, WMode eff, RAPS eff, RAPS p,
+  #                Q p, PRESSO n, PRESSO corr, PRESSO distort
   openxlsx::setColWidths(
     wb_s3, "S3 Sensitivity analyses",
     cols   = seq_len(ncol(tbl_s3_export)),
-    widths = c(26, 32, 7, 22, 12, 22, 30, 22, 22, 14, 16, 26, 22)
+    widths = c(26, 32, 7, 22, 12, 22, 30, 22, 22, 22, 12, 14, 16, 26, 22)
   )
 
   # Header style
@@ -1027,6 +1051,8 @@ if (requireNamespace("openxlsx", quietly = TRUE)) {
     "a low p-value indicates evidence of heterogeneity, which may reflect pleiotropy. ",
     "The Egger intercept (\u03b2) tests for directional (unbalanced) horizontal pleiotropy; ",
     "departure from zero suggests that InSIDE assumption violations may bias IVW estimates. ",
+    "MR-RAPS (Robust Adjusted Profile Score) is a winner's-curse-robust estimator run across ",
+    "all 30 outcomes for consistency with the other sensitivity methods above. ",
     "MR-PRESSO outlier-corrected estimates and distortion p-values are shown only for outcomes ",
     "where at least one outlier SNP was detected; \u2014 indicates no outliers. ",
     "The distortion test evaluates whether removal of outlier SNPs significantly changes the causal estimate. ",
@@ -1060,86 +1086,64 @@ message("Supplementary Table S3 done.")
 s3_file <- file.path(tables_dir, "Supplementary_Table_S3_sensitivity_analyses.csv")
 
 ###############################################################################
-# 10) TABLE S4 - HETEROGENEITY STATISTICS (COCHRAN'S Q, IVW ONLY)
+# 10) TABLE S4 - TRIO-BASED MR ESTIMATES (MATERNAL/FETAL/PATERNAL)
 #
-# --- [R3.2] Replaces the former "Supplementary Table S4 - trio-based MR
-#     estimates" (maternal/fetal/paternal DONUTS estimates), removed as it
-#     duplicated Figure 3 ("Trios overview", script 07). See REVISION LOG. ---
+# --- [R3.2, REVERTED] The [R3.2] change that replaced this table with
+#     heterogeneity statistics (Cochran's Q) was itself reverted: the
+#     manuscript's own "TABLES AND FIGURES" list and the Results text
+#     ("Intergenerational (trio-based) analyses", citing "Supplementary
+#     Table S4") both expect S4 to be the trio table, and the
+#     heterogeneity/Cochran's Q content is already fully covered by the
+#     "Cochran's Q p-value" column already present in Table S3 - so nothing
+#     is lost by dropping the standalone heterogeneity table.
+#     BLOCKER FIX: the version of this table previously pasted into the
+#     manuscript did not match the Results text at all for Fetal/Paternal
+#     (its values traced to no file anywhere in results/ - apparently a
+#     lost/stale independent-single-genotype model). This version is built
+#     directly from results/trios_adj_mr_results_by_outcome_long.csv
+#     (script 04.2, mutually-adjusted DONUTS model), restricted to the 3
+#     "conditioned" estimates the Methods promise ("Maternal-Fetal Genotype
+#     Correction": maternal adj. for fetal = primary, fetal adj. for
+#     maternal = sensitivity, paternal = negative control) - verified to
+#     reproduce the exact numbers quoted in Results (e.g. pretb_all maternal
+#     adj. OR=0.71/q=0.007, paternal OR=0.78/p=0.118). The unadjusted
+#     maternal estimate (quoted once in Results, as an illustrative
+#     before/after-adjustment contrast for preterm birth only) is not a
+#     standing row here to avoid re-introducing a 4th ambiguous category. ---
 ###############################################################################
 
-log_info("Creating Table S4: heterogeneity statistics (IVW only)...")
+log_info("Creating Table S4: trio-based MR estimates (maternal/fetal/paternal)...")
 
-dat_het <- data.table::fread(harm_file)
-dat_het <- dat_het[dat_het$outcome %in% vars_keep, , drop = FALSE]
+trios_long_file <- file.path(results_dir, "trios_adj_mr_results_by_outcome_long.csv")
+if (!file.exists(trios_long_file)) {
+  stop("File 'trios_adj_mr_results_by_outcome_long.csv' not found. Run 04.2_fetal_effect_endoMR-PREG.R first.")
+}
 
-het_res <- TwoSampleMR::mr_heterogeneity(dat_het)
+trios_long <- readr::read_csv(trios_long_file, show_col_types = FALSE)
 
-Table_S4 <- het_res %>%
-  dplyr::filter(
-    outcome %in% vars_keep,
-    method %in% c("Inverse variance weighted", "IVW")
-  ) %>%
+Table_S4 <- trios_long %>%
+  dplyr::filter(origin %in% c("Maternal (adj. fetal)", "Fetal (adj.)", "Paternal (adj.)")) %>%
   dplyr::mutate(
-    Outcome  = dplyr::recode(outcome, !!!outcome_labels, .default = outcome),
-    group    = label_group(outcome, Outcome),
-    exposure = "Genetic liability to endometriosis",
-    type     = dplyr::if_else(outcome %in% continuous_outcomes,
-                              "continuous", "binary"),
-    priority = "primary"
+    Outcome = dplyr::recode(outcome_id, !!!outcome_labels, .default = outcome_full),
+    origin  = dplyr::recode(origin,
+      "Maternal (adj. fetal)" = "Maternal (adjusted for fetal genotype)",
+      "Fetal (adj.)"          = "Fetal (adjusted for maternal genotype)",
+      "Paternal (adj.)"       = "Paternal (adjusted, negative control)"
+    ),
+    b   = round(b, 3),
+    se  = round(se, 3),
+    OR  = dplyr::if_else(scale == "binary", round(OR, 3), NA_real_),
+    LCL = dplyr::if_else(scale == "binary", round(LCL, 3), NA_real_),
+    UCL = dplyr::if_else(scale == "binary", round(UCL, 3), NA_real_),
+    pval = signif(pval, 3),
+    qval = round(qval, 3)
   ) %>%
-  dplyr::select(
-    group,
-    exposure,
-    Outcome,
-    Q,
-    Q_df,
-    Q_pval,
-    type,
-    priority
-  ) %>%
-  dplyr::arrange(group, Outcome)
+  dplyr::select(Outcome, origin, nsnp, b, se, OR, LCL, UCL, pval, qval) %>%
+  dplyr::arrange(Outcome, origin)
 
-s4_file <- file.path(tables_dir, "Table_S4_heterogeneity_IVW.csv")
+s4_file <- file.path(tables_dir, "Supplementary_Table_S4_trio_based_MR.csv")
 write.csv(Table_S4, s4_file, row.names = FALSE)
-log_info("Table S4 (heterogeneity, IVW) saved: ", s4_file)
-
-###############################################################################
-# 11) TABLE S5 - MR-EGGER INTERCEPT (HORIZONTAL PLEIOTROPY)
-###############################################################################
-
-log_info("Creating Table S5: MR-Egger intercept (pleiotropy)...")
-
-pleio_dat <- data.table::fread(harm_file)
-pleio_dat <- pleio_dat[pleio_dat$outcome %in% vars_keep, , drop = FALSE]
-
-egger_res <- TwoSampleMR::mr_pleiotropy_test(pleio_dat)
-
-Table_S5 <- egger_res %>%
-  dplyr::filter(outcome %in% vars_keep) %>%
-  dplyr::mutate(
-    outcome_code = outcome,
-    Outcome      = dplyr::recode(outcome_code, !!!outcome_labels, .default = outcome_code),
-    group        = label_group(outcome_code, Outcome),
-    exposure     = "Genetic liability to endometriosis",
-    type         = dplyr::if_else(outcome_code %in% continuous_outcomes,
-                                  "continuous", "binary"),
-    priority     = "primary"
-  ) %>%
-  dplyr::select(
-    group,
-    exposure,
-    Outcome,
-    egger_intercept,
-    se,
-    pval,
-    type,
-    priority
-  ) %>%
-  dplyr::arrange(group, Outcome)
-
-s5_file <- file.path(tables_dir, "Table_S5_egger_intercept.csv")
-write.csv(Table_S5, s5_file, row.names = FALSE)
-log_info("Table S5 (MR-Egger intercept) saved: ", s5_file)
+log_info("Table S4 (trio-based MR) saved: ", s4_file)
 
 log_info("=== Table generation for endoMR-PREG completed successfully ===")
 
@@ -1165,8 +1169,7 @@ tables_to_export <- list(
   Table_S1_harmonised_summary              = Table_S1,
   Supplementary_Table_2_Endometriosis_Instruments = supp_table2,
   Table_S3_all_MR_methods                  = Table_S3_csv,
-  Table_S4_heterogeneity_IVW               = Table_S4,
-  Table_S5_egger_intercept                 = Table_S5
+  Table_S4_trio_based_MR                   = Table_S4
 )
 
 table_titles <- list(
@@ -1197,11 +1200,8 @@ table_titles <- list(
   Table_S3_all_MR_methods =
     "Supplementary Table S3. Sensitivity analyses across all MR methods (IVW, MR-Egger, Weighted Median, Weighted Mode, MR-PRESSO) for genetic liability to endometriosis on pregnancy outcomes",
   
-  Table_S4_heterogeneity_IVW =
-    "Table S4. Heterogeneity statistics for inverse-variance weighted MR models",
-  
-  Table_S5_egger_intercept =
-    "Table S5. MR-Egger intercept estimates for directional pleiotropy assessment"
+  Table_S4_trio_based_MR =
+    "Supplementary Table S4. Trio-based Mendelian randomization estimates for the effect of genetic liability to endometriosis on pregnancy and perinatal outcomes by maternal, fetal, and paternal origin"
 )
 
 for (nm in names(tables_to_export)) {
@@ -1524,13 +1524,20 @@ if (!file.exists(coloc_path)) {
 #
 #   [R3.3] Reviewer #3 ("similarities or discrepancies... with the one used
 #   in their own analysis"): IVW sensitivity analysis using the Koller et al.
-#   (2026) endometriosis instrument (54 independent SNPs) across all 30 main
+#   (2026) endometriosis instrument (86 EUR loci, Supplementary Table 4) across all 30 main
 #   outcomes, with direction of effect compared against the primary
 #   Rahmioglu et al. (2023) analysis (originally 7/30, extended once the
 #   MR-PREG collaboration re-extracted the remaining 23 outcomes at the
 #   Koller SNPs).
+#   [EDIT] Rahmioglu OR/CI/P/q columns added alongside the Koller ones (not
+#   just the categorical Concordant/Discordant column), so the primary vs.
+#   sensitivity comparison is directly inspectable in one table rather than
+#   requiring a cross-reference to Table 3. Mirrors the ad hoc comparison
+#   already prepared as results/Koller_vs_Rahmioglu_publication_table.xlsx,
+#   now folded into the main S7 pipeline instead of living as a separate
+#   untracked file. ---
 #   Sources: results/koller_ivw_results.csv (script 05.1),
-#            results/ivw_results.csv (script 04, direction comparison only).
+#            results/ivw_results.csv (script 04).
 ###############################################################################
 
 koller_ivw_path_s7 <- file.path(results_dir, "koller_ivw_results.csv")
@@ -1545,7 +1552,14 @@ if (!file.exists(koller_ivw_path_s7) || !file.exists(rahm_ivw_path_s7)) {
 
   rahm_ivw_s7 <- readr::read_csv(rahm_ivw_path_s7, show_col_types = FALSE) %>%
     dplyr::filter(outcome %in% vars_keep, method == "Inverse variance weighted") %>%
-    dplyr::select(outcome, b_rahmioglu = b)
+    dplyr::select(
+      outcome,
+      nsnp_rahmioglu = nsnp,
+      b_rahmioglu    = b,
+      se_rahmioglu   = se,
+      pval_rahmioglu = pval,
+      qval_rahmioglu = qval
+    )
 
   Table_S7 <- koller_ivw_s7 %>%
     dplyr::left_join(rahm_ivw_s7, by = "outcome") %>%
@@ -1558,18 +1572,30 @@ if (!file.exists(koller_ivw_path_s7) || !file.exists(rahm_ivw_path_s7)) {
       Domain  = factor(domain, levels = domain_levels_t3),
       Source  = label_source(outcome),
       type    = dplyr::if_else(outcome %in% continuous_outcomes, "continuous", "binary"),
-      `IVW OR or beta` = dplyr::if_else(
+      `Rahmioglu IVW OR or beta` = dplyr::if_else(
+        type == "binary",
+        sprintf("%.2f", exp(b_rahmioglu)),
+        sprintf("%.3f", b_rahmioglu)
+      ),
+      `Rahmioglu 95% CI` = dplyr::if_else(
+        type == "binary",
+        sprintf("%.2f-%.2f", exp(b_rahmioglu - 1.96 * se_rahmioglu), exp(b_rahmioglu + 1.96 * se_rahmioglu)),
+        sprintf("%.3f-%.3f", b_rahmioglu - 1.96 * se_rahmioglu, b_rahmioglu + 1.96 * se_rahmioglu)
+      ),
+      `Rahmioglu P-value`     = fmt_p_s3(pval_rahmioglu),
+      `Rahmioglu FDR q-value` = sprintf("%.3f", qval_rahmioglu),
+      `Koller IVW OR or beta` = dplyr::if_else(
         type == "binary",
         sprintf("%.2f", exp(b)),
         sprintf("%.3f", b)
       ),
-      `95% CI` = dplyr::if_else(
+      `Koller 95% CI` = dplyr::if_else(
         type == "binary",
         sprintf("%.2f-%.2f", exp(b - 1.96 * se), exp(b + 1.96 * se)),
         sprintf("%.3f-%.3f", b - 1.96 * se, b + 1.96 * se)
       ),
-      `P-value`     = fmt_p_s3(pval),
-      `FDR q-value` = sprintf("%.3f", qval),
+      `Koller P-value`     = fmt_p_s3(pval),
+      `Koller FDR q-value` = sprintf("%.3f", qval),
       `Direction compared with the primary Rahmioglu analysis` = dplyr::case_when(
         is.na(b_rahmioglu)          ~ NA_character_,
         sign(b) == sign(b_rahmioglu) ~ "Concordant",
@@ -1580,11 +1606,16 @@ if (!file.exists(koller_ivw_path_s7) || !file.exists(rahm_ivw_path_s7)) {
     dplyr::select(
       Outcome,
       Source,
-      `Number of SNPs` = nsnp,
-      `IVW OR or beta`,
-      `95% CI`,
-      `P-value`,
-      `FDR q-value`,
+      `Rahmioglu N SNPs` = nsnp_rahmioglu,
+      `Rahmioglu IVW OR or beta`,
+      `Rahmioglu 95% CI`,
+      `Rahmioglu P-value`,
+      `Rahmioglu FDR q-value`,
+      `Koller N SNPs` = nsnp,
+      `Koller IVW OR or beta`,
+      `Koller 95% CI`,
+      `Koller P-value`,
+      `Koller FDR q-value`,
       `Direction compared with the primary Rahmioglu analysis`
     )
 
@@ -1603,7 +1634,8 @@ if (!file.exists(koller_ivw_path_s7) || !file.exists(rahm_ivw_path_s7)) {
 
     caption_text_s7 <- paste0(
       "Supplementary Table S7. Sensitivity Mendelian randomization analyses using the Koller et al. ",
-      "(2026) endometriosis instrument across 30 pregnancy and perinatal outcomes."
+      "(2026) endometriosis instrument across 30 pregnancy and perinatal outcomes, alongside the ",
+      "corresponding primary (Rahmioglu et al. 2023) estimates for direct comparison."
     )
     openxlsx::writeData(wb_s7, "S7 Koller sensitivity",
                         x = caption_text_s7, startRow = 1, startCol = 1)
@@ -1632,8 +1664,8 @@ if (!file.exists(koller_ivw_path_s7) || !file.exists(rahm_ivw_path_s7)) {
                        rows = 3, cols = seq_len(ncol(Table_S7)),
                        gridExpand = TRUE)
 
-    # Highlight rows surviving FDR correction (q < 0.05)
-    q_s7 <- suppressWarnings(as.numeric(Table_S7$`FDR q-value`))
+    # Highlight rows surviving FDR correction (q < 0.05, Koller instrument)
+    q_s7 <- suppressWarnings(as.numeric(Table_S7$`Koller FDR q-value`))
     sig_rows_s7 <- which(!is.na(q_s7) & q_s7 < 0.05) + 3
     if (length(sig_rows_s7) > 0) {
       openxlsx::addStyle(wb_s7, "S7 Koller sensitivity",
@@ -1648,21 +1680,24 @@ if (!file.exists(koller_ivw_path_s7) || !file.exists(rahm_ivw_path_s7)) {
     openxlsx::setColWidths(
       wb_s7, "S7 Koller sensitivity",
       cols   = seq_len(ncol(Table_S7)),
-      widths = c(34, 16, 14, 12, 14, 12, 12, 30)
+      widths = c(34, 16, 12, 14, 12, 12, 14, 12, 14, 12, 12, 14, 30)
     )
 
     footnote_row_s7 <- nrow(Table_S7) + 5
     footnote_text_s7 <- paste0(
-      "IVW estimates only. Koller instrument: 54 independent SNPs (Koller et al. 2026); SNP coverage ",
-      "per outcome ranged 39-50/54 depending on data source and harmonisation. Effect scale is OR for ",
-      "binary outcomes and beta for continuous outcomes (gestational age, birthweight z-score). FDR ",
-      "q-value is the Benjamini-Hochberg-adjusted p-value within this instrument's own set of 30 ",
-      "outcomes; rows are shaded where q < 0.05. Placenta praevia is the only outcome surviving FDR ",
-      "correction. NICU admission is nominally significant (p = 0.003) but does not survive FDR ",
-      "correction (q = 0.050) and is reported as hypothesis-generating only. Direction compared with ",
-      "the primary Rahmioglu analysis indicates whether the Koller-instrument point estimate falls on ",
-      "the same side of the null (Concordant) or the opposite side (Discordant) as the corresponding ",
-      "primary IVW estimate using the Rahmioglu et al. (2023) instrument; occasional discordance is ",
+      "IVW estimates only. Rahmioglu columns reproduce the primary analysis (Table 3) for direct ",
+      "comparison; Rahmioglu instrument: 41 SNPs (Rahmioglu et al. 2023). Koller instrument: 86 EUR ",
+      "loci (Koller et al. 2026, Supplementary Table 4); SNP coverage per outcome ranged 68-82/86 ",
+      "depending on outcome source and harmonisation. Effect scale is OR for binary outcomes and beta ",
+      "for continuous outcomes (gestational age, birthweight z-score), consistently for both ",
+      "instruments. Each FDR q-value is the Benjamini-Hochberg-adjusted p-value within that ",
+      "instrument's own set of 30 outcomes (Rahmioglu and Koller corrected separately); rows are ",
+      "shaded where the Koller q < 0.05. Placenta praevia is the only outcome surviving FDR correction ",
+      "under either instrument; several other outcomes are nominally significant (p < 0.05) under the ",
+      "Koller instrument but do not survive FDR correction and are reported as hypothesis-generating ",
+      "only. Direction compared with the primary Rahmioglu analysis indicates whether the ",
+      "Koller-instrument point estimate falls on the same side of the null (Concordant) or the ",
+      "opposite side (Discordant) as the corresponding primary IVW estimate; occasional discordance is ",
       "confined to outcomes that are non-significant and imprecise under both instruments and should ",
       "not be interpreted as a true conflict between the two analyses."
     )
@@ -1822,8 +1857,10 @@ if (!file.exists(adeno_mr_path)) {
       "clearly underpowered and should be interpreted as hypothesis-generating only, not as evidence for ",
       "or against a causal effect of adenomyosis liability on placenta praevia. ",
       "[!] Sample overlap: unlike the primary endometriosis-placenta praevia analysis, for which a ",
-      "targeted MRlap/cross-trait LD score regression analysis found no evidence of sample overlap with ",
-      "FinnGen R12 (intercept = 0.001, SE = 0.005; see response to Reviewer #4), no equivalent overlap ",
+      "targeted MRlap/cross-trait LD score regression analysis against FinnGen R12 gave an intercept ",
+      "compatible with zero (0.001, SE = 0.005; see response to Reviewer #4) - consistent with, but not ",
+      "proof of, absence of sample overlap (an intercept near zero can also reflect low phenotypic ",
+      "correlation between the traits even with some overlap) - no equivalent overlap ",
       "assessment was performed for the Koller et al. 2026 adenomyosis GWAS. As a large multi-biobank ",
       "European meta-analysis, this GWAS may include FinnGen among its contributing cohorts; if so, ",
       "FinnGen would then contribute to both the exposure and outcome samples here, which could bias ",
@@ -2103,10 +2140,11 @@ if (!file.exists(mrlap_path)) {
       "required for case-control data. The observed and corrected effects are expressed on MRlap's ",
       "internal Z/sqrt(N)-standardised effect-size scale (see Mounier & Kutalik, 2023), not on the ",
       "raw log-odds scale, and must not be exponentiated or otherwise compared numerically to the ",
-      "primary IVW odds ratio shown for reference only. The cross-trait LDSC intercept estimates the ",
-      "genetic covariance attributable to sample overlap specifically; the observed-vs-corrected ",
-      "comparison jointly reflects sample overlap, weak-instrument bias, and winner's-curse-related ",
-      "bias and cannot isolate overlap alone. A significant P for difference indicates that the ",
+      "primary IVW odds ratio shown for reference only. The cross-trait LDSC intercept reflects genetic ",
+      "covariance from sample overlap and/or phenotypic correlation between the traits in the ",
+      "overlapping samples, and cannot separate the two; the observed-vs-corrected comparison further ",
+      "jointly reflects sample overlap, weak-instrument bias, and winner's-curse-related bias and ",
+      "cannot isolate overlap alone. A significant P for difference indicates that the ",
       "corrected estimate should be considered more reliable than the observed estimate, per MRlap's ",
       "own recommended interpretation. The 23 warnings are R package-loading namespace conflicts ",
       "(MRlap calls GenomicSEM internally), not convergence or data-validity warnings. Table S11 uses ",
@@ -2283,5 +2321,136 @@ if (!file.exists(univar_path) || !file.exists(bivar_path)) {
   }
 
   message("Supplementary Table S11 (LDSC endo-praevia) done.")
+}
+
+###############################################################################
+# SUPPLEMENTARY TABLE S12 - CHARACTERISTICS OF THE SENSITIVITY INSTRUMENTS
+#                            (KOLLER ET AL. 2026, ENDOMETRIOSIS + ADENOMYOSIS)
+#
+#   Parallel to Supplementary Table 2 (primary Rahmioglu instrument), for the
+#   two Koller-derived instruments used in the revision follow-up analyses
+#   (Sections 05.1 / Supplementary Tables S7-S9). F-statistic computed as
+#   (beta/se)^2, consistent with the summary values reported in the Results
+#   ("Genetic instruments" paragraph: Koller endometriosis mean F=51.8,
+#   Koller adenomyosis mean F=42.6) - no per-SNP effective N is available for
+#   the endometriosis instrument (published Beta/SE used directly, see
+#   05.1_koller_sensitivity_endoMR-PREG.R REVISION LOG), so R2/F are not
+#   computed via the N-dependent formula used in Table 2.
+#   Sources: results/Koller_Endometriosis_Table4_EUR_snps.tsv,
+#            results/Koller_Adenomyosis_clumped_snps.tsv (script 05.1).
+###############################################################################
+
+message("\n=== Creating Supplementary Table S12: Koller instrument characteristics ===")
+
+koller_endo_snp_file  <- file.path(results_dir, "Koller_Endometriosis_Table4_EUR_snps.tsv")
+koller_adeno_snp_file <- file.path(results_dir, "Koller_Adenomyosis_clumped_snps.tsv")
+
+if (!file.exists(koller_endo_snp_file) || !file.exists(koller_adeno_snp_file)) {
+  warning("Koller instrument SNP files not found - skipping Table S12.")
+} else {
+
+  fmt_koller_instrument <- function(path, instrument_label) {
+    data.table::fread(path) %>%
+      dplyr::transmute(
+        Instrument      = instrument_label,
+        SNP             = SNP,
+        Beta            = round(beta.exposure, 4),
+        SE              = round(se.exposure, 4),
+        `P-value`       = formatC(pval.exposure, format = "e", digits = 2),
+        `Effect allele` = effect_allele.exposure,
+        `Other allele`  = other_allele.exposure,
+        EAF             = round(eaf.exposure, 4),
+        F               = round((beta.exposure / se.exposure)^2, 1)
+      )
+  }
+
+  Table_S12 <- dplyr::bind_rows(
+    fmt_koller_instrument(koller_endo_snp_file,  "Endometriosis (Koller et al. 2026, Supplementary Table 4, 86 EUR loci)"),
+    fmt_koller_instrument(koller_adeno_snp_file, "Adenomyosis (Koller et al. 2026)")
+  )
+
+  readr::write_csv(
+    Table_S12,
+    file.path(tables_dir, "Supplementary_Table_S12_koller_instrument_characteristics.csv")
+  )
+  log_info("Supplementary Table S12 (CSV) saved.")
+
+  if (requireNamespace("openxlsx", quietly = TRUE)) {
+
+    wb_s12 <- openxlsx::createWorkbook()
+    openxlsx::addWorksheet(wb_s12, "S12 Koller instruments")
+
+    caption_text_s12 <- paste0(
+      "Supplementary Table S12. Characteristics of the sensitivity endometriosis and adenomyosis ",
+      "instruments (Koller et al. 2026) used in the revision follow-up analyses."
+    )
+    openxlsx::writeData(wb_s12, "S12 Koller instruments",
+                        x = caption_text_s12, startRow = 1, startCol = 1)
+    openxlsx::addStyle(wb_s12, "S12 Koller instruments",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         wrapText = TRUE
+                       ),
+                       rows = 1, cols = 1)
+    openxlsx::mergeCells(wb_s12, "S12 Koller instruments", cols = 1:ncol(Table_S12), rows = 1)
+
+    openxlsx::writeDataTable(
+      wb_s12, "S12 Koller instruments",
+      x          = Table_S12,
+      startRow   = 3, startCol = 1,
+      tableStyle = "TableStyleLight9",
+      withFilter = TRUE
+    )
+
+    openxlsx::addStyle(wb_s12, "S12 Koller instruments",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 10, textDecoration = "bold",
+                         fgFill = "#D9E1F2", border = "Bottom", borderColour = "#4472C4",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = 3, cols = seq_len(ncol(Table_S12)),
+                       gridExpand = TRUE)
+
+    openxlsx::setColWidths(
+      wb_s12, "S12 Koller instruments",
+      cols   = seq_len(ncol(Table_S12)),
+      widths = c(46, 14, 10, 10, 12, 12, 12, 10, 10)
+    )
+
+    footnote_row_s12 <- nrow(Table_S12) + 5
+    footnote_text_s12 <- paste0(
+      "SNPs for the endometriosis instrument (86 EUR loci) use the published Beta/SE/EAF from Koller ",
+      "et al. (2026) Supplementary Table 4 directly, not re-derived from Z-scores; no per-SNP effective ",
+      "sample size is available for this instrument, so F is computed as (Beta/SE)² rather than via ",
+      "the R²-based formula used in Supplementary Table 2. The adenomyosis instrument (6 SNPs) uses ",
+      "the same (Beta/SE)² definition for consistency between the two instruments in this table, ",
+      "although a per-SNP effective sample size is available for it (see Methods, Section 1.5, and ",
+      "05.1_koller_sensitivity_endoMR-PREG.R). Neither instrument was re-clumped for this analysis: the ",
+      "endometriosis loci are already LD-independent in the source publication, and the adenomyosis ",
+      "instrument was clumped upstream (r²<0.001, 10,000kb window, 1000G EUR) exactly as for the ",
+      "primary Rahmioglu instrument (Supplementary Table 2)."
+    )
+    openxlsx::writeData(wb_s12, "S12 Koller instruments",
+                        x = footnote_text_s12, startRow = footnote_row_s12, startCol = 1)
+    openxlsx::addStyle(wb_s12, "S12 Koller instruments",
+                       style = openxlsx::createStyle(
+                         fontName = "Arial", fontSize = 8, fontColour = "#595959",
+                         wrapText = TRUE, valign = "top"
+                       ),
+                       rows = footnote_row_s12, cols = 1)
+    openxlsx::setRowHeights(wb_s12, "S12 Koller instruments",
+                            rows = footnote_row_s12, heights = 110)
+    openxlsx::mergeCells(wb_s12, "S12 Koller instruments",
+                         cols = 1:ncol(Table_S12), rows = footnote_row_s12)
+
+    openxlsx::saveWorkbook(
+      wb_s12,
+      file.path(tables_dir, "Supplementary_Table_S12_koller_instrument_characteristics.xlsx"),
+      overwrite = TRUE
+    )
+    log_info("Supplementary Table S12 (Excel) saved.")
+  }
+
+  message("Supplementary Table S12 (Koller instrument characteristics) done.")
 }
 
